@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("org.jetbrains.kotlin.plugin.compose") version "2.1.21"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.2.0"
     alias(libs.plugins.ksp)
 }
 
@@ -10,6 +10,7 @@ android {
     namespace = "com.efbsm5.easyway"
     compileSdk = 36
     buildFeatures {
+        buildConfig = true
         compose = true
     }
     defaultConfig {

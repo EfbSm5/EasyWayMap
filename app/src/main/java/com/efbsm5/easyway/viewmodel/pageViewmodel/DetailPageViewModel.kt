@@ -7,8 +7,8 @@ import com.efbsm5.easyway.data.models.Comment
 import com.efbsm5.easyway.data.models.DynamicPost
 import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.data.repository.DataRepository
-import com.efbsm5.easyway.map.MapUtil
-import com.efbsm5.easyway.map.MapUtil.getInitUser
+import com.efbsm5.easyway.getCurrentFormattedTime
+import com.efbsm5.easyway.getInitUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -101,7 +101,7 @@ class DetailPageViewModel(
                 content = string,
                 like = 0,
                 dislike = 0,
-                date = MapUtil.getCurrentFormattedTime()
+                date = getCurrentFormattedTime()
             )
             repository.uploadComment(comment)
             _commentAndUsers.value.add(

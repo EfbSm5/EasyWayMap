@@ -45,14 +45,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.efbsm5.easyway.data.models.User
-import com.efbsm5.easyway.map.MapUtil
+import com.efbsm5.easyway.getInitUser
 import com.efbsm5.easyway.viewmodel.pageViewmodel.HomePageState
 
 
 @Preview
 @Composable
 fun MainPageScreen(
-    user: User = MapUtil.getInitUser(), changeState: (HomePageState) -> Unit = {}
+    user: User = getInitUser(), changeState: (HomePageState) -> Unit = {}
 ) {
     Surface(color = MaterialTheme.colorScheme.background) {
         Column(

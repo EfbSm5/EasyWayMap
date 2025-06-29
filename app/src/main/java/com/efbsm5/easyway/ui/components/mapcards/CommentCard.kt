@@ -48,7 +48,7 @@ import com.efbsm5.easyway.R
 import com.efbsm5.easyway.data.models.Comment
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.models.User
-import com.efbsm5.easyway.map.MapUtil.getLatlng
+import com.efbsm5.easyway.getLatlng
 import com.efbsm5.easyway.ui.components.NavigationDialog
 import com.efbsm5.easyway.ui.components.TabSection
 import com.efbsm5.easyway.viewmodel.componentsViewmodel.CommentAndHistoryCardViewModel

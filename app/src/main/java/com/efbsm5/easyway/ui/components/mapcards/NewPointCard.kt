@@ -45,7 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import coil.compose.rememberAsyncImagePainter
 import com.efbsm5.easyway.data.models.EasyPoint
-import com.efbsm5.easyway.map.MapUtil
+import com.efbsm5.easyway.getInitPoint
 import com.efbsm5.easyway.viewmodel.componentsViewmodel.NewPointCardViewModel
 import java.io.File
 import java.io.FileOutputStream
@@ -102,7 +102,7 @@ fun NewPointCard(
 @Composable
 private fun NewPointCardSurface(
     label: String,
-    point: EasyPoint = MapUtil.getInitPoint(),
+    point: EasyPoint = getInitPoint(),
     onInfoValueChange: (String) -> Unit = {},
     onLocationValueChange: (String) -> Unit = {},
     onNameValueChange: (String) -> Unit = {},

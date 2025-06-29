@@ -25,10 +25,11 @@ package com.efbsm5.easyway.contract
 import com.amap.api.maps.model.BitmapDescriptor
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.MultiPointItem
-import com.melody.map.gd_compose.poperties.MapUiSettings
 import com.efbsm5.easyway.state.IUiEffect
 import com.efbsm5.easyway.state.IUiEvent
 import com.efbsm5.easyway.state.IUiState
+import com.melody.map.gd_compose.poperties.MapProperties
+import com.melody.map.gd_compose.poperties.MapUiSettings
 
 /**
  * MultiPointOverlayContract
@@ -41,6 +42,8 @@ class MultiPointOverlayContract {
 
     sealed class Event : IUiEvent {
         data class MultiPointClick(val pointItem: MultiPointItem) : Event()
+        object ShowOpenGPSDialog : Event()
+        object HideOpenGPSDialog : Event()
     }
 
     data class State(
@@ -48,8 +51,18 @@ class MultiPointOverlayContract {
         val uiSettings: MapUiSettings,
         val clickPointLatLng: LatLng?,
         val multiPointIcon: BitmapDescriptor,
-        val multiPointItems: List<MultiPointItem>
+        val multiPointItems: List<MultiPointItem>,
+        val isOpenGps: Boolean?,
+        // 是否显示打开GPS的确认弹框
+        val isShowOpenGPSDialog: Boolean,
+        // App是否打开了定位权限
+        val grantLocationPermission: Boolean,
+        // 当前位置的经纬度
+        val locationLatLng: LatLng?,
+        val mapProperties: MapProperties,
     ) : IUiState
 
-    sealed class Effect : IUiEffect
+    sealed class Effect : IUiEffect {
+        internal data class Toast(val msg: String?) : Effect()
+    }
 }

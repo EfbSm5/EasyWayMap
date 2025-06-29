@@ -14,7 +14,6 @@ import androidx.core.net.toUri
 //import com.alibaba.idst.nui.BuildConfig
 import com.efbsm5.easyway.BuildConfig
 import com.efbsm5.easyway.data.models.assistModel.UpdateInfo
-import com.squareup.leakcanary.core.BuildConfig
 
 private const val TAG = "Update"
 
@@ -58,7 +57,6 @@ private fun UpdateDialog(updateInfo: UpdateInfo, callback: (Boolean) -> Unit) {
                 Text("稍后再说")
             }
         })
-
 }
 
 private fun shouldUpdate(latestVersionCode: Int): Boolean {

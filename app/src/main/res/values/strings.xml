@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name">EasyWay</string>
-
     <string name="gd_map_main_feature_item_basic">基础功能</string>
     <string name="gd_map_main_feature_item_overlay">简单的Overlay功能</string>
     <string name="gd_map_main_feature_item_3dmap">3D地形图</string>
@@ -12,8 +10,11 @@
     <string name="gd_map_main_feature_item_multipoint_click">海量点点击</string>
     <string name="gd_map_main_feature_item_marker_animation">Marker动画</string>
     <string name="gd_map_main_feature_item_cluster_effect">点聚合效果</string>
-
-
+    <string name="app_name">行无碍</string>
+    <string name="newPoint">新加标点</string>
+    <string name="postLabel">心无距离，共享每一刻</string>
+    <string name="add">添加</string>
+    <string name="addPost">添加动态</string>
     <string name="gd_map_location_gps_no_open">定位失败，打开定位服务来获取位置信息</string>
     <string name="gd_map_location_gps_dialog_cancel">取消</string>
     <string name="gd_map_location_gps_dialog_ok">开启定位</string>

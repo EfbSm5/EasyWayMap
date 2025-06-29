@@ -50,12 +50,12 @@ import coil.compose.rememberAsyncImagePainter
 import com.amap.api.maps.model.LatLng
 import com.amap.api.services.core.PoiItemV2
 import com.efbsm5.easyway.R
+import com.efbsm5.easyway.addPoiItem
+import com.efbsm5.easyway.calculateDistance
+import com.efbsm5.easyway.convertToLatLng
 import com.efbsm5.easyway.data.models.EasyPoint
-import com.efbsm5.easyway.map.MapUtil
-import com.efbsm5.easyway.map.MapUtil.calculateDistance
-import com.efbsm5.easyway.map.MapUtil.convertToLatLng
-import com.efbsm5.easyway.map.MapUtil.formatDistance
-import com.efbsm5.easyway.map.MapUtil.getLatlng
+import com.efbsm5.easyway.formatDistance
+import com.efbsm5.easyway.getLatlng
 import com.efbsm5.easyway.ui.components.NavigationDialog
 import com.efbsm5.easyway.ui.components.TabSection
 import com.efbsm5.easyway.viewmodel.componentsViewmodel.FunctionCardViewModel
@@ -73,7 +73,7 @@ fun FunctionCard(
         onclick = { viewModel.search(context = context, string = it) },
         poiItemV2s = poiList,
         changeScreen = changeScreen,
-        location = viewModel.locationSaver.location,
+        location = viewModel.locationSaver. location,
         navigate = navigate,
         easyPoints = pointList
     )
@@ -105,7 +105,7 @@ private fun FunctionCardScreen(
             SearchPart(
                 poiItemV2s = poiItemV2s,
                 easyPoints = easyPoints,
-                onPoiItemV2Selected = { changeScreen(Screen.Comment(MapUtil.addPoiItem(it))) },
+                onPoiItemV2Selected = { changeScreen(Screen.Comment(addPoiItem(it))) },
                 onPointSelected = { changeScreen(Screen.Comment(it)) },
                 location = location,
                 navigate = { _destination, _name ->

@@ -22,22 +22,32 @@
 
 package com.efbsm5.easyway.ui
 
+import android.Manifest
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.amap.api.maps.CameraUpdateFactory
 import com.amap.api.maps.model.BitmapDescriptorFactory
 import com.amap.api.maps.model.CameraPosition
 import com.amap.api.maps.model.LatLng
+import com.efbsm5.easyway.contract.MultiPointOverlayContract
+import com.efbsm5.easyway.dialog.ShowOpenGPSDialog
+import com.efbsm5.easyway.launcher.handlerGPSLauncher
+import com.efbsm5.easyway.showToast
+import com.efbsm5.easyway.ui.components.RedCenterLoading
+import com.efbsm5.easyway.ui.components.requestMultiplePermission
+import com.efbsm5.easyway.viewmodel.MultiPointOverlayViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.melody.map.gd_compose.GDMap
 import com.melody.map.gd_compose.overlay.Marker
 import com.melody.map.gd_compose.overlay.MultiPointOverlay
 import com.melody.map.gd_compose.overlay.rememberMarkerState
 import com.melody.map.gd_compose.position.rememberCameraPositionState
-import com.efbsm5.easyway.ui.components.RedCenterLoading
-import com.efbsm5.easyway.viewmodel.MultiPointOverlayViewModel
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.onEach
 
 /**
  * MultiPointOverlayScreen
@@ -46,6 +56,7 @@ import kotlinx.coroutines.flow.filterNotNull
  * @github: https://github.com/TheMelody/OmniMap
  * created 2022/10/21 11:26
  */
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 internal fun MultiPointOverlayScreen() {
     val viewModel: MultiPointOverlayViewModel = viewModel()
@@ -58,13 +69,59 @@ internal fun MultiPointOverlayScreen() {
         snapshotFlow { currentState.clickPointLatLng }.filterNotNull()
             .collect { markerState.position = it }
     }
+    LaunchedEffect(viewModel.effect) {
+        viewModel.effect.onEach {
+            if (it is MultiPointOverlayContract.Effect.Toast) {
+                showToast(it.msg)
+            }
+        }.collect()
+    }
+    val openGpsLauncher = handlerGPSLauncher(viewModel::checkGpsStatus)
+    val reqGPSPermission = requestMultiplePermission(
+        permissions = listOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ),
+        onGrantAllPermission = viewModel::handleGrantLocationPermission,
+        onNoGrantPermission = viewModel::handleNoGrantLocationPermission
+    )
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { reqGPSPermission.allPermissionsGranted }.collect {
+            // 从app应用权限开关页面，打开权限，需要再检查一下GPS开关
+            viewModel.checkGpsStatus()
+        }
+    }
+    LaunchedEffect(currentState.locationLatLng) {
+        if (null == currentState.locationLatLng) return@LaunchedEffect
+        cameraPositionState.move(CameraUpdateFactory.newLatLng(currentState.locationLatLng))
+    }
+
+    LaunchedEffect(currentState.isOpenGps, reqGPSPermission.allPermissionsGranted) {
+        if (currentState.isOpenGps == true) {
+            if (!reqGPSPermission.allPermissionsGranted) {
+                reqGPSPermission.launchMultiplePermissionRequest()
+            } else {
+                viewModel.startMapLocation()
+            }
+        }
+    }
+    if (currentState.isShowOpenGPSDialog) {
+        ShowOpenGPSDialog(
+            onDismiss = viewModel::hideOpenGPSDialog,
+            onPositiveClick = {
+                viewModel.openGPSPermission(openGpsLauncher)
+            }
+        )
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         GDMap(
             modifier = Modifier.matchParentSize(),
             uiSettings = currentState.uiSettings,
             cameraPositionState = cameraPositionState,
-            onMapLoaded = viewModel::initMultiPointData
+            properties = currentState.mapProperties,
+            onMapLoaded = viewModel::initMultiPointDataAndCheckGps
         ) {
             MultiPointOverlay(
                 enable = true,

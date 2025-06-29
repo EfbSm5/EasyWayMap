@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.1.21"
+kotlin = "2.2.0"
 lifecycleRunTimektx = "2.9.1"
 lifecycleViewmodelCompose = "2.9.1"
 leakcanary_android = "2.14"
@@ -24,7 +24,8 @@ navigationCompose = "2.9.0"
 retrofit = "3.0.0"
 roomRuntime = "2.7.2"
 workRuntimeKtx = "2.10.2"
-ksp = "1.5.30-1.0.0"
+ksp = "2.2.0-2.0.2"
+ui-test-junit4="4.13.2"
 
 [libraries]
 androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }

@@ -11,6 +11,9 @@ import com.efbsm5.easyway.data.models.DynamicPost
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.data.models.assistModel.EasyPointSimplify
+import com.efbsm5.easyway.getCurrentFormattedTime
+import com.efbsm5.easyway.getInitPoint
+import com.efbsm5.easyway.getInitUser
 import kotlinx.coroutines.flow.Flow
 
 class DataRepository {
@@ -67,7 +70,7 @@ class DataRepository {
 
     fun uploadPost(dynamicPost: DynamicPost, photos: List<Uri>) {
         val id = database.dynamicPostDao().getCount() + 1
-        val date = MapUtil.getCurrentFormattedTime()
+        val date = getCurrentFormattedTime()
         val commentId = database.commentDao().getMaxCommentId() + 1
         val photo = emptyList<Uri>().toMutableList()
         photos.forEach { uri ->
@@ -123,7 +126,7 @@ class DataRepository {
             info = easyPoint.info,
             location = easyPoint.location,
             photo = photoUri,
-            refreshTime = MapUtil.getCurrentFormattedTime(),
+            refreshTime = getCurrentFormattedTime(),
             likes = 0,
             dislikes = 0,
             lat = easyPoint.lat,

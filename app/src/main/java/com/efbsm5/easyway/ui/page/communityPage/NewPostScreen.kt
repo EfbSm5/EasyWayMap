@@ -53,7 +53,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.efbsm5.easyway.R
 import com.efbsm5.easyway.data.models.DynamicPost
-import com.efbsm5.easyway.map.MapUtil
+import com.efbsm5.easyway.getInitPost
 import com.efbsm5.easyway.ui.components.TopBar
 import com.efbsm5.easyway.viewmodel.pageViewmodel.NewPostPageViewModel
 
@@ -84,7 +84,7 @@ fun NewDynamicPostPage(back: () -> Unit, viewModel: NewPostPageViewModel) {
 @Preview
 @Composable
 private fun DynamicPostScreen(
-    dynamicPost: DynamicPost = MapUtil.getInitPost(),
+    dynamicPost: DynamicPost = getInitPost(),
     photos: List<Uri> = emptyList(),
     onSelected: (Int) -> Unit = {},
     onTitleChanged: (String) -> Unit = {},

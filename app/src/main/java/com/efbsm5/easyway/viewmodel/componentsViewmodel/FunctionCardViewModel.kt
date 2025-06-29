@@ -4,10 +4,9 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.amap.api.services.core.PoiItemV2
+import com.efbsm5.easyway.LocationSaver
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.repository.DataRepository
-import com.efbsm5.easyway.map.LocationSaver
-import com.efbsm5.easyway.map.searchForPoi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,13 +21,15 @@ class FunctionCardViewModel(val repository: DataRepository, val locationSaver: L
 
     fun search(string: String, context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
-            searchForPoi(
-                string, context = context, onPoiSearched = { _poiList.value = it })
-            repository.getPointByName(string).collect {
-                _points.value = it
-            }
+//            searchForPoi(
+//                string, context = context, onPoiSearched = { _poiList.value = it })
+//            repository.getPointByName(string).collect {
+//                _points.value = it
+//            }
         }
     }
+
+
 
 
 }

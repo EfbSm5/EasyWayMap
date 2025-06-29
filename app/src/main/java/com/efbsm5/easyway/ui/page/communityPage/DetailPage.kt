@@ -48,7 +48,8 @@ import com.efbsm5.easyway.R
 import com.efbsm5.easyway.data.models.Comment
 import com.efbsm5.easyway.data.models.DynamicPost
 import com.efbsm5.easyway.data.models.User
-import com.efbsm5.easyway.map.MapUtil
+import com.efbsm5.easyway.getInitPost
+import com.efbsm5.easyway.getInitUser
 import com.efbsm5.easyway.ui.components.TopBar
 import com.efbsm5.easyway.viewmodel.pageViewmodel.DetailPageViewModel
 
@@ -72,8 +73,8 @@ fun DetailPage(onBack: () -> Unit, viewModel: DetailPageViewModel) {
 @Composable
 private fun DetailPageScreen(
     onBack: () -> Unit = {},
-    post: DynamicPost = MapUtil.getInitPost(),
-    postUser: User = MapUtil.getInitUser(),
+    post: DynamicPost = getInitPost(),
+    postUser: User = getInitUser(),
     commentAndUser: List<Pair<Comment, User>> = emptyList(),
     comment: (String) -> Unit = {},
     like: (Boolean, Int) -> Unit = { _, _ -> },

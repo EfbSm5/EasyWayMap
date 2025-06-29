@@ -4,9 +4,9 @@ import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.amap.api.maps.model.LatLng
+import com.efbsm5.easyway.LocationSaver
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.repository.DataRepository
-import com.efbsm5.easyway.map.LocationSaver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -7,7 +7,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import com.amap.api.maps.model.LatLng
-import com.efbsm5.easyway.map.MapUtil
+import com.efbsm5.easyway.startMapApp
 
 @Composable
 fun NavigationDialog(location: LatLng, name: String, navigate: (LatLng) -> Unit) {
@@ -31,9 +31,7 @@ fun NavigationDialog(location: LatLng, name: String, navigate: (LatLng) -> Unit)
 }
 
 fun navigate(context: Context, location: LatLng, name: String) {
-    MapUtil.apply {
-        context.startMapApp(
-            dstLat = location.latitude, dstLon = location.longitude, dstName = name
-        )
-    }
+    context.startMapApp(
+        dstLat = location.latitude, dstLon = location.longitude, dstName = name
+    )
 }

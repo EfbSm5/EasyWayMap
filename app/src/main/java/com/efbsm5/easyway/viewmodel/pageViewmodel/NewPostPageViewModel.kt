@@ -3,10 +3,10 @@ package com.efbsm5.easyway.viewmodel.pageViewmodel
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.efbsm5.easyway.LocationSaver
 import com.efbsm5.easyway.data.models.DynamicPost
 import com.efbsm5.easyway.data.repository.DataRepository
-import com.efbsm5.easyway.map.LocationSaver
-import com.efbsm5.easyway.map.MapUtil.getInitPost
+import com.efbsm5.easyway.getInitPost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
