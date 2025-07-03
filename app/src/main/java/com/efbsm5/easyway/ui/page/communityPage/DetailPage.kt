@@ -45,8 +45,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.efbsm5.easyway.R
-import com.efbsm5.easyway.data.models.Comment
-import com.efbsm5.easyway.data.models.DynamicPost
+import com.efbsm5.easyway.data.models.PointComment
+import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.getInitPost
 import com.efbsm5.easyway.getInitUser
@@ -56,13 +56,13 @@ import com.efbsm5.easyway.viewmodel.pageViewmodel.DetailPageViewModel
 @Composable
 fun DetailPage(onBack: () -> Unit, viewModel: DetailPageViewModel) {
     val postUser by viewModel.postUser.collectAsState()
-    val commentAndUser by viewModel.commentAndUser.collectAsState()
+    val commentAndUser by viewModel.pointCommentAndUser.collectAsState()
     val post by viewModel.post.collectAsState()
     DetailPageScreen(
         onBack = onBack,
         post = post!!,
         postUser = postUser,
-        commentAndUser = commentAndUser,
+        pointCommentAndUser = commentAndUser,
         comment = { viewModel.comment(it) },
         like = { boolean, index -> viewModel.likeComment(boolean, index) },
         dislike = { boolean, index -> viewModel.dislikeComment(boolean, index) },
@@ -73,9 +73,9 @@ fun DetailPage(onBack: () -> Unit, viewModel: DetailPageViewModel) {
 @Composable
 private fun DetailPageScreen(
     onBack: () -> Unit = {},
-    post: DynamicPost = getInitPost(),
+    post: Post = getInitPost(),
     postUser: User = getInitUser(),
-    commentAndUser: List<Pair<Comment, User>> = emptyList(),
+    pointCommentAndUser: List<Pair<PointComment, User>> = emptyList(),
     comment: (String) -> Unit = {},
     like: (Boolean, Int) -> Unit = { _, _ -> },
     dislike: (Boolean, Int) -> Unit = { _, _ -> },
@@ -97,7 +97,7 @@ private fun DetailPageScreen(
                 thickness = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
             )
             Comments(
-                list = commentAndUser, like = like, dislike = dislike
+                list = pointCommentAndUser, like = like, dislike = dislike
             )
             CommentSection(comment = { showTextField = true })
             if (showTextField) {
@@ -117,7 +117,7 @@ private fun DetailPageScreen(
 
 @Composable
 private fun DetailsContent(
-    post: DynamicPost,
+    post: Post,
     user: User,
     like: (Boolean) -> Unit,
 ) {
@@ -176,7 +176,7 @@ private fun DetailsContent(
 
 @Composable
 private fun Comments(
-    list: List<Pair<Comment, User>>, like: (Boolean, Int) -> Unit, dislike: (Boolean, Int) -> Unit
+    list: List<Pair<PointComment, User>>, like: (Boolean, Int) -> Unit, dislike: (Boolean, Int) -> Unit
 ) {
     LazyColumn(modifier = Modifier.padding(vertical = 16.dp)) {
         items(list) { commentAndUser ->
@@ -189,7 +189,7 @@ private fun Comments(
 
 @Composable
 private fun CommentItems(
-    commentAndUser: Pair<Comment, User>,
+    pointCommentAndUser: Pair<PointComment, User>,
     like: (Boolean, Int) -> Unit,
     dislike: (Boolean, Int) -> Unit
 ) {
@@ -207,8 +207,8 @@ private fun CommentItems(
     )
     val likeSize by animateFloatAsState(targetValue = if (isLiked) 36f else 24f)
     val dislikeSize by animateFloatAsState(targetValue = if (isDisliked) 36f else 24f)
-    val user = commentAndUser.second
-    val comment = commentAndUser.first
+    val user = pointCommentAndUser.second
+    val comment = pointCommentAndUser.first
     Row(
         modifier = Modifier.padding(bottom = 16.dp), verticalAlignment = Alignment.CenterVertically
     ) {

@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.efbsm5.easyway.data.models.DynamicPost
+import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.viewmodel.pageViewmodel.DetailPageViewModel
 import com.efbsm5.easyway.viewmodel.pageViewmodel.NewPostPageViewModel
 import com.efbsm5.easyway.viewmodel.pageViewmodel.ShowPageViewModel
@@ -50,5 +50,5 @@ fun CommunityPage(back: () -> Unit) {
 sealed interface State {
     data object Community : State
     data object NewPost : State
-    data class Detail(val dynamicPost: DynamicPost) : State
+    data class Detail(val dynamicPost: Post) : State
 }

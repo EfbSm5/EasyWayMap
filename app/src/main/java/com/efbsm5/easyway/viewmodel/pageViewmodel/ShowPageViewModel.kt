@@ -2,7 +2,7 @@ package com.efbsm5.easyway.viewmodel.pageViewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.efbsm5.easyway.data.models.assistModel.DynamicPostAndUser
+import com.efbsm5.easyway.data.models.assistModel.PointCommentAndUser
 import com.efbsm5.easyway.data.repository.DataRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,9 +10,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class ShowPageViewModel(val repository: DataRepository) : ViewModel() {
-    private var allPosts = MutableStateFlow<List<DynamicPostAndUser>>(emptyList())
-    private var _showPosts = MutableStateFlow<List<DynamicPostAndUser>>(emptyList())
-    val posts: StateFlow<List<DynamicPostAndUser>> = _showPosts
+    private var allPosts = MutableStateFlow<List<PointCommentAndUser>>(emptyList())
+    private var _showPosts = MutableStateFlow<List<PointCommentAndUser>>(emptyList())
+    val posts: StateFlow<List<PointCommentAndUser>> = _showPosts
 
     init {
         fetchPosts()
@@ -21,11 +21,11 @@ class ShowPageViewModel(val repository: DataRepository) : ViewModel() {
     private fun fetchPosts() {
         viewModelScope.launch(Dispatchers.IO) {
             repository.getAllDynamicPosts().collect { dynamicPosts ->
-                val list = emptyList<DynamicPostAndUser>().toMutableList()
+                val list = emptyList<PointCommentAndUser>().toMutableList()
                 dynamicPosts.forEach { post ->
                     repository.getCommentCount(post.commentId).collect {
                         list.add(
-                            DynamicPostAndUser(
+                            PointCommentAndUser(
                                 dynamicPost = post,
                                 user = repository.getUserById(post.userId),
                                 commentCount = it,

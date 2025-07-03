@@ -4,7 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.efbsm5.easyway.LocationSaver
-import com.efbsm5.easyway.data.models.DynamicPost
+import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.repository.DataRepository
 import com.efbsm5.easyway.getInitPost
 import kotlinx.coroutines.Dispatchers
@@ -19,10 +19,10 @@ class NewPostPageViewModel(
     ViewModel() {
     private var _newPost = MutableStateFlow(getInitPost())
     private val _chosenPhotos = MutableStateFlow(emptyList<Uri>())
-    val newPost: StateFlow<DynamicPost> = _newPost
+    val newPost: StateFlow<Post> = _newPost
     val chosenPhotos: StateFlow<List<Uri>> = _chosenPhotos
 
-    fun editPost(dynamicPost: DynamicPost) {
+    fun editPost(dynamicPost: Post) {
         _newPost.value = dynamicPost
     }
 

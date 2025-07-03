@@ -6,8 +6,8 @@ import com.amap.api.maps.model.LatLng
 import com.efbsm5.easyway.SDKUtils
 import com.efbsm5.easyway.data.UserManager
 import com.efbsm5.easyway.data.database.AppDataBase
-import com.efbsm5.easyway.data.models.Comment
-import com.efbsm5.easyway.data.models.DynamicPost
+import com.efbsm5.easyway.data.models.PointComment
+import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.data.models.assistModel.EasyPointSimplify
@@ -16,7 +16,7 @@ import com.efbsm5.easyway.getInitPoint
 import com.efbsm5.easyway.getInitUser
 import kotlinx.coroutines.flow.Flow
 
-class DataRepository {
+object DataRepository {
     val context = SDKUtils.getContext()
     private val database = AppDataBase.getDatabase(context)
 
@@ -24,11 +24,11 @@ class DataRepository {
         return database.pointsDao().loadAllPoints()
     }
 
-    fun getAllDynamicPosts(): Flow<List<DynamicPost>> {
+    fun getAllDynamicPosts(): Flow<List<Post>> {
         return database.dynamicPostDao().getAllDynamicPosts()
     }
 
-    fun getAllCommentsById(commentId: Int): Flow<List<Comment>> {
+    fun getAllCommentsById(commentId: Int): Flow<List<PointComment>> {
         return database.commentDao().getCommentByCommentId(commentId)
     }
 
@@ -68,7 +68,7 @@ class DataRepository {
         database.pointsDao().decreaseDislikes(pointId)
     }
 
-    fun uploadPost(dynamicPost: DynamicPost, photos: List<Uri>) {
+    fun uploadPost(dynamicPost: Post, photos: List<Uri>) {
         val id = database.dynamicPostDao().getCount() + 1
         val date = getCurrentFormattedTime()
         val commentId = database.commentDao().getMaxCommentId() + 1
@@ -83,7 +83,7 @@ class DataRepository {
 //                },
 //            )
         }
-        val post = DynamicPost(
+        val post = Post(
             id = id,
             title = dynamicPost.title,
             date = date,
@@ -105,8 +105,8 @@ class DataRepository {
             ?: getInitPoint(latLng)
     }
 
-    fun uploadComment(comment: Comment) {
-        database.commentDao().insert(comment)
+    fun uploadComment(pointComment: PointComment) {
+        database.commentDao().insert(pointComment)
     }
 
     fun uploadPoint(easyPoint: EasyPoint) {
@@ -143,7 +143,7 @@ class DataRepository {
     }
 
 
-    fun getPostByUserId(userId: Int): Flow<List<DynamicPost>> {
+    fun getPostByUserId(userId: Int): Flow<List<Post>> {
         return database.dynamicPostDao().getAllDynamicPostsByUserId(userId)
     }
 
@@ -151,7 +151,7 @@ class DataRepository {
         return database.pointsDao().getPointByUserId(userId)
     }
 
-    fun getCommentByUserId(userId: Int): Flow<List<Comment>> {
+    fun getCommentByUserId(userId: Int): Flow<List<PointComment>> {
         return database.commentDao().getCommentByUserId(userId)
     }
 

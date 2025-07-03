@@ -1,9 +1,9 @@
 package com.efbsm5.easyway.data.network
 
-import com.efbsm5.easyway.data.models.Comment
-import com.efbsm5.easyway.data.models.DynamicPost
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.models.ModelNames
+import com.efbsm5.easyway.data.models.PointComment
+import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.data.models.assistModel.EasyPointSimplify
 import com.efbsm5.easyway.data.models.assistModel.UpdateInfo
@@ -18,11 +18,10 @@ object EasyPointNetWork {
     private val network = ServiceCreator.create<HttpInterface>()
     suspend fun <T> sendRequest(modelNames: ModelNames): List<T> {
         return when (modelNames) {
-            ModelNames.DynamicPosts -> network.getData<DynamicPost>(modelNames.replacePath())
-                .await()
+            ModelNames.DynamicPosts -> network.getData<Post>(modelNames.replacePath()).await()
 
             ModelNames.Users -> network.getData<User>(modelNames.replacePath()).await()
-            ModelNames.Comments -> network.getData<Comment>(modelNames.replacePath()).await()
+            ModelNames.Comments -> network.getData<PointComment>(modelNames.replacePath()).await()
             ModelNames.EasyPoints -> network.getData<EasyPoint>(modelNames.replacePath()).await()
 
             ModelNames.EasyPointSimplify -> network.getData<EasyPointSimplify>(modelNames.replacePath())
@@ -34,9 +33,7 @@ object EasyPointNetWork {
         return network.getUpdate().await()
     }
 
-    private
-
-    suspend fun <T> Call<T>.await(): T {
+    private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {
                 override fun onResponse(call: Call<T>, response: Response<T>) {

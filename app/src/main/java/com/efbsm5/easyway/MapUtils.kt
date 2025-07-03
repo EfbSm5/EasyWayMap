@@ -14,7 +14,7 @@ import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.Poi
 import com.amap.api.services.core.LatLonPoint
 import com.amap.api.services.core.PoiItemV2
-import com.efbsm5.easyway.data.models.DynamicPost
+import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.models.User
 import java.math.BigDecimal
@@ -135,8 +135,8 @@ fun getInitUser(): User {
     )
 }
 
-fun getInitPost(): DynamicPost {
-    return DynamicPost(
+fun getInitPost(): Post {
+    return Post(
         title = "",
         date = "",
         like = 0,

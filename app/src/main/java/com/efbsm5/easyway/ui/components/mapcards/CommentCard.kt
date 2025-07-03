@@ -45,7 +45,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.amap.api.maps.model.LatLng
 import com.efbsm5.easyway.R
-import com.efbsm5.easyway.data.models.Comment
+import com.efbsm5.easyway.data.models.PointComment
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.getLatlng
@@ -102,7 +102,7 @@ private fun CommentAndHistoryCardScreen(
     point: EasyPoint,
     onSelect: (Int) -> Unit,
     state: CommentCardScreen,
-    pointComments: List<Pair<Comment, User>>,
+    pointComments: List<Pair<PointComment, User>>,
     publish: (String) -> Unit,
     update: () -> Unit,
     navigate: (LatLng) -> Unit,
@@ -242,7 +242,7 @@ fun PointInfo(
 
 @Composable
 private fun CommentCard(
-    comments: List<Pair<Comment, User>>,
+    comments: List<Pair<PointComment, User>>,
     like: (Int, Boolean) -> Unit,
     dislike: (Int, Boolean) -> Unit
 ) {
@@ -251,7 +251,7 @@ private fun CommentCard(
     } else LazyColumn {
         items(comments) { commentAndUser ->
             CommentItem(
-                commentAndUser = commentAndUser,
+                pointCommentAndUser = commentAndUser,
                 like = { like(commentAndUser.first.index, it) },
                 dislike = { dislike(commentAndUser.first.index, it) },
             )
@@ -261,7 +261,7 @@ private fun CommentCard(
 
 @Composable
 private fun CommentItem(
-    commentAndUser: Pair<Comment, User>, like: (Boolean) -> Unit, dislike: (Boolean) -> Unit
+    pointCommentAndUser: Pair<PointComment, User>, like: (Boolean) -> Unit, dislike: (Boolean) -> Unit
 ) {
     var isLiked by remember { mutableStateOf(false) }
     var isDisliked by remember { mutableStateOf(false) }
@@ -269,8 +269,8 @@ private fun CommentItem(
     val dislikeColor by animateColorAsState(targetValue = if (isDisliked) Color.Red else Color.Gray)
     val likeSize by animateFloatAsState(targetValue = if (isLiked) 36f else 24f)
     val dislikeSize by animateFloatAsState(targetValue = if (isDisliked) 36f else 24f)
-    val user = commentAndUser.second
-    val comment = commentAndUser.first
+    val user = pointCommentAndUser.second
+    val comment = pointCommentAndUser.first
     Row(
         modifier = Modifier
             .fillMaxWidth()

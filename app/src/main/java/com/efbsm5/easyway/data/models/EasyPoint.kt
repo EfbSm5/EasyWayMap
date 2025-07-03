@@ -6,7 +6,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
-@Entity(tableName = "points")
+@Entity(tableName = "point")
 data class EasyPoint(
     @PrimaryKey(autoGenerate = true) @SerializedName("point_id") var pointId: Int,
     @ColumnInfo(name = "name") @SerializedName("name") var name: String,

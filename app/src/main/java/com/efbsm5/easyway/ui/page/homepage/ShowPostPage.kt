@@ -8,8 +8,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import com.efbsm5.easyway.data.models.DynamicPost
-import com.efbsm5.easyway.data.models.assistModel.DynamicPostAndUser
+import com.efbsm5.easyway.data.models.Post
+import com.efbsm5.easyway.data.models.assistModel.PointCommentAndUser
 import com.efbsm5.easyway.ui.components.DynamicPostList
 import com.efbsm5.easyway.ui.page.communityPage.DetailPage
 import com.efbsm5.easyway.viewmodel.pageViewmodel.DetailPageViewModel
@@ -17,7 +17,7 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @Composable
-fun ShowPostPage(posts: List<DynamicPostAndUser>) {
+fun ShowPostPage(posts: List<PointCommentAndUser>) {
     var state by remember { mutableStateOf<PostPageState>(PostPageState.No) }
     if (posts.isNotEmpty()) {
         state = PostPageState.All(posts)
@@ -44,6 +44,6 @@ fun ShowPostPage(posts: List<DynamicPostAndUser>) {
 
 sealed interface PostPageState {
     data object No : PostPageState
-    data class Detail(val dynamicPost: DynamicPost) : PostPageState
-    data class All(val posts: List<DynamicPostAndUser>) : PostPageState
+    data class Detail(val dynamicPost: Post) : PostPageState
+    data class All(val posts: List<PointCommentAndUser>) : PostPageState
 }

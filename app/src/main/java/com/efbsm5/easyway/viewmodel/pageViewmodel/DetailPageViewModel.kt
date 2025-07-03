@@ -3,8 +3,8 @@ package com.efbsm5.easyway.viewmodel.pageViewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.efbsm5.easyway.data.UserManager
-import com.efbsm5.easyway.data.models.Comment
-import com.efbsm5.easyway.data.models.DynamicPost
+import com.efbsm5.easyway.data.models.PointComment
+import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.data.repository.DataRepository
 import com.efbsm5.easyway.getCurrentFormattedTime
@@ -15,15 +15,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class DetailPageViewModel(
-    val repository: DataRepository, val userManager: UserManager, dynamicPost: DynamicPost
+    val repository: DataRepository, val userManager: UserManager, dynamicPost: Post
 ) : ViewModel() {
-    private val _dynamicPost = MutableStateFlow<DynamicPost>(dynamicPost)
+    private val _dynamicPost = MutableStateFlow<Post>(dynamicPost)
     private var _postUser = MutableStateFlow(getInitUser())
-    private val _commentAndUsers =
-        MutableStateFlow(emptyList<Pair<Comment, User>>().toMutableList())
+    private val _Point_commentAndUsers =
+        MutableStateFlow(emptyList<Pair<PointComment, User>>().toMutableList())
     val postUser: StateFlow<User> = _postUser
-    val commentAndUser: StateFlow<MutableList<Pair<Comment, User>>> = _commentAndUsers
-    val post: StateFlow<DynamicPost?> = _dynamicPost
+    val pointCommentAndUser: StateFlow<MutableList<Pair<PointComment, User>>> = _Point_commentAndUsers
+    val post: StateFlow<Post?> = _dynamicPost
 
 
     init {
@@ -35,10 +35,10 @@ class DetailPageViewModel(
             _postUser.value = repository.getUserById(_dynamicPost.value.userId)
             repository.getAllCommentsById(commentId = _dynamicPost.value.commentId)
                 .collect { comments ->
-                    _commentAndUsers.value.clear()
+                    _Point_commentAndUsers.value.clear()
                     comments.forEach {
-                        _commentAndUsers.value.add(
-                            Pair<Comment, User>(
+                        _Point_commentAndUsers.value.add(
+                            Pair<PointComment, User>(
                                 it, repository.getUserById(it.userId)
                             )
                         )
@@ -63,12 +63,12 @@ class DetailPageViewModel(
     fun likeComment(boolean: Boolean, commentIndex: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             if (boolean) {
-                _commentAndUsers.value.find { commentAndUser ->
+                _Point_commentAndUsers.value.find { commentAndUser ->
                     commentAndUser.first.index == commentIndex
                 }!!.first.like + 1
                 repository.addLikeForComment(commentIndex)
             } else {
-                _commentAndUsers.value.find { commentAndUser ->
+                _Point_commentAndUsers.value.find { commentAndUser ->
                     commentAndUser.first.index == commentIndex
                 }!!.first.like - 1
                 repository.decreaseLikeForComment(commentIndex)
@@ -79,12 +79,12 @@ class DetailPageViewModel(
     fun dislikeComment(boolean: Boolean, commentIndex: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             if (boolean) {
-                _commentAndUsers.value.find { commentAndUser ->
+                _Point_commentAndUsers.value.find { commentAndUser ->
                     commentAndUser.first.index == commentIndex
                 }!!.first.dislike + 1
                 repository.addDisLikeForComment(commentIndex)
             } else {
-                _commentAndUsers.value.find { commentAndUser ->
+                _Point_commentAndUsers.value.find { commentAndUser ->
                     commentAndUser.first.index == commentIndex
                 }!!.first.dislike - 1
                 repository.decreaseDisLikeForComment(commentIndex)
@@ -94,7 +94,7 @@ class DetailPageViewModel(
 
     fun comment(string: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val comment = Comment(
+            val pointComment = PointComment(
                 index = repository.getCommentCount() + 1,
                 commentId = _dynamicPost.value.commentId,
                 userId = userManager.userId,
@@ -103,10 +103,10 @@ class DetailPageViewModel(
                 dislike = 0,
                 date = getCurrentFormattedTime()
             )
-            repository.uploadComment(comment)
-            _commentAndUsers.value.add(
-                Pair<Comment, User>(
-                    comment, repository.getUserById(comment.userId)
+            repository.uploadComment(pointComment)
+            _Point_commentAndUsers.value.add(
+                Pair<PointComment, User>(
+                    pointComment, repository.getUserById(pointComment.userId)
                 )
             )
         }

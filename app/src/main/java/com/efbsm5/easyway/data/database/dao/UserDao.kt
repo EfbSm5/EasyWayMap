@@ -11,18 +11,18 @@ interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(user: User)
 
-    @Query("SELECT * FROM users WHERE id = :id")
+    @Query("SELECT * FROM user WHERE id = :id")
     fun getUserById(id: Int): User?
 
-    @Query("SELECT * FROM users")
+    @Query("SELECT * FROM user")
     fun getAllUsers(): List<User>
 
-    @Query("DELETE FROM users WHERE id = :id")
+    @Query("DELETE FROM user WHERE id = :id")
     fun deleteUserById(id: Int)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(posts: List<User>)
 
-    @Query("DELETE FROM users WHERE id IN (:ids)")
+    @Query("DELETE FROM user WHERE id IN (:ids)")
     fun deleteAll(ids: List<Int>)
 }

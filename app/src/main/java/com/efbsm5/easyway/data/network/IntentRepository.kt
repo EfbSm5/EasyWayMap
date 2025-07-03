@@ -2,8 +2,8 @@ package com.efbsm5.easyway.data.network
 
 import com.efbsm5.easyway.SDKUtils
 import com.efbsm5.easyway.data.database.AppDataBase
-import com.efbsm5.easyway.data.models.Comment
-import com.efbsm5.easyway.data.models.DynamicPost
+import com.efbsm5.easyway.data.models.PointComment
+import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.models.ModelNames
 import com.efbsm5.easyway.data.models.User
@@ -24,9 +24,9 @@ object IntentRepository {
 
     private suspend fun syncComments() {
         val localComments = commentDao.getAllComments()
-        val networkComments = EasyPointNetWork.sendRequest<Comment>(ModelNames.Comments)
-        val toInsert = networkComments.filter { it !in localComments }
-        localComments.filter { it !in networkComments }.map { it.commentId }
+        val networkPointComments = EasyPointNetWork.sendRequest<PointComment>(ModelNames.Comments)
+        val toInsert = networkPointComments.filter { it !in localComments }
+        localComments.filter { it !in networkPointComments }.map { it.commentId }
         db.runInTransaction {
 //                    commentDao.deleteAll(toDelete)
             commentDao.insertAll(toInsert)
@@ -46,7 +46,7 @@ object IntentRepository {
     }
 
     private suspend fun syncDynamicPosts() {
-        val networkPosts = EasyPointNetWork.sendRequest<DynamicPost>(ModelNames.DynamicPosts)
+        val networkPosts = EasyPointNetWork.sendRequest<Post>(ModelNames.DynamicPosts)
         val localPosts = dynamicPostDao.getAllDynamicPostsByOnce()
         val toInsert = networkPosts.filter { it !in localPosts }
         localPosts.filter { it !in networkPosts }.map { it.id }

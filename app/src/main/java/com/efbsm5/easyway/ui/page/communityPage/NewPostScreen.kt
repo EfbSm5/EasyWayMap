@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.efbsm5.easyway.R
-import com.efbsm5.easyway.data.models.DynamicPost
+import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.getInitPost
 import com.efbsm5.easyway.ui.components.TopBar
 import com.efbsm5.easyway.viewmodel.pageViewmodel.NewPostPageViewModel
@@ -84,7 +84,7 @@ fun NewDynamicPostPage(back: () -> Unit, viewModel: NewPostPageViewModel) {
 @Preview
 @Composable
 private fun DynamicPostScreen(
-    dynamicPost: DynamicPost = getInitPost(),
+    dynamicPost: Post = getInitPost(),
     photos: List<Uri> = emptyList(),
     onSelected: (Int) -> Unit = {},
     onTitleChanged: (String) -> Unit = {},
@@ -183,7 +183,7 @@ private fun PublishButton(label: String, selectedButton: String, onSelected: (Bo
 
 @Composable
 private fun AddTitleAndContentSection(
-    dynamicPost: DynamicPost, onTitleChanged: (String) -> Unit, onContentChanged: (String) -> Unit
+    dynamicPost: Post, onTitleChanged: (String) -> Unit, onContentChanged: (String) -> Unit
 ) {
     Column {
         TextField(

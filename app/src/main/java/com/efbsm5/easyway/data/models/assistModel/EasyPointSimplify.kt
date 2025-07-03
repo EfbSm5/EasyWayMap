@@ -9,7 +9,7 @@ data class EasyPointSimplify(
     @SerializedName("lat") val lat: Double,
     @SerializedName("lng") val lng: Double,
 ) {
-    fun getLatlng(): LatLng {
+    fun getLatLng(): LatLng {
         return LatLng(lat, lng)
     }
 }

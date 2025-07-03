@@ -123,18 +123,18 @@ internal fun MultiPointOverlayScreen() {
             properties = currentState.mapProperties,
             onMapLoaded = viewModel::initMultiPointDataAndCheckGps
         ) {
-            MultiPointOverlay(
-                enable = true,
-                icon = currentState.multiPointIcon,
-                multiPointItems = currentState.multiPointItems,
-                onClick = viewModel::onMultiPointItemClick
-            )
-            Marker(
-                icon = BitmapDescriptorFactory.defaultMarker(),
-                state = markerState,
-                visible = null != currentState.clickPointLatLng,
-                isClickable = false
-            )
+//            MultiPointOverlay(
+//                enable = true,
+//                icon = currentState.multiPointIcon,
+//                multiPointItems = currentState.multiPointItems,
+//                onClick = viewModel::onMultiPointItemClick
+//            )
+//            Marker(
+//                icon = BitmapDescriptorFactory.defaultMarker(),
+//                state = markerState,
+//                visible = null != currentState.clickPointLatLng,
+//                isClickable = false
+//            )
         }
         if (currentState.isLoading) {
             RedCenterLoading()

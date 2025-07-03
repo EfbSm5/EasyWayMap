@@ -3,7 +3,7 @@ package com.efbsm5.easyway.viewmodel.componentsViewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.efbsm5.easyway.data.UserManager
-import com.efbsm5.easyway.data.models.Comment
+import com.efbsm5.easyway.data.models.PointComment
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.data.repository.DataRepository
@@ -21,11 +21,11 @@ class CommentAndHistoryCardViewModel(
 ) : ViewModel() {
     private var _state = MutableStateFlow<CommentCardScreen>(CommentCardScreen.Comment)
     private val _point = MutableStateFlow(initialPoint)
-    private var _pointComments = MutableStateFlow<List<Pair<Comment, User>>>(emptyList())
+    private var _pointComments = MutableStateFlow<List<Pair<PointComment, User>>>(emptyList())
 
     val point: StateFlow<EasyPoint> = _point
     val state: StateFlow<CommentCardScreen> = _state
-    val pointComments: StateFlow<List<Pair<Comment, User>>> = _pointComments
+    val pointComments: StateFlow<List<Pair<PointComment, User>>> = _pointComments
 
     fun changeState(commentCardScreen: CommentCardScreen) {
         _state.value = commentCardScreen
@@ -33,7 +33,7 @@ class CommentAndHistoryCardViewModel(
 
     fun publish(string: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val comment = Comment(
+            val pointComment = PointComment(
                 index = repository.getCommentCount(),
                 commentId = _point.value.commentId,
                 userId = userManager.userId,
@@ -43,11 +43,11 @@ class CommentAndHistoryCardViewModel(
                 date = getCurrentFormattedTime()
             )
             repository.uploadComment(
-                comment = comment
+                pointComment = pointComment
             )
             _pointComments.value = _pointComments.value.plus(
-                Pair<Comment, User>(
-                    first = comment, second = repository.getUserById(userManager.userId)
+                Pair<PointComment, User>(
+                    first = pointComment, second = repository.getUserById(userManager.userId)
                 )
             )
         }

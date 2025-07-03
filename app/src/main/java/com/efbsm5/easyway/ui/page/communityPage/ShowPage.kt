@@ -38,7 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.efbsm5.easyway.R
-import com.efbsm5.easyway.data.models.assistModel.DynamicPostAndUser
+import com.efbsm5.easyway.data.models.assistModel.PointCommentAndUser
 import com.efbsm5.easyway.ui.components.DynamicPostList
 import com.efbsm5.easyway.ui.components.TabSection
 import com.efbsm5.easyway.ui.components.TopBar
@@ -63,11 +63,11 @@ fun ShowPage(
 @Composable
 fun ShowPageScreen(
     back: () -> Unit = {},
-    posts: List<DynamicPostAndUser> = emptyList(),
+    posts: List<PointCommentAndUser> = emptyList(),
     titleText: String = "心无距离，共享每一刻",
     onChangeState: () -> Unit = {},
     onSelect: (Int) -> Unit = {},
-    onClick: (DynamicPostAndUser) -> Unit = {},
+    onClick: (PointCommentAndUser) -> Unit = {},
     search: (String) -> Unit = {}
 ) {
     Surface {

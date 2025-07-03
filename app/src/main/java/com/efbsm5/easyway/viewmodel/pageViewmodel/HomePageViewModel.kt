@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.efbsm5.easyway.data.UserManager
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.models.User
-import com.efbsm5.easyway.data.models.assistModel.DynamicPostAndUser
+import com.efbsm5.easyway.data.models.assistModel.PointCommentAndUser
 import com.efbsm5.easyway.data.network.IntentRepository
 import com.efbsm5.easyway.data.repository.DataRepository
 import com.efbsm5.easyway.getInitUser
@@ -21,10 +21,10 @@ class HomePageViewModel(
 ) : ViewModel() {
     private val _user = MutableStateFlow(getInitUser())
     private val _points = MutableStateFlow(emptyList<EasyPoint>())
-    private val _post = MutableStateFlow(emptyList<DynamicPostAndUser>())
+    private val _post = MutableStateFlow(emptyList<PointCommentAndUser>())
     private val _content = MutableStateFlow<HomePageState>(HomePageState.Main)
     val points: StateFlow<List<EasyPoint>> = _points
-    val post: StateFlow<List<DynamicPostAndUser>> = _post
+    val post: StateFlow<List<PointCommentAndUser>> = _post
     val content: StateFlow<HomePageState> = _content
     val user: StateFlow<User> = _user
 
@@ -45,11 +45,11 @@ class HomePageViewModel(
     fun getUserPost() {
         viewModelScope.launch(Dispatchers.IO) {
             repository.getAllDynamicPosts().collect { dynamicPosts ->
-                val list = emptyList<DynamicPostAndUser>().toMutableList()
+                val list = emptyList<PointCommentAndUser>().toMutableList()
                 dynamicPosts.forEach { post ->
                     repository.getCommentCount(post.commentId).collect {
                         list.add(
-                            DynamicPostAndUser(
+                            PointCommentAndUser(
                                 dynamicPost = post,
                                 user = repository.getUserById(post.userId),
                                 commentCount = it,

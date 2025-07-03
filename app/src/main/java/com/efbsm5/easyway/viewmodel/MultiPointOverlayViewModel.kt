@@ -35,7 +35,6 @@ import com.amap.api.maps.LocationSource.OnLocationChangedListener
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.MultiPointItem
 import com.efbsm5.easyway.base.BaseViewModel
-import com.efbsm5.easyway.contract.LocationTrackingContract
 import com.efbsm5.easyway.contract.MultiPointOverlayContract
 import com.efbsm5.easyway.openAppPermissionSettingPage
 import com.efbsm5.easyway.repo.DragDropSelectPointRepository
@@ -79,6 +78,7 @@ class MultiPointOverlayViewModel :
             is MultiPointOverlayContract.Event.MultiPointClick -> {
                 setState { copy(clickPointLatLng = event.pointItem.latLng) }
             }
+
             is MultiPointOverlayContract.Event.ShowOpenGPSDialog -> {
                 setState { copy(isShowOpenGPSDialog = true) }
             }
@@ -90,27 +90,26 @@ class MultiPointOverlayViewModel :
     }
 
 
-
     fun initMultiPointDataAndCheckGps() = asyncLaunch(Dispatchers.IO) {
         val pointItemList = MultiPointOverlayRepository.initMultiPointItemList()
         val isOpenGps = DragDropSelectPointRepository.checkGPSIsOpen()
-        setState { copy(isOpenGps = isOpenGps) }
-        if (!isOpenGps) {
-            setEvent(LocationTrackingContract.Event.ShowOpenGPSDialog)
-        } else {
-            hideOpenGPSDialog()
-        }
         setState {
             copy(
                 isLoading = false, multiPointItems = pointItemList
             )
         }
+        setState { copy(isOpenGps = isOpenGps) }
+        if (!isOpenGps) {
+            setEvent(MultiPointOverlayContract.Event.ShowOpenGPSDialog)
+        } else {
+            hideOpenGPSDialog()
+        }
+
     }
 
     fun onMultiPointItemClick(pointItem: MultiPointItem) {
         setEvent(MultiPointOverlayContract.Event.MultiPointClick(pointItem))
     }
-
 
 
     /**
@@ -154,7 +153,10 @@ class MultiPointOverlayViewModel :
     }
 
     fun startMapLocation() {
-        MultiPointOverlayRepository.initAMapLocationClient(mLocationClient, this) { client, option ->
+        MultiPointOverlayRepository.initAMapLocationClient(
+            mLocationClient,
+            this
+        ) { client, option ->
             mLocationClient = client
             mLocationOption = option
         }
