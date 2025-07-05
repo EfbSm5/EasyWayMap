@@ -10,7 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.assistModel.PointCommentAndUser
-import com.efbsm5.easyway.ui.components.DynamicPostList
+import com.efbsm5.easyway.ui.components.PostList
 import com.efbsm5.easyway.ui.page.communityPage.DetailPage
 import com.efbsm5.easyway.viewmodel.pageViewmodel.DetailPageViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -24,7 +24,7 @@ fun ShowPostPage(posts: List<PointCommentAndUser>) {
 
     }
     when (state) {
-        is PostPageState.All -> DynamicPostList(
+        is PostPageState.All -> PostList(
             posts = posts, onClick = { state = PostPageState.Detail(it.dynamicPost) })
 
         is PostPageState.Detail -> {

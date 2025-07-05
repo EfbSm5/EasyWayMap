@@ -6,7 +6,7 @@ import com.efbsm5.easyway.data.UserManager
 import com.efbsm5.easyway.data.models.PointComment
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.models.User
-import com.efbsm5.easyway.data.repository.DataRepository
+import com.efbsm5.easyway.repo.DataRepository
 import com.efbsm5.easyway.getCurrentFormattedTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

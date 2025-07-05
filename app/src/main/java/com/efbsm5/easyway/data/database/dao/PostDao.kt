@@ -7,7 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
-import kotlinx.coroutines.flow.Flow
+import com.efbsm5.easyway.model.ImmutableListWrapper
 
 @Dao
 interface PostDao {
@@ -15,16 +15,14 @@ interface PostDao {
     fun insert(dynamicPost: Post)
 
     @Query("SELECT * FROM post WHERE id = :id")
-    fun getDynamicPostById(id: Int): Post?
+    fun getPostById(id: Int): Post?
 
     @Query("SELECT * FROM post")
-    fun getAllDynamicPosts(): Flow<List<Post>>
+    fun getAllPosts(): List<Post>
 
-    @Query("SELECT * FROM post")
-    fun getAllDynamicPostsByOnce(): List<Post>
 
     @Query("DELETE FROM post WHERE id = :id")
-    fun deleteDynamicPostById(id: Int)
+    fun deletePostById(id: Int)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(posts: List<Post>)
@@ -37,7 +35,7 @@ interface PostDao {
 
     @Transaction
     @Query("SELECT * FROM post")
-    fun getPostWithUser(): PostAndUser
+    fun getPostWithUser(): ImmutableListWrapper<PostAndUser>
 
     @Query("UPDATE post SET `like` = `like` + 1 WHERE `id` = :id")
     fun increaseLike(id: Int)

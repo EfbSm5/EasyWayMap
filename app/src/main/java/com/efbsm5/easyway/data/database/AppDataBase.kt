@@ -25,7 +25,7 @@ import com.efbsm5.easyway.data.models.User
 abstract class AppDataBase : RoomDatabase() {
     abstract fun pointsDao(): PointsDao
     abstract fun pointCommentDao(): PointCommentDao
-    abstract fun dynamicPostDao(): PostDao
+    abstract fun postDao(): PostDao
     abstract fun userDao(): UserDao
     abstract fun postCommentDao(): PostCommentDao
 

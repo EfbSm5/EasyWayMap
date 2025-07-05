@@ -26,11 +26,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import com.efbsm5.easyway.data.models.assistModel.PointCommentAndUser
+import com.efbsm5.easyway.data.models.assistModel.PostAndUser
+import com.efbsm5.easyway.data.models.assistModel.PostCommentAndUser
 
 @Composable
-fun DynamicPostList(
-    posts: List<PointCommentAndUser>, onClick: (PointCommentAndUser) -> Unit
+fun PostList(
+    posts: List<PostAndUser>, onClick: (PostAndUser) -> Unit
 ) {
     if (posts.isEmpty()) {
         Text("没有数据")
@@ -47,10 +48,9 @@ fun DynamicPostList(
 
 
 @Composable
-private fun PostsItem(dynamicPostAndUser: PointCommentAndUser, onClick: () -> Unit) {
-    val user = dynamicPostAndUser.user
-    val commentsCount = dynamicPostAndUser.commentCount
-    val dynamicPost = dynamicPostAndUser.dynamicPost
+private fun PostsItem(postAndUser: PostAndUser, onClick: () -> Unit) {
+    val user = postAndUser.user
+    val dynamicPost = postAndUser.post
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -119,7 +119,6 @@ private fun PostsItem(dynamicPostAndUser: PointCommentAndUser, onClick: () -> Un
                     modifier = Modifier.padding(horizontal = 4.dp)
                 )
                 Spacer(modifier = Modifier.width(16.dp))
-                Text(text = "评论 $commentsCount")
             }
         }
     }

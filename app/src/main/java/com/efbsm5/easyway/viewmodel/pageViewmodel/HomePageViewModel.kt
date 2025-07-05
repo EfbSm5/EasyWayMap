@@ -7,7 +7,7 @@ import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.data.models.assistModel.PointCommentAndUser
 import com.efbsm5.easyway.data.network.IntentRepository
-import com.efbsm5.easyway.data.repository.DataRepository
+import com.efbsm5.easyway.repo.DataRepository
 import com.efbsm5.easyway.getInitUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -1,54 +1,50 @@
 package com.efbsm5.easyway.ui.page.communityPage
 
-import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.efbsm5.easyway.data.models.Post
-import com.efbsm5.easyway.viewmodel.pageViewmodel.DetailPageViewModel
-import com.efbsm5.easyway.viewmodel.pageViewmodel.NewPostPageViewModel
-import com.efbsm5.easyway.viewmodel.pageViewmodel.ShowPageViewModel
-import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.efbsm5.easyway.data.models.assistModel.PostAndUser
+import com.efbsm5.easyway.viewmodel.CommunityViewModel
 
 @Composable
-fun CommunityPage(back: () -> Unit) {
-    var state: State by remember { mutableStateOf(State.Community) }
-    Crossfade(targetState = state, modifier = Modifier.fillMaxSize()) { nowState ->
-        when (nowState) {
-            State.Community -> {
-                val showPageViewModel: ShowPageViewModel = koinViewModel()
-                ShowPage(
-                    onChangeState = { state = it }, viewModel = showPageViewModel, back = back
-                )
-            }
+fun CommunityPage(back: () -> Unit, onChangeState: (PostAndUser) -> Unit) {
+    val viewModel: CommunityViewModel = viewModel()
+    val currentState by viewModel.uiState.collectAsState()
 
-            is State.Detail -> {
-                val detailPageViewModel: DetailPageViewModel =
-                    koinViewModel(parameters = { parametersOf(nowState.dynamicPost) })
-                DetailPage(
-                    onBack = { state = State.Community }, viewModel = detailPageViewModel
-                )
-            }
-
-            State.NewPost -> {
-                val newPostPageViewModel: NewPostPageViewModel = koinViewModel()
-                NewDynamicPostPage(
-                    back = { state = State.Community }, viewModel = newPostPageViewModel
-                )
+    when {
+        currentState.isLoading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
         }
+
+        currentState.error != null -> {
+            Box(
+                modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+            ) {
+                Text(currentState.error!!)
+            }
+        }
+
+        else -> {
+            ShowPage(
+                back = back,
+                posts = currentState.postItems,
+                onSelect = viewModel::select,
+                onClick = onChangeState,
+                search = viewModel::search
+            )
+        }
     }
-
 }
 
 
-sealed interface State {
-    data object Community : State
-    data object NewPost : State
-    data class Detail(val dynamicPost: Post) : State
-}

@@ -51,8 +51,7 @@ import kotlinx.coroutines.delay
  */
 class LocationTrackingViewModel :
     BaseViewModel<LocationTrackingContract.Event, LocationTrackingContract.State, LocationTrackingContract.Effect>(),
-    LocationSource,
-    AMapLocationListener {
+    LocationSource, AMapLocationListener {
 
     private var mListener: OnLocationChangedListener? = null
     private var mLocationClient: AMapLocationClient? = null

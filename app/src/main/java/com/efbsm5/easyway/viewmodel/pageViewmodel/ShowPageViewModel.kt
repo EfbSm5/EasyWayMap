@@ -3,7 +3,7 @@ package com.efbsm5.easyway.viewmodel.pageViewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.efbsm5.easyway.data.models.assistModel.PointCommentAndUser
-import com.efbsm5.easyway.data.repository.DataRepository
+import com.efbsm5.easyway.repo.DataRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -31,15 +31,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.amap.api.maps.CameraUpdateFactory
 import com.amap.api.maps.model.CameraPosition
 import com.amap.api.maps.model.LatLng
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.melody.map.gd_compose.GDMap
-import com.melody.map.gd_compose.position.rememberCameraPositionState
 import com.efbsm5.easyway.contract.LocationTrackingContract
 import com.efbsm5.easyway.dialog.ShowOpenGPSDialog
 import com.efbsm5.easyway.launcher.handlerGPSLauncher
 import com.efbsm5.easyway.showToast
 import com.efbsm5.easyway.ui.components.requestMultiplePermission
 import com.efbsm5.easyway.viewmodel.LocationTrackingViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.melody.map.gd_compose.GDMap
+import com.melody.map.gd_compose.position.rememberCameraPositionState
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 
@@ -70,8 +70,7 @@ internal fun LocationTrackingScreen() {
     val openGpsLauncher = handlerGPSLauncher(viewModel::checkGpsStatus)
     val reqGPSPermission = requestMultiplePermission(
         permissions = listOf(
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION
+            Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION
         ),
         onGrantAllPermission = viewModel::handleGrantLocationPermission,
         onNoGrantPermission = viewModel::handleNoGrantLocationPermission
@@ -101,11 +100,9 @@ internal fun LocationTrackingScreen() {
 
     if (currentState.isShowOpenGPSDialog) {
         ShowOpenGPSDialog(
-            onDismiss = viewModel::hideOpenGPSDialog,
-            onPositiveClick = {
+            onDismiss = viewModel::hideOpenGPSDialog, onPositiveClick = {
                 viewModel.openGPSPermission(openGpsLauncher)
-            }
-        )
+            })
     }
 
     Box(modifier = Modifier.fillMaxSize()) {

@@ -16,12 +16,3 @@ data class PostWithComments(
     val comments: List<PointCommentAndUser>
 )
 
-data class PointWithComments(
-    @Embedded val point: EasyPoint,
-    @Relation(
-        entity = EasyPoint::class,
-        parentColumn = "postId",
-        entityColumn = "postOwnerId"
-    )
-    val comments: List<PointCommentAndUser>
-)

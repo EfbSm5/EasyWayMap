@@ -3,7 +3,7 @@
 //import androidx.lifecycle.ViewModel
 //import androidx.lifecycle.viewModelScope
 //import com.amap.api.maps.AMap
-//import com.efbsm5.easyway.data.repository.DataRepository
+//import com.efbsm5.easyway.repo.DataRepository
 //import com.efbsm5.easyway.map.MapState
 //import com.efbsm5.easyway.map.MapUtil
 //import com.efbsm5.easyway.ui.components.mapcards.Screen

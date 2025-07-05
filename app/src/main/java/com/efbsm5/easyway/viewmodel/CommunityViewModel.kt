@@ -2,34 +2,58 @@ package com.efbsm5.easyway.viewmodel
 
 import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.CommunityContract
-import com.efbsm5.easyway.data.models.assistModel.PointCommentAndUser
+import com.efbsm5.easyway.data.models.assistModel.PostAndUser
+import com.efbsm5.easyway.model.ImmutableListWrapper
+import com.efbsm5.easyway.repo.CommunityRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 class CommunityViewModel :
     BaseViewModel<CommunityContract.Event, CommunityContract.State, CommunityContract.Effect>() {
-    private var _showPosts = MutableStateFlow<List<PointCommentAndUser>>(emptyList())
-    val posts: StateFlow<List<PointCommentAndUser>> = _showPosts
+    private var _showPosts =
+        MutableStateFlow<ImmutableListWrapper<PostAndUser>>(ImmutableListWrapper(emptyList()))
 
     init {
-        fetchPosts()
+        setEvent(CommunityContract.Event.Loading)
     }
 
     override fun createInitialState(): CommunityContract.State {
+
         return CommunityContract.State(
             searchContent = "",
-            poiItems = emptyList()
+            postItems = ImmutableListWrapper(emptyList()),
+            tab = 0,
+            isLoading = true,
+            error = null
         )
     }
 
     override fun handleEvents(event: CommunityContract.Event) {
         when (event) {
-            CommunityContract.Event.Loaded -> TODO()
             CommunityContract.Event.Loading -> {
-                
+                asyncLaunch(Dispatchers.IO) {
+                    _showPosts.value = CommunityRepository.fetchPosts()
+                    setState {
+                        copy(
+                            isLoading = false,
+                            postItems = _showPosts.value
+                        )
+                    }
+                }
+            }
+
+            CommunityContract.Event.Click -> {
+
             }
         }
-        TODO("Not yet implemented")
+    }
+
+    fun search(text: String) {
+
+    }
+
+    fun select(int: Int) {
+
     }
 
 }

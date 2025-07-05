@@ -15,8 +15,8 @@ import com.google.gson.annotations.SerializedName
         childColumns = ["userId"],
         onDelete = ForeignKey.CASCADE
     ), ForeignKey(
-        entity = Post::class,
-        parentColumns = ["id"],
+        entity = EasyPoint::class,
+        parentColumns = ["pointId"],
         childColumns = ["pointId"],
         onDelete = ForeignKey.CASCADE
     )],

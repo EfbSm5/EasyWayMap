@@ -14,7 +14,7 @@ import com.google.gson.annotations.SerializedName
         childColumns = ["userId"],
         onDelete = ForeignKey.CASCADE
     )],
-    indices = [Index("authorId")]
+    indices = [Index("userId")]
 )
 data class Post(
     @PrimaryKey @SerializedName("id") var id: Int,
