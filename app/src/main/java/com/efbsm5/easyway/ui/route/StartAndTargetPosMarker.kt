@@ -25,11 +25,11 @@ package com.efbsm5.easyway.ui.route
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Offset
 import com.amap.api.maps.model.BitmapDescriptor
+import com.efbsm5.easyway.model.BaseRouteDataState
 import com.melody.map.gd_compose.model.GDMapComposable
 import com.melody.map.gd_compose.overlay.Marker
 import com.melody.map.gd_compose.overlay.MarkerState
 import com.melody.map.gd_compose.overlay.rememberMarkerState
-import com.efbsm5.easyway.model.BaseRouteDataState
 
 /**
  * StartAndTargetPosMarker

@@ -123,6 +123,13 @@ class DragDropSelectPointViewModel :
                     .plus(poiItemV2.snippet ?: "")
             )
         }
+        setEffect {
+            DragDropSelectPointContract.Effect.Selected(
+                poiItemV2.cityName ?: ""
+                    .plus(poiItemV2.adName ?: "")
+                    .plus(poiItemV2.snippet ?: "")
+            )
+        }
     }
 
     /**

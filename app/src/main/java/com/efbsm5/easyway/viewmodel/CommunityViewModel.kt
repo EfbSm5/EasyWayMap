@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class CommunityViewModel :
     BaseViewModel<CommunityContract.Event, CommunityContract.State, CommunityContract.Effect>() {
     private var _showPosts =
-        MutableStateFlow<ImmutableListWrapper<PostAndUser>>(ImmutableListWrapper(emptyList()))
+        MutableStateFlow<List<PostAndUser>>(emptyList())
 
     init {
         setEvent(CommunityContract.Event.Loading)
@@ -36,7 +36,7 @@ class CommunityViewModel :
                     setState {
                         copy(
                             isLoading = false,
-                            postItems = _showPosts.value
+                            postItems = ImmutableListWrapper(_showPosts.value)
                         )
                     }
                 }

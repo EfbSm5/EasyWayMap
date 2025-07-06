@@ -7,7 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
-import com.efbsm5.easyway.model.ImmutableListWrapper
+import com.efbsm5.easyway.data.models.assistModel.PostWithComments
 
 @Dao
 interface PostDao {
@@ -35,7 +35,11 @@ interface PostDao {
 
     @Transaction
     @Query("SELECT * FROM post")
-    fun getPostWithUser(): ImmutableListWrapper<PostAndUser>
+    fun getPostWithUser(): List<PostAndUser>
+
+    @Transaction
+    @Query("SELECT * FROM post WHERE`id` = :id")
+    fun getPostWithComment(id: Int): PostWithComments
 
     @Query("UPDATE post SET `like` = `like` + 1 WHERE `id` = :id")
     fun increaseLike(id: Int)

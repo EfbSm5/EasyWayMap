@@ -23,11 +23,11 @@
 package com.efbsm5.easyway.contract
 
 import com.amap.api.maps.model.LatLng
-import com.melody.map.gd_compose.poperties.MapProperties
-import com.melody.map.gd_compose.poperties.MapUiSettings
 import com.efbsm5.easyway.state.IUiEffect
 import com.efbsm5.easyway.state.IUiEvent
 import com.efbsm5.easyway.state.IUiState
+import com.melody.map.gd_compose.poperties.MapProperties
+import com.melody.map.gd_compose.poperties.MapUiSettings
 
 /**
  * LocationTrackingContract

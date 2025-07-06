@@ -35,7 +35,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.amap.api.maps.CameraUpdateFactory
 import com.amap.api.maps.model.BitmapDescriptorFactory
@@ -54,7 +53,6 @@ import com.melody.map.gd_compose.overlay.Marker
 import com.melody.map.gd_compose.overlay.rememberMarkerState
 import com.melody.map.gd_compose.poperties.MapUiSettings
 import com.melody.map.gd_compose.position.rememberCameraPositionState
-import com.melody.map.gd_compose.utils.MapUtils
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 
@@ -67,8 +65,7 @@ import kotlinx.coroutines.flow.onEach
  */
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-internal fun DragDropSelectPointScreen() {
-    MapUtils.setMapPrivacy(LocalContext.current, true)
+internal fun DragDropSelectPointScreen(onSelected: (String) -> Unit) {
     var isMapLoaded by rememberSaveable { mutableStateOf(false) }
     val dragDropAnimatable = remember { Animatable(Size.Zero, Size.VectorConverter) }
     val cameraPositionState = rememberCameraPositionState()
@@ -91,6 +88,9 @@ internal fun DragDropSelectPointScreen() {
         viewModel.effect.onEach {
             if (it is DragDropSelectPointContract.Effect.Toast) {
                 showToast(it.msg)
+            }
+            if (it is DragDropSelectPointContract.Effect.Selected) {
+                onSelected(it.location)
             }
         }.collect()
     }

@@ -2,10 +2,10 @@ package com.efbsm5.easyway.data.network
 
 import com.efbsm5.easyway.SDKUtils
 import com.efbsm5.easyway.data.database.AppDataBase
-import com.efbsm5.easyway.data.models.PointComment
-import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.models.ModelNames
+import com.efbsm5.easyway.data.models.PointComment
+import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.User
 
 object IntentRepository {

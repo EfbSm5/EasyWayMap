@@ -22,12 +22,12 @@ import com.google.gson.annotations.SerializedName
     indices = [Index("postId"), Index("userId")]
 )
 data class PostComment(
-    @SerializedName("index") @PrimaryKey val index: Int,
+    @SerializedName("index") @PrimaryKey val index: Int = 0,
     @SerializedName("post_id") val postId: Int,
     @SerializedName("user_id") val userId: Int,
     @SerializedName("content") var content: String,
     @SerializedName("like") var like: Int,
-    @SerializedName("dislike") val dislike: Int,
+    @SerializedName("dislike") var dislike: Int,
     @SerializedName("date") val date: String,
 )
 

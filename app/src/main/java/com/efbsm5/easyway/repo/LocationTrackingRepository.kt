@@ -30,10 +30,10 @@ import com.amap.api.location.AMapLocationClientOption
 import com.amap.api.location.AMapLocationListener
 import com.amap.api.maps.model.BitmapDescriptorFactory
 import com.amap.api.maps.model.MyLocationStyle
-import com.melody.map.gd_compose.poperties.MapProperties
-import com.melody.map.gd_compose.poperties.MapUiSettings
 import com.efbsm5.easyway.R
 import com.efbsm5.easyway.SDKUtils
+import com.melody.map.gd_compose.poperties.MapProperties
+import com.melody.map.gd_compose.poperties.MapUiSettings
 
 /**
  * LocationTrackingRepository

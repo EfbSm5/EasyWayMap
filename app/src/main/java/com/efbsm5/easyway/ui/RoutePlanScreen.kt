@@ -39,9 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.accompanist.flowlayout.FlowRow
-import com.melody.map.gd_compose.GDMap
-import com.melody.map.gd_compose.position.rememberCameraPositionState
 import com.efbsm5.easyway.contract.RoutePlanContract
 import com.efbsm5.easyway.model.BusRouteDataState
 import com.efbsm5.easyway.model.DrivingRouteDataState
@@ -56,6 +53,9 @@ import com.efbsm5.easyway.ui.route.DrivingRouteOverlayContent
 import com.efbsm5.easyway.ui.route.RideRouteOverlayContent
 import com.efbsm5.easyway.ui.route.WalkRouteOverlayContent
 import com.efbsm5.easyway.viewmodel.RoutePlanViewModel
+import com.google.accompanist.flowlayout.FlowRow
+import com.melody.map.gd_compose.GDMap
+import com.melody.map.gd_compose.position.rememberCameraPositionState
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 

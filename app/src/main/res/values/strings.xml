@@ -18,5 +18,5 @@
     <string name="gd_map_location_gps_no_open">定位失败，打开定位服务来获取位置信息</string>
     <string name="gd_map_location_gps_dialog_cancel">取消</string>
     <string name="gd_map_location_gps_dialog_ok">开启定位</string>
-    
+
 </resources>

@@ -73,7 +73,7 @@ fun FunctionCard(
         onclick = { viewModel.search(context = context, string = it) },
         poiItemV2s = poiList,
         changeScreen = changeScreen,
-        location = viewModel.locationSaver. location,
+        location = viewModel.locationSaver.location,
         navigate = navigate,
         easyPoints = pointList
     )

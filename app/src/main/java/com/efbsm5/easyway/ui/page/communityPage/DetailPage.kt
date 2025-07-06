@@ -43,30 +43,37 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.efbsm5.easyway.R
-import com.efbsm5.easyway.data.models.PointComment
 import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.User
+import com.efbsm5.easyway.data.models.assistModel.PostCommentAndUser
 import com.efbsm5.easyway.getInitPost
 import com.efbsm5.easyway.getInitUser
+import com.efbsm5.easyway.model.ImmutableListWrapper
 import com.efbsm5.easyway.ui.components.TopBar
-import com.efbsm5.easyway.viewmodel.pageViewmodel.DetailPageViewModel
+import com.efbsm5.easyway.viewmodel.pageViewmodel.DetailViewModel
 
 @Composable
-fun DetailPage(onBack: () -> Unit, viewModel: DetailPageViewModel) {
-    val postUser by viewModel.postUser.collectAsState()
-    val commentAndUser by viewModel.pointCommentAndUser.collectAsState()
-    val post by viewModel.post.collectAsState()
+fun DetailPage(onBack: () -> Unit) {
+    val viewmodel: DetailViewModel = viewModel()
+    val currentState by viewmodel.uiState.collectAsState()
     DetailPageScreen(
         onBack = onBack,
-        post = post!!,
-        postUser = postUser,
-        pointCommentAndUser = commentAndUser,
-        comment = { viewModel.comment(it) },
-        like = { boolean, index -> viewModel.likeComment(boolean, index) },
-        dislike = { boolean, index -> viewModel.dislikeComment(boolean, index) },
-        likePost = { viewModel.likePost(it) })
+        post = currentState.post,
+        postUser = currentState.user,
+        postComment = currentState.comments,
+        comment = viewmodel::comment,
+        like = { boolean, index -> viewmodel.likeComment(boolean, index) },
+        dislike = { boolean, index -> viewmodel.likeComment(boolean, index) },
+        likePost = { viewmodel.likePost(it) },
+        showTextField = TODO(),
+        ifShowField = TODO(),
+        commentText = TODO(),
+        changeText = TODO()
+    )
+
 }
 
 @Preview
@@ -75,13 +82,16 @@ private fun DetailPageScreen(
     onBack: () -> Unit = {},
     post: Post = getInitPost(),
     postUser: User = getInitUser(),
-    pointCommentAndUser: List<Pair<PointComment, User>> = emptyList(),
+    postComment: ImmutableListWrapper<PostCommentAndUser> = ImmutableListWrapper(emptyList()),
     comment: (String) -> Unit = {},
     like: (Boolean, Int) -> Unit = { _, _ -> },
     dislike: (Boolean, Int) -> Unit = { _, _ -> },
-    likePost: (Boolean) -> Unit = {}
+    likePost: (Boolean) -> Unit = {},
+    showTextField: Boolean = true,
+    ifShowField: (Boolean) -> Unit = {},
+    commentText: String = "",
+    changeText: (String) -> Unit = {}
 ) {
-    var showTextField by remember { mutableStateOf(false) }
     Surface(color = MaterialTheme.colorScheme.background) {
         Column(
             modifier = Modifier
@@ -97,20 +107,23 @@ private fun DetailPageScreen(
                 thickness = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
             )
             Comments(
-                list = pointCommentAndUser, like = like, dislike = dislike
+                list = postComment.items, like = like, dislike = dislike
             )
-            CommentSection(comment = { showTextField = true })
+            CommentSection(comment = { ifShowField(true) })
             if (showTextField) {
                 AddCommentField(
                     onClickButton = {
-                        showTextField = false
+                        ifShowField(false)
                         comment(it)
-                    })
+                    },
+                    commentText = commentText,
+                    changeText = changeText
+                )
             }
         }
     }
     BackHandler(enabled = showTextField) {
-        showTextField = false
+        ifShowField(false)
     }
 }
 
@@ -176,22 +189,21 @@ private fun DetailsContent(
 
 @Composable
 private fun Comments(
-    list: List<Pair<PointComment, User>>, like: (Boolean, Int) -> Unit, dislike: (Boolean, Int) -> Unit
+    list: List<PostCommentAndUser>, like: (Boolean, Int) -> Unit, dislike: (Boolean, Int) -> Unit
 ) {
     LazyColumn(modifier = Modifier.padding(vertical = 16.dp)) {
         items(list) { commentAndUser ->
             CommentItems(
-                commentAndUser, like = like, dislike = dislike
-            )
+                commentAndUser,
+                like = { like(it, list.indexOf(commentAndUser)) },
+                dislike = { dislike(it, list.indexOf(commentAndUser)) })
         }
     }
 }
 
 @Composable
 private fun CommentItems(
-    pointCommentAndUser: Pair<PointComment, User>,
-    like: (Boolean, Int) -> Unit,
-    dislike: (Boolean, Int) -> Unit
+    postCommentAndUser: PostCommentAndUser, like: (Boolean) -> Unit, dislike: (Boolean) -> Unit
 ) {
     var isLiked by remember { mutableStateOf(false) }
     var isDisliked by remember { mutableStateOf(false) }
@@ -207,8 +219,8 @@ private fun CommentItems(
     )
     val likeSize by animateFloatAsState(targetValue = if (isLiked) 36f else 24f)
     val dislikeSize by animateFloatAsState(targetValue = if (isDisliked) 36f else 24f)
-    val user = pointCommentAndUser.second
-    val comment = pointCommentAndUser.first
+    val user = postCommentAndUser.user
+    val comment = postCommentAndUser.postComment
     Row(
         modifier = Modifier.padding(bottom = 16.dp), verticalAlignment = Alignment.CenterVertically
     ) {
@@ -239,7 +251,7 @@ private fun CommentItems(
                 .clickable {
                     isLiked = !isLiked
                     if (isDisliked) isDisliked = false
-                    like(isLiked, comment.index)
+                    like(isLiked)
                 }, contentDescription = "Like", tint = likeColor
         )
         Spacer(modifier = Modifier.width(4.dp))
@@ -250,7 +262,7 @@ private fun CommentItems(
                 .clickable {
                     isDisliked = !isDisliked
                     if (isLiked) isLiked = false
-                    dislike(isDisliked, comment.index)
+                    dislike(isDisliked)
                 },
             painter = painterResource(id = R.drawable.thumb_down),
             contentDescription = "Dislike",
@@ -295,13 +307,14 @@ private fun CommentSection(comment: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddCommentField(
-    onClickButton: (String) -> Unit
+    onClickButton: (String) -> Unit,
+    commentText: String,
+    changeText: (String) -> Unit
 ) {
-    var commentText by remember { mutableStateOf("") }
     Row(verticalAlignment = Alignment.CenterVertically) {
         TextField(
             value = commentText,
-            onValueChange = { commentText = it },
+            onValueChange = changeText,
             modifier = Modifier.weight(1f),
             placeholder = { Text("添加评论", style = MaterialTheme.typography.bodySmall) },
         )

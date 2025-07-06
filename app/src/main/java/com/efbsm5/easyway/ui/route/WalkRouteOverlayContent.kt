@@ -27,9 +27,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import com.efbsm5.easyway.model.WalkRouteDataState
 import com.melody.map.gd_compose.model.GDMapComposable
 import com.melody.map.gd_compose.overlay.WalkRouteOverlay
-import com.efbsm5.easyway.model.WalkRouteDataState
 
 /**
  * WalkRouteOverlayContent

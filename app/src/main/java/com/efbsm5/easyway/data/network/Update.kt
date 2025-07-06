@@ -1,17 +1,13 @@
 package com.efbsm5.easyway.data.network
 
+//import com.alibaba.idst.nui.BuildConfig
 import android.content.Intent
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
-//import com.alibaba.idst.nui.BuildConfig
 import com.efbsm5.easyway.BuildConfig
 import com.efbsm5.easyway.data.models.assistModel.UpdateInfo
 

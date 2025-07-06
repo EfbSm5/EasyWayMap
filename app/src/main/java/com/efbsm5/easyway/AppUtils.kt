@@ -1,5 +1,6 @@
 package com.efbsm5.easyway
 
+import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Bitmap
@@ -7,7 +8,10 @@ import android.graphics.Matrix
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.Composable
 import androidx.core.net.toUri
 
 fun <T : Any> ActivityResultLauncher<T>.safeLaunch(input: T?) {
@@ -61,3 +65,17 @@ fun Bitmap.rotate(degrees: Float): Bitmap {
     val matrix = Matrix().apply { postRotate(degrees) }
     return Bitmap.createBitmap(this, 0, 0, width, height, matrix, true)
 }
+
+@Composable
+fun SelectPoint() {
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data = result.data?.getStringExtra("result_key")
+        }
+    }
+    val intent = Intent(SDKUtils.getContext(), LocationPoiActivity::class.java)
+    launcher.launch(intent)
+}
+

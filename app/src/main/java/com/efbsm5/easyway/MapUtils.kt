@@ -14,8 +14,8 @@ import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.Poi
 import com.amap.api.services.core.LatLonPoint
 import com.amap.api.services.core.PoiItemV2
-import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.EasyPoint
+import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.User
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -53,6 +53,7 @@ fun Context.startMapApp(dstLat: Double, dstLon: Double, dstName: String) {
         openTencentMap(dstLat, dstLon, dstName)
     }
 }
+
 fun convertToLatLonPoint(latLng: LatLng): LatLonPoint {
     return LatLonPoint(latLng.latitude, latLng.longitude)
 }

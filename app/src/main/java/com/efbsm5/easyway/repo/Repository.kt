@@ -8,13 +8,14 @@ import com.efbsm5.easyway.data.UserManager
 import com.efbsm5.easyway.data.database.AppDataBase
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.models.Post
+import com.efbsm5.easyway.data.models.PostComment
 import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.data.models.assistModel.EasyPointSimplify
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
+import com.efbsm5.easyway.data.models.assistModel.PostCommentAndUser
 import com.efbsm5.easyway.getCurrentFormattedTime
 import com.efbsm5.easyway.getInitPoint
 import com.efbsm5.easyway.getInitUser
-import com.efbsm5.easyway.model.ImmutableListWrapper
 import kotlinx.coroutines.flow.Flow
 
 object DataRepository {
@@ -28,8 +29,12 @@ object DataRepository {
         return database.postDao().getAllPosts()
     }
 
-    suspend fun getPostAndUser(): ImmutableListWrapper<PostAndUser> {
+    suspend fun getPostAndUser(): List<PostAndUser> {
         return database.postDao().getPostWithUser()
+    }
+
+    suspend fun getPostAndComments(id: Int): List<PostCommentAndUser> {
+        return database.postDao().getPostWithComment(id).comments
     }
 
     suspend fun getUserById(userId: Int): User {
@@ -141,6 +146,10 @@ object DataRepository {
         ).let {
             database.pointsDao().insert(it)
         }
+    }
+
+    suspend fun uploadPostComment(comment: PostComment) {
+        database.postCommentDao().insert(comment)
     }
 
     suspend fun getPointFromLatLng(latLng: LatLng): EasyPoint {

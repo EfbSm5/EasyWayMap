@@ -45,8 +45,8 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.amap.api.maps.model.LatLng
 import com.efbsm5.easyway.R
-import com.efbsm5.easyway.data.models.PointComment
 import com.efbsm5.easyway.data.models.EasyPoint
+import com.efbsm5.easyway.data.models.PointComment
 import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.getLatlng
 import com.efbsm5.easyway.ui.components.NavigationDialog
@@ -261,7 +261,9 @@ private fun CommentCard(
 
 @Composable
 private fun CommentItem(
-    pointCommentAndUser: Pair<PointComment, User>, like: (Boolean) -> Unit, dislike: (Boolean) -> Unit
+    pointCommentAndUser: Pair<PointComment, User>,
+    like: (Boolean) -> Unit,
+    dislike: (Boolean) -> Unit
 ) {
     var isLiked by remember { mutableStateOf(false) }
     var isDisliked by remember { mutableStateOf(false) }

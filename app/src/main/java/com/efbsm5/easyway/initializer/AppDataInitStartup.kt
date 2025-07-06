@@ -26,8 +26,8 @@ import android.app.Application
 import android.content.Context
 import android.util.Log
 import androidx.startup.Initializer
-import com.melody.map.gd_compose.utils.MapUtils
 import com.efbsm5.easyway.SDKUtils
+import com.melody.map.gd_compose.utils.MapUtils
 
 /**
  * AppDataInitStartup

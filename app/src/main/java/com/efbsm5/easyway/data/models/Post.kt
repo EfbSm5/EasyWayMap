@@ -17,7 +17,7 @@ import com.google.gson.annotations.SerializedName
     indices = [Index("userId")]
 )
 data class Post(
-    @PrimaryKey @SerializedName("id") var id: Int,
+    @PrimaryKey(autoGenerate = true) @SerializedName("id") var id: Int = 0,
     @SerializedName("title") var title: String,
     @SerializedName("type") var type: Int,
     @SerializedName("date") var date: String,

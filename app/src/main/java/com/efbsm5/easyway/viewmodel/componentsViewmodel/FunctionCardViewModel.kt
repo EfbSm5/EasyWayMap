@@ -30,7 +30,5 @@ class FunctionCardViewModel(val repository: DataRepository, val locationSaver: L
     }
 
 
-
-
 }
 

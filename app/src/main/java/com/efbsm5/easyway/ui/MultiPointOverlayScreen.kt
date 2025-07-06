@@ -29,7 +29,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.amap.api.maps.CameraUpdateFactory
-import com.amap.api.maps.model.BitmapDescriptorFactory
 import com.amap.api.maps.model.CameraPosition
 import com.amap.api.maps.model.LatLng
 import com.efbsm5.easyway.contract.MultiPointOverlayContract
@@ -41,8 +40,6 @@ import com.efbsm5.easyway.ui.components.requestMultiplePermission
 import com.efbsm5.easyway.viewmodel.MultiPointOverlayViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.melody.map.gd_compose.GDMap
-import com.melody.map.gd_compose.overlay.Marker
-import com.melody.map.gd_compose.overlay.MultiPointOverlay
 import com.melody.map.gd_compose.overlay.rememberMarkerState
 import com.melody.map.gd_compose.position.rememberCameraPositionState
 import kotlinx.coroutines.flow.collect

@@ -33,9 +33,6 @@ import com.amap.api.services.route.DriveRouteResultV2
 import com.amap.api.services.route.RideRouteResultV2
 import com.amap.api.services.route.RouteSearchV2
 import com.amap.api.services.route.WalkRouteResultV2
-import com.melody.map.gd_compose.model.MapType
-import com.melody.map.gd_compose.poperties.MapProperties
-import com.melody.map.gd_compose.poperties.MapUiSettings
 import com.efbsm5.easyway.R
 import com.efbsm5.easyway.SDKUtils
 import com.efbsm5.easyway.model.BaseRouteDataState
@@ -43,6 +40,9 @@ import com.efbsm5.easyway.model.BusRouteDataState
 import com.efbsm5.easyway.model.DrivingRouteDataState
 import com.efbsm5.easyway.model.RideRouteDataState
 import com.efbsm5.easyway.model.WalkRouteDataState
+import com.melody.map.gd_compose.model.MapType
+import com.melody.map.gd_compose.poperties.MapProperties
+import com.melody.map.gd_compose.poperties.MapUiSettings
 import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**

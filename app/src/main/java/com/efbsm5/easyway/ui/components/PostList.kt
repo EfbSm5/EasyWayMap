@@ -27,7 +27,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
-import com.efbsm5.easyway.data.models.assistModel.PostCommentAndUser
 
 @Composable
 fun PostList(

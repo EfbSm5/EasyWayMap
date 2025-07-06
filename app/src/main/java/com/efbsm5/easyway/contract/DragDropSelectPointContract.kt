@@ -58,5 +58,6 @@ class DragDropSelectPointContract {
 
     sealed class Effect : IUiEffect {
         internal data class Toast(val msg: String?) : Effect()
+        internal data class Selected(val location: String) : Effect()
     }
 }
