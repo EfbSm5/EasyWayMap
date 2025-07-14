@@ -117,14 +117,13 @@ fun getInitPoint(latLng: LatLng = LatLng(30.507950, 114.413514)): EasyPoint {
         type = "未知类别",
         info = "无信息",
         location = "无详细地址",
-        photo = "https://27142293.s21i.faiusr.com/2/ABUIABACGAAg_I_bmQYokt25kQUwwAc4gAU.jpg".toUri(),
+        photo = "https://27142293.s21i.faiusr.com/2/ABUIABACGAAg_I_bmQYokt25kQUwwAc4gAU.jpg",
         refreshTime = "2035.3.8",
         likes = 0,
         dislikes = 0,
         lat = latLng.latitude,
         lng = latLng.longitude,
         userId = 0,
-        commentId = 0
     )
 }
 
@@ -146,7 +145,6 @@ fun getInitPost(): Post {
         lng = 114.4268,
         position = "",
         userId = 1,
-        commentId = 1,
         id = 1,
         type = 1,
         photo = emptyList()
@@ -171,7 +169,6 @@ fun poiToEasyPoint(poi: Poi): EasyPoint {
         lat = poi.coordinate.latitude,
         lng = poi.coordinate.longitude,
         userId = 0,
-        commentId = 0
     )
 }
 
@@ -182,14 +179,13 @@ fun addPoiItem(poiItemV2: PoiItemV2): EasyPoint {
         type = "一般点",
         info = poiItemV2.snippet,
         location = "无详细描述",
-        photo = poiItemV2.photos.firstOrNull()?.url?.toUri(),
+        photo = poiItemV2.photos.firstOrNull()?.url,
         refreshTime = "未知",
         likes = 0,
         dislikes = 0,
         lat = poiItemV2.latLonPoint.latitude,
         lng = poiItemV2.latLonPoint.longitude,
         userId = 0,
-        commentId = 0
     )
 }
 

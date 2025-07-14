@@ -3,7 +3,6 @@ package com.efbsm5.easyway.viewmodel.pageViewmodel
 import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.DetailContract
 import com.efbsm5.easyway.data.UserManager
-import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.PostComment
 import com.efbsm5.easyway.data.models.assistModel.PostCommentAndUser
 import com.efbsm5.easyway.getCurrentFormattedTime
@@ -12,27 +11,23 @@ import com.efbsm5.easyway.getInitUser
 import com.efbsm5.easyway.model.ImmutableListWrapper
 import com.efbsm5.easyway.repo.DataRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 
 class DetailViewModel :
     BaseViewModel<DetailContract.Event, DetailContract.State, DetailContract.Effect>() {
-    private val _post = MutableStateFlow<Post>(getInitPost())
-    private var _postUser = MutableStateFlow(getInitUser())
-    private val _comment = MutableStateFlow(emptyList<PostCommentAndUser>())
-    private val _commentString = MutableStateFlow<String?>(null)
-
 
     init {
         setEvent(DetailContract.Event.Loading)
+
     }
 
     override fun createInitialState(): DetailContract.State {
         return DetailContract.State(
-            post = _post.value,
-            user = _postUser.value,
-            comments = ImmutableListWrapper(_comment.value),
-            commentString = _commentString.value,
-            error = null
+            post = getInitPost(),
+            user = getInitUser(),
+            comments = ImmutableListWrapper(emptyList<PostCommentAndUser>()),
+            commentString = "",
+            error = null,
+            showTextField = false
         )
     }
 
@@ -40,26 +35,26 @@ class DetailViewModel :
         when (event) {
             DetailContract.Event.Loading -> {
                 asyncLaunch(Dispatchers.IO) {
-                    _comment.value = DataRepository.getPostAndComments(_post.value.id)
-                    setState { copy(comments = ImmutableListWrapper<PostCommentAndUser>(_comment.value)) }
+                    val user = DataRepository.getUserById(UserManager.userId)
+                    val post = getInitPost()
+                    val newComment = DataRepository.getPostAndComments(currentState.user.id)
+                    setState {
+                        copy(
+                            user = user,
+                            post = post,
+                            comments = ImmutableListWrapper<PostCommentAndUser>(newComment)
+                        )
+                    }
                 }
-                setEvent(DetailContract.Event.Loaded)
             }
 
-            is DetailContract.Event.Editing -> {
-                _commentString.value = event.string
-                setEvent(DetailContract.Event.Loaded)
+            is DetailContract.Event.EditComment -> {
+                setState { copy(commentString = event.string) }
             }
 
-            DetailContract.Event.Loaded -> {
-                setState {
-                    copy(
-                        post = _post.value,
-                        user = _postUser.value,
-                        comments = ImmutableListWrapper(_comment.value),
-                        commentString = _commentString.value,
-                        error = null
-                    )
+            DetailContract.Event.Upload -> {
+                asyncLaunch {
+
                 }
             }
         }
@@ -68,11 +63,11 @@ class DetailViewModel :
     fun likePost(boolean: Boolean) {
         asyncLaunch(Dispatchers.IO) {
             if (boolean) {
-                _post.value.like + 1
-                DataRepository.addLikeForPost(_post.value.id)
+                setState { copy(post.copy(like = post.like + 1)) }
+                DataRepository.addLikeForPost(currentState.post.id)
             } else {
-                _post.value.like - 1
-                DataRepository.decreaseLikeForPost(_post.value.id)
+                setState { copy(post.copy(like = post.like + 1)) }
+                DataRepository.decreaseLikeForPost(currentState.post.id)
             }
         }
     }
@@ -80,13 +75,27 @@ class DetailViewModel :
     fun likeComment(boolean: Boolean, commentIndex: Int) {
         asyncLaunch(Dispatchers.IO) {
             if (boolean) {
-                _comment.value[commentIndex].postComment.like++
-                setState { copy(comments = ImmutableListWrapper(_comment.value)) }
-                DataRepository.addLikeForPostComment(_comment.value[commentIndex].postComment.index)
+                val newList = ImmutableListWrapper(
+                    currentState.comments.items.modifyCommentAt(
+                        commentIndex,
+                        modify = { comment ->
+                            comment.copy(like = comment.like + 1)
+                        },
+                    )
+                )
+                setState { copy(comments = newList) }
+                DataRepository.addLikeForPostComment(currentState.comments.items[commentIndex].postComment.index)
             } else {
-                _comment.value[commentIndex].postComment.like--
-                setState { copy(comments = ImmutableListWrapper(_comment.value)) }
-                DataRepository.decreaseLikeForPostComment(_comment.value[commentIndex].postComment.index)
+                val newList = ImmutableListWrapper(
+                    currentState.comments.items.modifyCommentAt(
+                        commentIndex,
+                        modify = { comment ->
+                            comment.copy(like = comment.like - 1)
+                        },
+                    )
+                )
+                setState { copy(comments = newList) }
+                DataRepository.decreaseLikeForPostComment(currentState.comments.items[commentIndex].postComment.index)
             }
         }
     }
@@ -94,34 +103,75 @@ class DetailViewModel :
     fun dislikeComment(boolean: Boolean, commentIndex: Int) {
         asyncLaunch(Dispatchers.IO) {
             if (boolean) {
-                _comment.value[commentIndex].postComment.dislike++
-                setState { copy(comments = ImmutableListWrapper(_comment.value)) }
-                DataRepository.addDisLikeForPostComment(_comment.value[commentIndex].postComment.index)
+                val newList = ImmutableListWrapper(
+                    currentState.comments.items.modifyCommentAt(
+                        commentIndex,
+                        modify = { comment ->
+                            comment.copy(like = comment.dislike + 1)
+                        },
+                    )
+                )
+                setState { copy(comments = newList) }
+                DataRepository.addDisLikeForPostComment(currentState.comments.items[commentIndex].postComment.index)
             } else {
-                _comment.value[commentIndex].postComment.like--
-                setState { copy(comments = ImmutableListWrapper(_comment.value)) }
-                DataRepository.decreaseDisLikeForPostComment(_comment.value[commentIndex].postComment.index)
+                val newList = ImmutableListWrapper(
+                    currentState.comments.items.modifyCommentAt(
+                        commentIndex,
+                        modify = { comment ->
+                            comment.copy(like = comment.dislike - 1)
+                        },
+                    )
+                )
+                setState { copy(comments = newList) }
+                DataRepository.decreaseDisLikeForPostComment(currentState.comments.items[commentIndex].postComment.index)
             }
         }
     }
 
     fun comment(string: String) {
-        if (_commentString.value != null) asyncLaunch(Dispatchers.IO) {
-            val postComment = PostComment(
-                postId = _post.value.id,
-                userId = UserManager.userId,
-                content = _commentString.value!!,
-                like = 0,
-                dislike = 0,
-                date = getCurrentFormattedTime()
-            )
-            DataRepository.uploadPostComment(postComment)
-            _comment.value.toMutableList().add(
-                PostCommentAndUser(
-                    postComment = postComment, user = DataRepository.getUserById(UserManager.userId)
+        if (currentState.commentString != null) {
+            asyncLaunch(Dispatchers.IO) {
+                val postComment = PostComment(
+                    postId = currentState.post.id,
+                    userId = UserManager.userId,
+                    content = currentState.commentString ?: "",
+                    like = 0,
+                    dislike = 0,
+                    date = getCurrentFormattedTime()
                 )
-            )
-            setEvent(DetailContract.Event.Loaded)
+                val user = DataRepository.getUserById(UserManager.userId)
+                DataRepository.uploadPostComment(postComment)
+                setState {
+                    copy(
+                        comments = ImmutableListWrapper(
+                            currentState.comments.items + PostCommentAndUser(
+                                postComment = postComment, user = user
+                            )
+                        ), commentString = ""
+                    )
+                }
+            }
         }
     }
+
+    fun back() {
+        setEffect { DetailContract.Effect.Back }
+    }
+
+    fun List<PostCommentAndUser>.modifyCommentAt(
+        index: Int, modify: (PostComment) -> PostComment
+    ): List<PostCommentAndUser> {
+        return this.mapIndexed { i, commentAndUser ->
+            if (i == index) {
+                commentAndUser.copy(postComment = modify(commentAndUser.postComment))
+            } else {
+                commentAndUser
+            }
+        }
+    }
+
+    fun changeShowTextField(boolean: Boolean) {
+        setState { copy(showTextField = boolean) }
+    }
+
 }

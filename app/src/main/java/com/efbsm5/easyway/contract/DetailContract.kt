@@ -11,8 +11,8 @@ import com.efbsm5.easyway.state.IUiState
 class DetailContract {
     sealed class Event : IUiEvent {
         object Loading : Event()
-        class Editing(val string: String) : Event()
-        object Loaded : Event()
+        class EditComment(val string: String) : Event()
+        object Upload : Event()
     }
 
     data class State(
@@ -25,5 +25,8 @@ class DetailContract {
         val error: String?
     ) : IUiState
 
-    sealed class Effect : IUiEffect
+    sealed class Effect : IUiEffect {
+        object Back : Effect()
+        internal class Toast(val string: String) : Effect()
+    }
 }

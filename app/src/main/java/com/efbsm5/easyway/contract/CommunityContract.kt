@@ -20,5 +20,8 @@ class CommunityContract {
         val error: String?
     ) : IUiState
 
-    sealed class Effect : IUiEffect
+    sealed class Effect : IUiEffect {
+        internal data class SelectedPost(val postAndUser: PostAndUser) : Effect()
+        internal object Back : Effect()
+    }
 }

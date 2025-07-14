@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package com.efbsm5.easyway.ui
+package com.efbsm5.easyway.ui.page
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

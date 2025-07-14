@@ -21,7 +21,7 @@ data class EasyPoint(
     @ColumnInfo(name = "type") @SerializedName("type") var type: String,
     @ColumnInfo(name = "info") @SerializedName("info") var info: String,
     @ColumnInfo(name = "location") @SerializedName("location") var location: String,
-    @ColumnInfo(name = "photo") @SerializedName("photo") var photo: String,
+    @ColumnInfo(name = "photo") @SerializedName("photo") var photo: String?,
     @ColumnInfo(name = "refresh_time") @SerializedName("refresh_time") var refreshTime: String,
     @ColumnInfo(name = "like") @SerializedName("like") var likes: Int,
     @ColumnInfo(name = "dislike") @SerializedName("dislike") var dislikes: Int,

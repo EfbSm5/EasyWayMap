@@ -6,12 +6,9 @@ import com.efbsm5.easyway.data.models.assistModel.PostAndUser
 import com.efbsm5.easyway.model.ImmutableListWrapper
 import com.efbsm5.easyway.repo.CommunityRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 
 class CommunityViewModel :
     BaseViewModel<CommunityContract.Event, CommunityContract.State, CommunityContract.Effect>() {
-    private var _showPosts =
-        MutableStateFlow<List<PostAndUser>>(emptyList())
 
     init {
         setEvent(CommunityContract.Event.Loading)
@@ -32,11 +29,11 @@ class CommunityViewModel :
         when (event) {
             CommunityContract.Event.Loading -> {
                 asyncLaunch(Dispatchers.IO) {
-                    _showPosts.value = CommunityRepository.fetchPosts()
+                    val posts = CommunityRepository.fetchPosts()
                     setState {
                         copy(
                             isLoading = false,
-                            postItems = ImmutableListWrapper(_showPosts.value)
+                            postItems = ImmutableListWrapper(posts)
                         )
                     }
                 }
@@ -56,4 +53,11 @@ class CommunityViewModel :
 
     }
 
+    fun selectPost(postAndUser: PostAndUser) {
+        setEffect { CommunityContract.Effect.SelectedPost(postAndUser) }
+    }
+
+    fun back() {
+        setEffect { CommunityContract.Effect.Back }
+    }
 }

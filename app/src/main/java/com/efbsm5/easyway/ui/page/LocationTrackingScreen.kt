@@ -1,17 +1,17 @@
 // MIT License
-// 
+//
 // Copyright (c) 2022 被风吹过的夏天
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package com.efbsm5.easyway.ui
+package com.efbsm5.easyway.ui.page
 
 import android.Manifest
 import androidx.compose.foundation.layout.Box
@@ -31,53 +31,46 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.amap.api.maps.CameraUpdateFactory
 import com.amap.api.maps.model.CameraPosition
 import com.amap.api.maps.model.LatLng
-import com.efbsm5.easyway.contract.MultiPointOverlayContract
+import com.efbsm5.easyway.contract.LocationTrackingContract
 import com.efbsm5.easyway.dialog.ShowOpenGPSDialog
 import com.efbsm5.easyway.launcher.handlerGPSLauncher
 import com.efbsm5.easyway.showToast
-import com.efbsm5.easyway.ui.components.RedCenterLoading
 import com.efbsm5.easyway.ui.components.requestMultiplePermission
-import com.efbsm5.easyway.viewmodel.MultiPointOverlayViewModel
+import com.efbsm5.easyway.viewmodel.LocationTrackingViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.melody.map.gd_compose.GDMap
-import com.melody.map.gd_compose.overlay.rememberMarkerState
 import com.melody.map.gd_compose.position.rememberCameraPositionState
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.onEach
 
 /**
- * MultiPointOverlayScreen
+ * 高德地图默认定位蓝点，这里我们代码动态替换了SDK默认的蓝点图片
  * @author 被风吹过的夏天
  * @email developer_melody@163.com
  * @github: https://github.com/TheMelody/OmniMap
- * created 2022/10/21 11:26
+ * created 2022/10/10 17:31
  */
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-internal fun MultiPointOverlayScreen() {
-    val viewModel: MultiPointOverlayViewModel = viewModel()
+internal fun LocationTrackingScreen() {
+    val viewModel: LocationTrackingViewModel = viewModel()
     val currentState by viewModel.uiState.collectAsState()
-    val markerState = rememberMarkerState()
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition(LatLng(39.91, 116.40), 3F, 0f, 0f)
-    }
-    LaunchedEffect(Unit) {
-        snapshotFlow { currentState.clickPointLatLng }.filterNotNull()
-            .collect { markerState.position = it }
+    val cameraPosition = rememberCameraPositionState {
+        // 不预加载显示默认北京的位置
+        position = CameraPosition(LatLng(0.0, 0.0), 11f, 0f, 0f)
     }
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.onEach {
-            if (it is MultiPointOverlayContract.Effect.Toast) {
+            if (it is LocationTrackingContract.Effect.Toast) {
                 showToast(it.msg)
             }
         }.collect()
     }
+
     val openGpsLauncher = handlerGPSLauncher(viewModel::checkGpsStatus)
     val reqGPSPermission = requestMultiplePermission(
         permissions = listOf(
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION
+            Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION
         ),
         onGrantAllPermission = viewModel::handleGrantLocationPermission,
         onNoGrantPermission = viewModel::handleNoGrantLocationPermission
@@ -89,9 +82,10 @@ internal fun MultiPointOverlayScreen() {
             viewModel.checkGpsStatus()
         }
     }
+
     LaunchedEffect(currentState.locationLatLng) {
         if (null == currentState.locationLatLng) return@LaunchedEffect
-        cameraPositionState.move(CameraUpdateFactory.newLatLng(currentState.locationLatLng))
+        cameraPosition.move(CameraUpdateFactory.newLatLng(currentState.locationLatLng))
     }
 
     LaunchedEffect(currentState.isOpenGps, reqGPSPermission.allPermissionsGranted) {
@@ -103,39 +97,21 @@ internal fun MultiPointOverlayScreen() {
             }
         }
     }
+
     if (currentState.isShowOpenGPSDialog) {
         ShowOpenGPSDialog(
-            onDismiss = viewModel::hideOpenGPSDialog,
-            onPositiveClick = {
+            onDismiss = viewModel::hideOpenGPSDialog, onPositiveClick = {
                 viewModel.openGPSPermission(openGpsLauncher)
-            }
-        )
+            })
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
         GDMap(
-            modifier = Modifier.matchParentSize(),
-            uiSettings = currentState.uiSettings,
-            cameraPositionState = cameraPositionState,
+            cameraPositionState = cameraPosition,
             properties = currentState.mapProperties,
-            onMapLoaded = viewModel::initMultiPointDataAndCheckGps
-        ) {
-//            MultiPointOverlay(
-//                enable = true,
-//                icon = currentState.multiPointIcon,
-//                multiPointItems = currentState.multiPointItems,
-//                onClick = viewModel::onMultiPointItemClick
-//            )
-//            Marker(
-//                icon = BitmapDescriptorFactory.defaultMarker(),
-//                state = markerState,
-//                visible = null != currentState.clickPointLatLng,
-//                isClickable = false
-//            )
-        }
-        if (currentState.isLoading) {
-            RedCenterLoading()
-        }
+            uiSettings = currentState.mapUiSettings,
+            locationSource = viewModel,
+            onMapLoaded = viewModel::checkGpsStatus
+        )
     }
-
 }

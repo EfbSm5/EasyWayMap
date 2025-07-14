@@ -1,9 +1,6 @@
 package com.efbsm5.easyway.contract
 
 import com.efbsm5.easyway.data.models.Post
-import com.efbsm5.easyway.data.models.User
-import com.efbsm5.easyway.data.models.assistModel.PostCommentAndUser
-import com.efbsm5.easyway.model.ImmutableListWrapper
 import com.efbsm5.easyway.state.IUiEffect
 import com.efbsm5.easyway.state.IUiEvent
 import com.efbsm5.easyway.state.IUiState
@@ -11,17 +8,23 @@ import com.efbsm5.easyway.state.IUiState
 class NewPostContract {
     sealed class Event : IUiEvent {
         object Loading : Event()
-        class Editing(val string: String) : Event()
-        object Loaded : Event()
+        class EditTitle(val string: String) : Event()
+        class EditContent(val string: String) : Event()
+        class ChangeDialogData(val data: String) : Event()
+
+        object Upload : Effect()
+
     }
 
     data class State(
         val post: Post,
-        val user: User,
-        val comments: ImmutableListWrapper<PostCommentAndUser>,
-        val commentString: String?,
+        val dialogData: String?,
         val error: String?
     ) : IUiState
 
-    sealed class Effect : IUiEffect
+    sealed class Effect : IUiEffect {
+        object GetPhoto : Effect()
+        object GetLocation : Effect()
+        object Back : Effect()
+    }
 }

@@ -1,5 +1,6 @@
 package com.efbsm5.easyway.data.models
 
+import androidx.compose.runtime.Immutable
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -16,6 +17,7 @@ import com.google.gson.annotations.SerializedName
     )],
     indices = [Index("userId")]
 )
+@Immutable
 data class Post(
     @PrimaryKey(autoGenerate = true) @SerializedName("id") var id: Int = 0,
     @SerializedName("title") var title: String,

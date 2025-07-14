@@ -9,5 +9,5 @@ import com.google.gson.annotations.SerializedName
 data class User(
     @PrimaryKey(autoGenerate = true) @SerializedName("id") val id: Int,
     @ColumnInfo(name = "name") @SerializedName("name") val name: String,
-    @ColumnInfo(name = "avatar") @SerializedName("avatar") val avatar: String
+    @ColumnInfo(name = "avatar") @SerializedName("avatar") val avatar: String?
 )

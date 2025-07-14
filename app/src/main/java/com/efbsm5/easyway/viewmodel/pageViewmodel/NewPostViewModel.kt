@@ -1,49 +1,80 @@
 package com.efbsm5.easyway.viewmodel.pageViewmodel
 
 import android.net.Uri
-import androidx.lifecycle.viewModelScope
 import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.NewPostContract
-import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.getInitPost
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 class NewPostViewModel :
     BaseViewModel<NewPostContract.Event, NewPostContract.State, NewPostContract.Effect>() {
-    private var _newPost = MutableStateFlow(getInitPost())
-    private val _chosenPhotos = MutableStateFlow(emptyList<Uri>())
-    val newPost: StateFlow<Post> = _newPost
-    val chosenPhotos: StateFlow<List<Uri>> = _chosenPhotos
 
     override fun createInitialState(): NewPostContract.State {
-        TODO("Not yet implemented")
+        return NewPostContract.State(
+            post = getInitPost(), dialogData = null, error = null
+        )
     }
 
     override fun handleEvents(event: NewPostContract.Event) {
-        TODO("Not yet implemented")
-    }
+        when (event) {
+            NewPostContract.Event.Loading -> {
 
+            }
 
-    fun editPost(dynamicPost: Post) {
-        _newPost.value = dynamicPost
-    }
+            is NewPostContract.Event.ChangeDialogData -> {
+                setState { copy(dialogData = event.data) }
+            }
 
-    fun getPicture(uri: Uri) {
-        _chosenPhotos.value = _chosenPhotos.value.plus(uri)
-    }
+            is NewPostContract.Event.EditContent -> {
+                setState { copy(post = post.copy(content = event.string)) }
+            }
 
-    fun push() {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.uploadPost(_newPost.value, _chosenPhotos.value)
+            is NewPostContract.Event.EditTitle -> {
+                setState { copy(post = post.copy(title = event.string)) }
+            }
         }
     }
 
-    private fun updatePhotos(newPhotos: List<Uri>) {
-        _chosenPhotos.value = newPhotos
+    fun getPicture(uri: Uri?) {
+        if (uri != null) {
+            setState { copy(post = post.copy(photo = post.photo.plus(uri.toString()))) }
+        } else {
+            setState { copy(error = "error") }
+        }
     }
 
+    fun push() {
+        asyncLaunch { }
+    }
 
+    private fun updatePhotos(newPhotos: List<Uri>) {
+
+    }
+
+    fun changeContent(string: String) {
+        setEvent(NewPostContract.Event.EditContent(string))
+    }
+
+    fun changeTitle(string: String) {
+        setEvent(NewPostContract.Event.EditTitle(string))
+    }
+
+    fun setLocation(location: String) {
+        setState { copy(post = post.copy(position = location)) }
+    }
+
+    fun selectIndex(index: Int) {
+        setState { copy(post = post.copy(type = index)) }
+    }
+
+    fun back() {
+        setEffect { NewPostContract.Effect.Back }
+    }
+
+    fun getLocation() {
+        setEffect { NewPostContract.Effect.GetLocation }
+    }
+
+    fun getPhoto() {
+        setEffect { NewPostContract.Effect.GetPhoto }
+    }
 }

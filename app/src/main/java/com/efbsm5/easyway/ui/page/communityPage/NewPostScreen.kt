@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -47,14 +48,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.efbsm5.easyway.LocationPoiActivity
 import com.efbsm5.easyway.R
 import com.efbsm5.easyway.SDKUtils
+import com.efbsm5.easyway.contract.NewPostContract.Effect
 import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.getInitPost
-import com.efbsm5.easyway.model.ImmutableListWrapper
 import com.efbsm5.easyway.ui.components.TopBar
 import com.efbsm5.easyway.viewmodel.pageViewmodel.NewPostViewModel
 
@@ -62,13 +64,13 @@ import com.efbsm5.easyway.viewmodel.pageViewmodel.NewPostViewModel
 @Composable
 fun NewDynamicPostPage(back: () -> Unit) {
     val viewModel: NewPostViewModel = viewModel()
-    val currentState = viewModel.uiState.collectAsState()
+    val currentState by viewModel.uiState.collectAsState()
 
     val locationLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val data = result.data?.getStringExtra("result_key")
+            viewModel.setLocation(result.data?.getStringExtra("result_key") ?: "")
         }
     }
     val locationIntent = Intent(SDKUtils.getContext(), LocationPoiActivity::class.java)
@@ -77,36 +79,49 @@ fun NewDynamicPostPage(back: () -> Unit) {
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            onSelectedPhoto(result.data?.data)
+            viewModel.getPicture(result.data?.data)
         }
     }
-    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+    val photoIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
         addCategory(Intent.CATEGORY_OPENABLE)
         type = "image/*"
     }
-    launcher.launch(intent)
+    LaunchedEffect(viewModel.effect) {
+        when (viewModel.effect) {
+            Effect.GetPhoto -> {
+                photoLauncher.launch(photoIntent)
+            }
 
-    DynamicPostScreen(
-        post = TODO(),
-        photos = TODO(),
-        onSelected = TODO(),
-        onTitleChanged = TODO(),
-        onContentChanged = TODO(),
-        selectPhoto = TODO(),
-        publish = TODO(),
-        back = TODO(),
-        getLocation = TODO(),
-        selectedButton = TODO(),
-        getPhoto = TODO(),
-        dialogPhoto = TODO()
+            Effect.GetLocation -> {
+                locationLauncher.launch(locationIntent)
+            }
+
+            Effect.Back -> {
+                back()
+            }
+        }
+    }
+
+
+    PostScreen(
+        post = currentState.post,
+        onSelected = viewModel::selectIndex,
+        onTitleChanged = viewModel::changeTitle,
+        onContentChanged = viewModel::changeContent,
+        selectPhoto = viewModel::getPicture,
+        publish = viewModel::push,
+        back = viewModel::back,
+        getLocation = viewModel::getLocation,
+        selectedButton = currentState.post.type,
+        getPhoto = viewModel::getPhoto,
+        dialogPhoto = currentState.dialogData?.toUri()
     )
 }
 
 @Preview
 @Composable
-private fun DynamicPostScreen(
+private fun PostScreen(
     post: Post = getInitPost(),
-    photos: ImmutableListWrapper<Uri> = ImmutableListWrapper(emptyList()),
     onSelected: (Int) -> Unit = {},
     onTitleChanged: (String) -> Unit = {},
     onContentChanged: (String) -> Unit = {},
@@ -114,9 +129,9 @@ private fun DynamicPostScreen(
     publish: () -> Unit = {},
     back: () -> Unit = {},
     getLocation: () -> Unit = { },
-    selectedButton: Int,
-    getPhoto: () -> Unit,
-    dialogPhoto: Uri?
+    selectedButton: Int = 0,
+    getPhoto: () -> Unit = {},
+    dialogPhoto: Uri? = null
 ) {
     Surface {
         Column(
@@ -139,7 +154,7 @@ private fun DynamicPostScreen(
                 location = post.position, getLocation = getLocation
             )
             ImagesSection(
-                selectedPhotos = photos.items,
+                selectedPhotos = post.photo,
                 getPhoto = getPhoto,
                 dialogPhoto = dialogPhoto,
                 setDialogPhoto = selectPhoto
@@ -233,7 +248,7 @@ private fun AddLocation(
 
 @Composable
 private fun ImagesSection(
-    selectedPhotos: List<Uri>,
+    selectedPhotos: List<String>,
     getPhoto: () -> Unit,
     dialogPhoto: Uri?,
     setDialogPhoto: (Uri?) -> Unit
@@ -251,7 +266,7 @@ private fun ImagesSection(
                 modifier = Modifier
                     .size(100.dp)
                     .padding(4.dp)
-                    .clickable { setDialogPhoto(photoUri) })
+                    .clickable { setDialogPhoto(photoUri.toUri()) })
         }
         item {
             Box(

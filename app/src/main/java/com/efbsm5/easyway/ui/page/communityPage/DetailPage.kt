@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.efbsm5.easyway.R
+import com.efbsm5.easyway.contract.DetailContract
 import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.data.models.assistModel.PostCommentAndUser
@@ -59,8 +61,16 @@ import com.efbsm5.easyway.viewmodel.pageViewmodel.DetailViewModel
 fun DetailPage(onBack: () -> Unit) {
     val viewmodel: DetailViewModel = viewModel()
     val currentState by viewmodel.uiState.collectAsState()
+    LaunchedEffect(viewmodel.effect) {
+        when (viewmodel.effect) {
+            DetailContract.Effect.Back -> onBack
+            is DetailContract.Effect.Toast -> {
+
+            }
+        }
+    }
     DetailPageScreen(
-        onBack = onBack,
+        onBack = viewmodel::back,
         post = currentState.post,
         postUser = currentState.user,
         postComment = currentState.comments,
@@ -68,10 +78,10 @@ fun DetailPage(onBack: () -> Unit) {
         like = { boolean, index -> viewmodel.likeComment(boolean, index) },
         dislike = { boolean, index -> viewmodel.likeComment(boolean, index) },
         likePost = { viewmodel.likePost(it) },
-        showTextField = TODO(),
-        ifShowField = TODO(),
-        commentText = TODO(),
-        changeText = TODO()
+        showTextField = currentState.showTextField,
+        ifShowField = viewmodel::changeShowTextField,
+        commentText = currentState.commentString ?: "",
+        changeText = {}
     )
 
 }
@@ -115,9 +125,7 @@ private fun DetailPageScreen(
                     onClickButton = {
                         ifShowField(false)
                         comment(it)
-                    },
-                    commentText = commentText,
-                    changeText = changeText
+                    }, commentText = commentText, changeText = changeText
                 )
             }
         }
@@ -307,9 +315,7 @@ private fun CommentSection(comment: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddCommentField(
-    onClickButton: (String) -> Unit,
-    commentText: String,
-    changeText: (String) -> Unit
+    onClickButton: (String) -> Unit, commentText: String, changeText: (String) -> Unit
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         TextField(
