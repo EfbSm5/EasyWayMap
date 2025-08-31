@@ -49,7 +49,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 
 @Composable
-fun CommunityPage(back: () -> Unit, onChangeState: (PostAndUser) -> Unit) {
+fun CommunitySquarePage(back: () -> Unit, onChangeState: (PostAndUser) -> Unit) {
     val viewModel: CommunityViewModel = viewModel()
     val currentState by viewModel.uiState.collectAsState()
 
@@ -82,7 +82,7 @@ fun CommunityPage(back: () -> Unit, onChangeState: (PostAndUser) -> Unit) {
         }
 
         else -> {
-            CommunityPage(
+            PostScreen(
                 back = viewModel::back,
                 posts = currentState.postItems,
                 onSelect = viewModel::select,
@@ -95,7 +95,7 @@ fun CommunityPage(back: () -> Unit, onChangeState: (PostAndUser) -> Unit) {
 
 @Preview
 @Composable
-fun CommunityPage(
+fun PostScreen(
     back: () -> Unit = {},
     posts: ImmutableListWrapper<PostAndUser> = ImmutableListWrapper(emptyList()),
     titleText: String = "心无距离，共享每一刻",

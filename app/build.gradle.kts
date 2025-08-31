@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("org.jetbrains.kotlin.plugin.compose") version "2.2.0"
     alias(libs.plugins.ksp)
+    id("kotlin-parcelize")
+
 }
 
 

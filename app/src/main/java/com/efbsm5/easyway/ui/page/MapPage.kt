@@ -45,6 +45,7 @@ fun MapPage() {
 //        scope.launch { sheetState.bottomSheetState.animateTo(BottomSheetValue.HalfExpanded) }
 //    }
 
+//backHandler
     BackHandler(
         enabled = currentState.cardScreen != CardScreen.Function,
         onBack = { viewmodel.setScreen(CardScreen.Function) })
@@ -58,6 +59,9 @@ fun MapPage() {
                 onChangeScreen = viewmodel::setScreen
             )
         },
+
+        //contentChanging
+
         content = {
             when (currentState.mapState) {
                 MapState.Loading -> {

@@ -4,6 +4,7 @@ import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.DetailContract
 import com.efbsm5.easyway.data.UserManager
 import com.efbsm5.easyway.data.models.PostComment
+import com.efbsm5.easyway.data.models.assistModel.PostAndUser
 import com.efbsm5.easyway.data.models.assistModel.PostCommentAndUser
 import com.efbsm5.easyway.getCurrentFormattedTime
 import com.efbsm5.easyway.getInitPost
@@ -15,9 +16,8 @@ import kotlinx.coroutines.Dispatchers
 class DetailViewModel :
     BaseViewModel<DetailContract.Event, DetailContract.State, DetailContract.Effect>() {
 
-    init {
-        setEvent(DetailContract.Event.Loading)
-
+    fun setPostAndUser(postAndUser: PostAndUser) {
+        setEvent(DetailContract.Event.Loading(postAndUser))
     }
 
     override fun createInitialState(): DetailContract.State {
@@ -33,16 +33,16 @@ class DetailViewModel :
 
     override fun handleEvents(event: DetailContract.Event) {
         when (event) {
-            DetailContract.Event.Loading -> {
+            is DetailContract.Event.Loading -> {
                 asyncLaunch(Dispatchers.IO) {
-                    val user = DataRepository.getUserById(UserManager.userId)
-                    val post = getInitPost()
+                    val user = event.postAndUser.user
+                    val post = event.postAndUser.post
                     val newComment = DataRepository.getPostAndComments(currentState.user.id)
                     setState {
                         copy(
                             user = user,
                             post = post,
-                            comments = ImmutableListWrapper<PostCommentAndUser>(newComment)
+                            comments = ImmutableListWrapper(newComment)
                         )
                     }
                 }

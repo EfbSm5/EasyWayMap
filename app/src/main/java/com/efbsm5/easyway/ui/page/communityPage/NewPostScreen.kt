@@ -62,7 +62,7 @@ import com.efbsm5.easyway.viewmodel.pageViewmodel.NewPostViewModel
 
 
 @Composable
-fun NewDynamicPostPage(back: () -> Unit) {
+fun NewPostPage(back: () -> Unit) {
     val viewModel: NewPostViewModel = viewModel()
     val currentState by viewModel.uiState.collectAsState()
 
@@ -101,7 +101,6 @@ fun NewDynamicPostPage(back: () -> Unit) {
             }
         }
     }
-
 
     PostScreen(
         post = currentState.post,

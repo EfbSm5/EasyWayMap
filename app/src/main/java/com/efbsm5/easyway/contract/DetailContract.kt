@@ -2,6 +2,7 @@ package com.efbsm5.easyway.contract
 
 import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.User
+import com.efbsm5.easyway.data.models.assistModel.PostAndUser
 import com.efbsm5.easyway.data.models.assistModel.PostCommentAndUser
 import com.efbsm5.easyway.model.ImmutableListWrapper
 import com.efbsm5.easyway.state.IUiEffect
@@ -10,7 +11,7 @@ import com.efbsm5.easyway.state.IUiState
 
 class DetailContract {
     sealed class Event : IUiEvent {
-        object Loading : Event()
+        class Loading(val postAndUser: PostAndUser) : Event()
         class EditComment(val string: String) : Event()
         object Upload : Event()
     }

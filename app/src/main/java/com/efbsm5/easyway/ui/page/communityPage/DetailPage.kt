@@ -1,5 +1,6 @@
 package com.efbsm5.easyway.ui.page.communityPage
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -47,9 +48,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.efbsm5.easyway.R
+import com.efbsm5.easyway.SDKUtils
 import com.efbsm5.easyway.contract.DetailContract
 import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.User
+import com.efbsm5.easyway.data.models.assistModel.PostAndUser
 import com.efbsm5.easyway.data.models.assistModel.PostCommentAndUser
 import com.efbsm5.easyway.getInitPost
 import com.efbsm5.easyway.getInitUser
@@ -60,15 +63,18 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 
 @Composable
-fun DetailPage(onBack: () -> Unit) {
+fun DetailPage(onBack: () -> Unit, postAndUser: PostAndUser) {
     val viewmodel: DetailViewModel = viewModel()
     val currentState by viewmodel.uiState.collectAsState()
+    LaunchedEffect(Unit) {
+        viewmodel.setPostAndUser(postAndUser)
+    }
     LaunchedEffect(viewmodel.effect) {
         viewmodel.effect.onEach {
             when (it) {
                 DetailContract.Effect.Back -> onBack
                 is DetailContract.Effect.Toast -> {
-
+                    Toast.makeText(SDKUtils.getContext(), it.string, Toast.LENGTH_SHORT).show()
                 }
             }
         }.collect()

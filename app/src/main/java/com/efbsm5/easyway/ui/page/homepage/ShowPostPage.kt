@@ -12,9 +12,6 @@ import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.assistModel.PointCommentAndUser
 import com.efbsm5.easyway.ui.components.PostList
 import com.efbsm5.easyway.ui.page.communityPage.DetailPage
-import com.efbsm5.easyway.viewmodel.pageViewmodel.DetailViewModel
-import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
 
 @Composable
 fun ShowPostPage(posts: List<PointCommentAndUser>) {
@@ -28,11 +25,8 @@ fun ShowPostPage(posts: List<PointCommentAndUser>) {
             posts = posts, onClick = { state = PostPageState.Detail(it.dynamicPost) })
 
         is PostPageState.Detail -> {
-            val detailPageViewModel: DetailViewModel =
-                koinViewModel(parameters = { parametersOf((state as PostPageState.Detail).dynamicPost) })
             DetailPage(
                 onBack = { state = PostPageState.All(posts) },
-                viewModel = detailPageViewModel
             )
         }
 
