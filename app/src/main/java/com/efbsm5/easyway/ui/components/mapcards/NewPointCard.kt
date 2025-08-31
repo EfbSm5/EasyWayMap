@@ -52,7 +52,7 @@ import java.io.FileOutputStream
 
 @Composable
 fun NewPointCard(
-    changeScreen: (Screen) -> Unit,
+    changeScreen: (CardScreen) -> Unit,
     viewModel: NewPointCardViewModel,
     label: String
 ) {
@@ -90,9 +90,9 @@ fun NewPointCard(
                 }
 
                 viewModel.publishPoint()
-                changeScreen(Screen.Function)
+                changeScreen(CardScreen.Function)
             } else {
-                changeScreen(Screen.Function)
+                changeScreen(CardScreen.Function)
             }
         },
         onNameValueChange = { viewModel.changeTempPoint(newPoint.copy(name = it)) },

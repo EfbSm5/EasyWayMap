@@ -56,18 +56,22 @@ import com.efbsm5.easyway.getInitUser
 import com.efbsm5.easyway.model.ImmutableListWrapper
 import com.efbsm5.easyway.ui.components.TopBar
 import com.efbsm5.easyway.viewmodel.pageViewmodel.DetailViewModel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
 
 @Composable
 fun DetailPage(onBack: () -> Unit) {
     val viewmodel: DetailViewModel = viewModel()
     val currentState by viewmodel.uiState.collectAsState()
     LaunchedEffect(viewmodel.effect) {
-        when (viewmodel.effect) {
-            DetailContract.Effect.Back -> onBack
-            is DetailContract.Effect.Toast -> {
+        viewmodel.effect.onEach {
+            when (it) {
+                DetailContract.Effect.Back -> onBack
+                is DetailContract.Effect.Toast -> {
 
+                }
             }
-        }
+        }.collect()
     }
     DetailPageScreen(
         onBack = viewmodel::back,
@@ -81,8 +85,7 @@ fun DetailPage(onBack: () -> Unit) {
         showTextField = currentState.showTextField,
         ifShowField = viewmodel::changeShowTextField,
         commentText = currentState.commentString ?: "",
-        changeText = {}
-    )
+        changeText = {})
 
 }
 

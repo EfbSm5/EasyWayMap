@@ -1,62 +1,46 @@
-//package com.efbsm5.easyway.viewmodel.pageViewmodel
-//
-//import androidx.lifecycle.ViewModel
-//import androidx.lifecycle.viewModelScope
-//import com.amap.api.maps.AMap
-//import com.efbsm5.easyway.repo.DataRepository
-//import com.efbsm5.easyway.map.MapState
-//import com.efbsm5.easyway.map.MapUtil
-//import com.efbsm5.easyway.ui.components.mapcards.Screen
-//import kotlinx.coroutines.Dispatchers
-//import kotlinx.coroutines.flow.MutableStateFlow
-//import kotlinx.coroutines.flow.StateFlow
-//import kotlinx.coroutines.launch
-//
-//
-//class MapPageViewModel(
-//    val repository: DataRepository
-//) : ViewModel() {
-//    private val _state = MutableStateFlow<Screen>(Screen.Function)
-//    private val _mapState = MutableStateFlow<MapState>(MapState.Point(emptyList()))
-//    val state: StateFlow<Screen> = _state
-//    val onMarkerClick = AMap.OnMarkerClickListener {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            changeScreen(
-//                Screen.Comment(
-//                    easyPoint = repository.getPointFromLatlng(it.position)
-//                )
-//            )
-//        }
-//        true
-//    }
-//    val onPoiClick = AMap.OnPOIClickListener {
-//        changeScreen(
-//            Screen.Comment(
-//                easyPoint = MapUtil.poiToEasyPoint(it)
-//            )
-//        )
-//    }
-//    val onMapClick = AMap.OnMapClickListener {}
-//    val mapState: StateFlow<MapState> = _mapState
-//
-//    init {
-//        getPoints()
-//    }
-//
-//    fun getPoints() {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            repository.getAllPoints().collect {
-//                _mapState.value = MapState.Point(it)
-//            }
-//        }
-//    }
-//
-//    fun changeScreen(screen: Screen) {
-//        _state.value = screen
-//    }
-//
-//    fun changeState(mapState: MapState) {
-//        _mapState.value = mapState
-//    }
-//
-//}
+package com.efbsm5.easyway.viewmodel.pageViewmodel
+
+import com.amap.api.maps.model.LatLng
+import com.efbsm5.easyway.base.BaseViewModel
+import com.efbsm5.easyway.contract.MapContract
+import com.efbsm5.easyway.ui.components.mapcards.CardScreen
+
+
+class MapPageViewModel : BaseViewModel<MapContract.Event, MapContract.State, MapContract.Effect>() {
+
+    fun setState(mapState: MapState) {
+        setEvent(MapContract.Event.ChangeState(mapState))
+    }
+
+    fun setScreen(cardScreen: CardScreen) {
+        setEvent(MapContract.Event.ChangeScreen(cardScreen))
+    }
+
+    fun onAdd() {
+        setEvent(MapContract.Event.ChangeScreen(CardScreen.NewPoint("")))
+    }
+
+    override fun createInitialState(): MapContract.State {
+        return MapContract.State(
+            mapState = MapState.PointState,
+            cardScreen = CardScreen.Function
+        )
+    }
+
+    override fun handleEvents(event: MapContract.Event) {
+        when (event) {
+            is MapContract.Event.ChangeState -> setState { copy(mapState = event.mapState) }
+            is MapContract.Event.ChangeScreen -> setState { copy(cardScreen = event.cardScreen) }
+        }
+    }
+
+}
+
+sealed interface MapState {
+    data object PointState : MapState
+    data object LocationState : MapState
+    data object Loading : MapState
+    data class Route(val destination: LatLng) : MapState
+}
+
+enum class SheetValue { Collapsed, PartiallyExpanded, Expanded }

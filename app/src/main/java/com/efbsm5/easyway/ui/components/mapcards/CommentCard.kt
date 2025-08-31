@@ -59,7 +59,7 @@ import com.efbsm5.easyway.viewmodel.componentsViewmodel.CommentCardScreen
 fun CommentAndHistoryCard(
     viewModel: CommentAndHistoryCardViewModel,
     navigate: (LatLng) -> Unit,
-    changeScreen: (Screen) -> Unit
+    changeScreen: (CardScreen) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
     val pointComment by viewModel.pointComments.collectAsState()
@@ -77,7 +77,7 @@ fun CommentAndHistoryCard(
         publish = { viewModel.publish(it) },
         update = {
             changeScreen(
-                Screen.NewPoint(
+                CardScreen.NewPoint(
                     label = "更新点位"
                 )
             )

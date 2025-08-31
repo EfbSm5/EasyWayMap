@@ -18,7 +18,6 @@ class SDKUtils private constructor(
             MapsInitializer.updatePrivacyShow(instance!!.application, true, true)
             MapsInitializer.updatePrivacyAgree(instance!!.application, true)
             AMapUtilCoreApi.setCollectInfoEnable(true)
-
         }
 
         fun getContext(): Application {

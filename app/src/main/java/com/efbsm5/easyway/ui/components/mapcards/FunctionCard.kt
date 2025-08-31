@@ -62,7 +62,7 @@ import com.efbsm5.easyway.viewmodel.componentsViewmodel.FunctionCardViewModel
 
 @Composable
 fun FunctionCard(
-    changeScreen: (Screen) -> Unit,
+    changeScreen: (CardScreen) -> Unit,
     viewModel: FunctionCardViewModel,
     navigate: (LatLng) -> Unit
 ) {
@@ -84,7 +84,7 @@ private fun FunctionCardScreen(
     onclick: (String) -> Unit = { },
     poiItemV2s: List<PoiItemV2> = emptyList(),
     easyPoints: List<EasyPoint> = emptyList(),
-    changeScreen: (Screen) -> Unit,
+    changeScreen: (CardScreen) -> Unit,
     location: LatLng,
     navigate: (LatLng) -> Unit
 ) {
@@ -105,8 +105,8 @@ private fun FunctionCardScreen(
             SearchPart(
                 poiItemV2s = poiItemV2s,
                 easyPoints = easyPoints,
-                onPoiItemV2Selected = { changeScreen(Screen.Comment(addPoiItem(it))) },
-                onPointSelected = { changeScreen(Screen.Comment(it)) },
+                onPoiItemV2Selected = { changeScreen(CardScreen.Comment(addPoiItem(it))) },
+                onPointSelected = { changeScreen(CardScreen.Comment(it)) },
                 location = location,
                 navigate = { _destination, _name ->
                     destination = _destination

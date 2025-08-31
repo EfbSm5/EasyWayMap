@@ -92,7 +92,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.accompanist.permissions)
-
+    implementation("io.morfly.compose:advanced-bottomsheet-material3:0.1.0")
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     testImplementation(libs.junit)

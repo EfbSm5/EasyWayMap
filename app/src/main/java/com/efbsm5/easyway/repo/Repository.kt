@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.Flow
 object DataRepository {
     private val database = AppDataBase.getDatabase(SDKUtils.getContext())
 
-    suspend fun getAllPoints(): Flow<List<EasyPointSimplify>> {
+    fun getAllPoints(): Flow<List<EasyPointSimplify>> {
         return database.pointsDao().loadAllPoints()
     }
 
