@@ -22,11 +22,14 @@
 
 package com.efbsm5.easyway.viewmodel
 
+import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.MultiPointItem
 import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.MultiPointOverlayContract
+import com.efbsm5.easyway.repo.DataRepository
 import com.efbsm5.easyway.repo.MultiPointOverlayRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.map
 
 /**
  * MultiPointOverlayViewModel
@@ -56,13 +59,19 @@ class MultiPointOverlayViewModel :
     }
 
     fun initMultiPointData() = asyncLaunch(Dispatchers.IO) {
-        val pointItemList = MultiPointOverlayRepository.initMultiPointItemList()
-        setState {
-            copy(
-                isLoading = false,
-                multiPointItems = pointItemList
-            )
+        DataRepository.getAllPoints().map { pointSimplifies ->
+            pointSimplifies.map { pointSimplify ->
+                MultiPointItem(LatLng(pointSimplify.lat, pointSimplify.lng))
+            }
+        }.collect {
+            setState {
+                copy(
+                    isLoading = false, multiPointItems = it
+                )
+            }
         }
+
+
     }
 
     fun onMultiPointItemClick(pointItem: MultiPointItem) {

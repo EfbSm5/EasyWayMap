@@ -3,12 +3,9 @@ package com.efbsm5.easyway.repo
 import android.graphics.BitmapFactory
 import com.amap.api.maps.model.BitmapDescriptor
 import com.amap.api.maps.model.BitmapDescriptorFactory
-import com.amap.api.maps.model.LatLng
-import com.amap.api.maps.model.MultiPointItem
 import com.efbsm5.easyway.R
 import com.efbsm5.easyway.SDKUtils
 import com.melody.map.gd_compose.poperties.MapUiSettings
-import java.io.IOException
 
 /**
  * MultiPointOverlayRepository
@@ -37,21 +34,4 @@ object MultiPointOverlayRepository {
         )
     }
 
-    suspend fun initMultiPointItemList(): List<MultiPointItem> {
-        val list: MutableList<MultiPointItem> = mutableListOf()
-        DataRepository.getAllPoints().collect {
-
-        }
-        try {
-
-            val lat = str[1].trim { it <= ' ' }.toDouble()
-            val lon = str[0].trim { it <= ' ' }.toDouble()
-            val latLng = LatLng(lat, lon, false) //保证经纬度没有问题的时候可以填false
-            val multiPointItem = MultiPointItem(latLng)
-            list.add(multiPointItem)
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-        return list
-    }
 }

@@ -13,6 +13,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
@@ -27,7 +28,7 @@ import com.efbsm5.easyway.ui.page.homepage.HomePage
 @Composable
 fun EasyWay() {
     val navController = rememberNavController()
-    val navBackStackEntry = navController.currentBackStackEntryAsState().value
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
     Scaffold(
         bottomBar = {
             AppBar(

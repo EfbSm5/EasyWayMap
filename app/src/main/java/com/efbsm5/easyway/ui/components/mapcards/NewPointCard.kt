@@ -42,7 +42,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.net.toUri
 import coil.compose.rememberAsyncImagePainter
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.getInitPoint
@@ -72,7 +71,7 @@ fun NewPointCard(
                     it.copyTo(outputStream)
                     outputStream.close()
                     it.close()
-                    viewModel.changeTempPoint(newPoint.copy(photo = file.toUri()))
+                    viewModel.changeTempPoint(newPoint.copy(photo = file.path))
                 }
             }
         },

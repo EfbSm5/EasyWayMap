@@ -7,6 +7,7 @@ import com.efbsm5.easyway.SDKUtils
 import com.efbsm5.easyway.data.UserManager
 import com.efbsm5.easyway.data.database.AppDataBase
 import com.efbsm5.easyway.data.models.EasyPoint
+import com.efbsm5.easyway.data.models.PointComment
 import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.PostComment
 import com.efbsm5.easyway.data.models.User
@@ -150,6 +151,10 @@ object DataRepository {
 
     suspend fun uploadPostComment(comment: PostComment) {
         database.postCommentDao().insert(comment)
+    }
+
+    suspend fun uploadPointComment(comment: PointComment) {
+        database.pointCommentDao().insert(comment)
     }
 
     suspend fun getPointFromLatLng(latLng: LatLng): EasyPoint {

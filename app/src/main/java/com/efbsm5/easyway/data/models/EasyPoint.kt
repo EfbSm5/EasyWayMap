@@ -27,5 +27,5 @@ data class EasyPoint(
     @ColumnInfo(name = "dislike") @SerializedName("dislike") var dislikes: Int,
     @ColumnInfo(name = "lat") @SerializedName("lat") var lat: Double,
     @ColumnInfo(name = "lng") @SerializedName("lng") var lng: Double,
-    @ColumnInfo(name = "user_id") @SerializedName("user_id") var userId: Int,
+    @ColumnInfo(name = "userId") @SerializedName("userId") var userId: Int,
 )

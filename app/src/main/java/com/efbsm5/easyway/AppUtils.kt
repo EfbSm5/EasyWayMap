@@ -72,7 +72,7 @@ fun SelectPoint() {
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val data = result.data?.getStringExtra("result_key")
+            result.data?.getStringExtra("result_key")
         }
     }
     val intent = Intent(SDKUtils.getContext(), LocationPoiActivity::class.java)

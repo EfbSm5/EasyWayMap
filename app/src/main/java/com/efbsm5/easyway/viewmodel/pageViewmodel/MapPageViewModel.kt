@@ -39,7 +39,6 @@ class MapPageViewModel : BaseViewModel<MapContract.Event, MapContract.State, Map
 sealed interface MapState {
     data object PointState : MapState
     data object LocationState : MapState
-    data object Loading : MapState
     data class Route(val destination: LatLng) : MapState
 }
 

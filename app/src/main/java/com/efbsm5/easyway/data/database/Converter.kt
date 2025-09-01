@@ -15,12 +15,12 @@ class Converters {
     }
 
     @TypeConverter
-    fun fromUriList(uriList: List<Uri>?): String {
-        return uriList?.joinToString(separator = ",") { it.toString() } ?: ""
+    fun fromUriList(uriList: List<String>?): String {
+        return uriList?.joinToString(separator = ",") { it } ?: ""
     }
 
     @TypeConverter
-    fun toUriList(data: String?): List<Uri> {
-        return data?.split(",")?.map { Uri.parse(it) } ?: emptyList()
+    fun toUriList(data: String?): List<String> {
+        return data?.split(",")?.map { it } ?: emptyList()
     }
 }

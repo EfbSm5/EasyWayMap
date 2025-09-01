@@ -10,9 +10,9 @@ object UserManager {
         SDKUtils.getContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
 
     var userId: Int
-        get() = prefs.getInt("user_id", 0)
+        get() = prefs.getInt("userId", 0)
         set(value) {
-            prefs.edit { putInt("user_id", value) }
+            prefs.edit { putInt("userId", value) }
         }
 
 }

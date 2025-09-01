@@ -1,6 +1,7 @@
 package com.efbsm5.easyway.data.models
 
 import androidx.compose.runtime.Immutable
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -8,27 +9,25 @@ import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
 @Entity(
-    tableName = "post",
-    foreignKeys = [ForeignKey(
+    tableName = "post", foreignKeys = [ForeignKey(
         entity = User::class,
         parentColumns = ["id"],
         childColumns = ["userId"],
         onDelete = ForeignKey.CASCADE
-    )],
-    indices = [Index("userId")]
+    )], indices = [Index("userId")]
 )
 @Immutable
 data class Post(
-    @PrimaryKey(autoGenerate = true) @SerializedName("id") var id: Int = 0,
-    @SerializedName("title") var title: String,
-    @SerializedName("type") var type: Int,
-    @SerializedName("date") var date: String,
-    @SerializedName("like") var like: Int,
-    @SerializedName("content") var content: String,
+    @ColumnInfo(name = "id") @PrimaryKey(autoGenerate = true) @SerializedName("id") var id: Int = 0,
+    @ColumnInfo(name = "title") @SerializedName("title") var title: String,
+    @ColumnInfo(name = "type") @SerializedName("type") var type: Int,
+    @ColumnInfo(name = "date") @SerializedName("date") var date: String,
+    @ColumnInfo(name = "like") @SerializedName("like") var like: Int,
+    @ColumnInfo(name = "content") @SerializedName("content") var content: String,
     @SerializedName("lat") var lat: Double,
     @SerializedName("lng") var lng: Double,
     @SerializedName("position") var position: String,
-    @SerializedName("user_id") var userId: Int,
+    @ColumnInfo(name = "userId") @SerializedName("userId") var userId: Int,
     @SerializedName("photo") var photo: List<String>
 )
 

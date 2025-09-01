@@ -1,6 +1,7 @@
 package com.efbsm5.easyway.data.models
 
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -8,8 +9,7 @@ import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
 @Entity(
-    tableName = "pointComment",
-    foreignKeys = [ForeignKey(
+    tableName = "pointComment", foreignKeys = [ForeignKey(
         entity = User::class,
         parentColumns = ["id"],
         childColumns = ["userId"],
@@ -19,15 +19,14 @@ import com.google.gson.annotations.SerializedName
         parentColumns = ["pointId"],
         childColumns = ["pointId"],
         onDelete = ForeignKey.CASCADE
-    )],
-    indices = [Index("pointId"), Index("userId")]
+    )], indices = [Index("pointId"), Index("userId")]
 )
 data class PointComment(
-    @SerializedName("index") @PrimaryKey val index: Int,
-    @SerializedName("point_id") val pointId: Int,
-    @SerializedName("user_id") val userId: Int,
-    @SerializedName("content") var content: String,
-    @SerializedName("like") var like: Int,
-    @SerializedName("dislike") val dislike: Int,
-    @SerializedName("date") val date: String,
+    @ColumnInfo(name = "index") @SerializedName("index") @PrimaryKey(autoGenerate = true) val index: Int = 0,
+    @ColumnInfo(name = "pointId") @SerializedName("pointId") val pointId: Int,
+    @ColumnInfo(name = "userId") @SerializedName("userId") val userId: Int,
+    @ColumnInfo(name = "content") @SerializedName("content") var content: String,
+    @ColumnInfo(name = "like") @SerializedName("like") var like: Int = 0,
+    @ColumnInfo(name = "dislike") @SerializedName("dislike") val dislike: Int = 0,
+    @ColumnInfo(name = "date") @SerializedName("date") val date: String,
 )

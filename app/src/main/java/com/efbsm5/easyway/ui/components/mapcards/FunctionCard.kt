@@ -1,6 +1,5 @@
 package com.efbsm5.easyway.ui.components.mapcards
 
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -223,7 +222,7 @@ fun SearchPart(
         if (selectedTabIndex == 1) {
             items(poiItemV2s) { poiItem ->
                 AccessiblePlaceItem(
-                    imageRes = poiItem.photos.firstOrNull()?.url?.toUri(),
+                    imageRes = poiItem.photos.firstOrNull()?.url,
                     title = poiItem.title,
                     distance = calculateDistance(
                         location, convertToLatLng(poiItem.latLonPoint)
@@ -249,7 +248,7 @@ fun SearchPart(
 
 @Composable
 private fun AccessiblePlaceItem(
-    imageRes: Uri?, title: String, distance: Float, navigate: () -> Unit, select: () -> Unit
+    imageRes: String?, title: String, distance: Float, navigate: () -> Unit, select: () -> Unit
 ) {
     Card(
         shape = RoundedCornerShape(8.dp),
@@ -266,7 +265,7 @@ private fun AccessiblePlaceItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                rememberAsyncImagePainter(imageRes),
+                rememberAsyncImagePainter(imageRes?.toUri()),
                 contentDescription = "地点图片",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

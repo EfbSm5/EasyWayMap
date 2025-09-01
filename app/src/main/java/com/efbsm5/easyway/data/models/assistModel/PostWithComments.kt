@@ -9,8 +9,8 @@ data class PostWithComments(
     @Embedded val post: Post,
     @Relation(
         entity = PostComment::class,
-        parentColumn = "postId",
-        entityColumn = "postOwnerId"
+        parentColumn = "id",
+        entityColumn = "postId"
     )
     val comments: List<PostCommentAndUser>
 )

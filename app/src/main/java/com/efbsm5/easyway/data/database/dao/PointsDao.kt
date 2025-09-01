@@ -46,7 +46,7 @@ interface PointsDao {
     @Query("DELETE FROM point WHERE pointId IN (:ids)")
     fun deleteAll(ids: List<Int>)
 
-    @Query("SELECT * FROM point WHERE user_id=:userId")
+    @Query("SELECT * FROM point WHERE userId=:userId")
     fun getPointByUserId(userId: Int): Flow<List<EasyPoint>>
 
     @Query("SELECT * FROM point WHERE name LIKE '%' || :searchString || '%'")

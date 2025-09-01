@@ -3,13 +3,12 @@ package com.efbsm5.easyway.ui.page
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -51,8 +50,7 @@ fun MapPage() {
         onBack = { viewmodel.setScreen(CardScreen.Function) })
 
     BottomSheetScaffold(
-        scaffoldState = rememberBottomSheetScaffoldState(sheetState),
-        sheetContent = {
+        scaffoldState = rememberBottomSheetScaffoldState(sheetState), sheetContent = {
             MapPageCard(
                 onNavigate = { viewmodel.setState(MapState.Route(it)) },
                 content = currentState.cardScreen,
@@ -63,25 +61,21 @@ fun MapPage() {
         //contentChanging
 
         content = {
-            when (currentState.mapState) {
-                MapState.Loading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
-                    ) {
+            Box(modifier = Modifier.padding(it))
+            {
 
+                when (currentState.mapState) {
+                    MapState.LocationState -> {
+                        LocationTrackingScreen()
                     }
-                }
 
-                MapState.LocationState -> {
-                    LocationTrackingScreen()
-                }
+                    MapState.PointState -> {
+                        MultiPointOverlayScreen(onclick = {})
+                    }
 
-                MapState.PointState -> {
-                    MultiPointOverlayScreen(onclick = {})
-                }
-
-                is MapState.Route -> {
-                    RoutePlanScreen()
+                    is MapState.Route -> {
+                        RoutePlanScreen()
+                    }
                 }
             }
         })

@@ -1,11 +1,13 @@
 package com.efbsm5.easyway.data.database.dao
 
+import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.efbsm5.easyway.data.models.PostComment
 import kotlinx.coroutines.flow.Flow
 
+@Dao
 interface PostCommentDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(postComment: PostComment)

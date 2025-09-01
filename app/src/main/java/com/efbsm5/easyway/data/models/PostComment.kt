@@ -1,5 +1,6 @@
 package com.efbsm5.easyway.data.models
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -23,8 +24,8 @@ import com.google.gson.annotations.SerializedName
 )
 data class PostComment(
     @SerializedName("index") @PrimaryKey val index: Int = 0,
-    @SerializedName("post_id") val postId: Int,
-    @SerializedName("user_id") val userId: Int,
+    @ColumnInfo(name = "postId") @SerializedName("postId") val postId: Int,
+    @ColumnInfo(name = "userId") @SerializedName("userId") val userId: Int,
     @SerializedName("content") var content: String,
     @SerializedName("like") var like: Int,
     @SerializedName("dislike") var dislike: Int,
