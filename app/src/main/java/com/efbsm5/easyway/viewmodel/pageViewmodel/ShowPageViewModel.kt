@@ -1,57 +1,54 @@
 package com.efbsm5.easyway.viewmodel.pageViewmodel
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.efbsm5.easyway.base.BaseViewModel
+import com.efbsm5.easyway.contract.ShowPageContract
 import com.efbsm5.easyway.data.models.assistModel.PointCommentAndUser
+import com.efbsm5.easyway.getInitUser
+import com.efbsm5.easyway.model.ImmutableListWrapper
 import com.efbsm5.easyway.repo.DataRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
-class ShowPageViewModel(val repository: DataRepository) : ViewModel() {
-    private var allPosts = MutableStateFlow<List<PointCommentAndUser>>(emptyList())
-    private var _showPosts = MutableStateFlow<List<PointCommentAndUser>>(emptyList())
-    val posts: StateFlow<List<PointCommentAndUser>> = _showPosts
-
-    init {
-        fetchPosts()
-    }
+class ShowPageViewModel :
+    BaseViewModel<ShowPageContract.Event, ShowPageContract.State, ShowPageContract.Effect>() {
 
     private fun fetchPosts() {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.getAllDynamicPosts().collect { dynamicPosts ->
-                val list = emptyList<PointCommentAndUser>().toMutableList()
-                dynamicPosts.forEach { post ->
-                    repository.getCommentCount(post.commentId).collect {
-                        list.add(
-                            PointCommentAndUser(
-                                dynamicPost = post,
-                                user = repository.getUserById(post.userId),
-                                commentCount = it,
-                            )
+        asyncLaunch(Dispatchers.IO) {
+            DataRepository.getAllPosts().forEach { post ->
+                repository.getCommentCount(post.commentId).collect {
+                    list.add(
+                        PointCommentAndUser(
+                            dynamicPost = post,
+                            user = repository.getUserById(post.userId),
+                            commentCount = it,
                         )
-                        allPosts.value = list.toList()
-                    }
+                    )
+                    allPosts.value = list.toList()
                 }
+                emptyList<PointCommentAndUser>().toMutableList()
             }
         }
+
     }
 
     fun changeTab(int: Int) {
-        if (int != 0) {
-            _showPosts.value = allPosts.value.filter {
-                it.dynamicPost.type == int
-            }
-        } else {
-            _showPosts.value = allPosts.value
-        }
+
     }
 
     fun search(string: String) {
-        _showPosts.value = allPosts.value.filter {
-            it.dynamicPost.title.contains(string)
-        }
+
+    }
+
+    override fun createInitialState(): ShowPageContract.State {
+        return ShowPageContract.State(
+            points = ImmutableListWrapper(emptyList()),
+            post = ImmutableListWrapper(emptyList()),
+            content = HomePageState.Loading,
+            user = getInitUser()
+        )
+    }
+
+    override fun handleEvents(event: ShowPageContract.Event) {
+        TODO("Not yet implemented")
     }
 }
 

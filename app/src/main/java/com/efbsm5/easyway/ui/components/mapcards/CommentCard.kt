@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +29,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,49 +44,48 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.amap.api.maps.model.LatLng
 import com.efbsm5.easyway.R
+import com.efbsm5.easyway.contract.CommentAndHistoryCardContract
 import com.efbsm5.easyway.data.models.EasyPoint
-import com.efbsm5.easyway.data.models.PointComment
-import com.efbsm5.easyway.data.models.User
+import com.efbsm5.easyway.data.models.assistModel.PointCommentAndUser
 import com.efbsm5.easyway.getLatlng
+import com.efbsm5.easyway.model.ImmutableListWrapper
 import com.efbsm5.easyway.ui.components.NavigationDialog
 import com.efbsm5.easyway.ui.components.TabSection
 import com.efbsm5.easyway.viewmodel.componentsViewmodel.CommentAndHistoryCardViewModel
 import com.efbsm5.easyway.viewmodel.componentsViewmodel.CommentCardScreen
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
 
 
 @Composable
 fun CommentAndHistoryCard(
-    viewModel: CommentAndHistoryCardViewModel,
-    navigate: (LatLng) -> Unit,
-    changeScreen: (CardScreen) -> Unit
+    navigate: (LatLng) -> Unit, changeScreen: (CardScreen) -> Unit
 ) {
-    val state by viewModel.state.collectAsState()
-    val pointComment by viewModel.pointComments.collectAsState()
-    val point by viewModel.point.collectAsState()
+    val viewModel: CommentAndHistoryCardViewModel = viewModel()
+    val currentState by viewModel.uiState.collectAsState()
+    LaunchedEffect(viewModel.effect) {
+        viewModel.effect.onEach {
+            when (it) {
+                CommentAndHistoryCardContract.Effect.Back -> changeScreen(CardScreen.Function)
+                CommentAndHistoryCardContract.Effect.Update -> changeScreen(CardScreen.NewPoint("New point"))
+            }
+        }.collect()
+    }
+
     CommentAndHistoryCardScreen(
-        point = point,
-        onSelect = {
-            viewModel.changeState(
-                if (it == 0) CommentCardScreen.Comment
-                else CommentCardScreen.History
-            )
-        },
-        state = state,
-        pointComments = pointComment,
-        publish = { viewModel.publish(it) },
-        update = {
-            changeScreen(
-                CardScreen.NewPoint(
-                    label = "更新点位"
-                )
-            )
-        },
+        point = currentState.point,
+        onSelect = viewModel::select,
+        state = currentState.state,
+        pointComments = currentState.pointComments,
+        publish = viewModel::publish,
+        update = viewModel::update,
         navigate = navigate,
-        like = { viewModel.likePost(it) },
-        dislike = { viewModel.dislikePost(it) },
+        like = viewModel::likePost,
+        dislike = viewModel::dislikePost,
         likeComment = { index, boolean ->
             viewModel.likeComment(
                 commentIndex = index, boolean = boolean
@@ -102,8 +103,8 @@ private fun CommentAndHistoryCardScreen(
     point: EasyPoint,
     onSelect: (Int) -> Unit,
     state: CommentCardScreen,
-    pointComments: List<Pair<PointComment, User>>,
-    publish: (String) -> Unit,
+    pointComments: ImmutableListWrapper<PointCommentAndUser>,
+    publish: () -> Unit,
     update: () -> Unit,
     navigate: (LatLng) -> Unit,
     like: (Boolean) -> Unit,
@@ -130,15 +131,18 @@ private fun CommentAndHistoryCardScreen(
         )
         when (state) {
             CommentCardScreen.Comment -> CommentCard(
-                pointComments, like = likeComment, dislike = dislikeComment
+                pointComments.items, like = likeComment, dislike = dislikeComment
             )
 
             CommentCardScreen.History -> HistoryCard()
+            CommentCardScreen.Loading -> Box {
+
+            }
         }
         if (comment) {
             ShowTextField(publish = {
                 comment = false
-                publish(it)
+                publish()
             }, cancel = { comment = false })
         } else BottomActionBar(comment = { comment = true }, update = update)
         if (destination != LatLng(0.0, 0.0)) NavigationDialog(destination, name) {
@@ -242,7 +246,7 @@ fun PointInfo(
 
 @Composable
 private fun CommentCard(
-    comments: List<Pair<PointComment, User>>,
+    comments: List<PointCommentAndUser>,
     like: (Int, Boolean) -> Unit,
     dislike: (Int, Boolean) -> Unit
 ) {
@@ -252,8 +256,8 @@ private fun CommentCard(
         items(comments) { commentAndUser ->
             CommentItem(
                 pointCommentAndUser = commentAndUser,
-                like = { like(commentAndUser.first.index, it) },
-                dislike = { dislike(commentAndUser.first.index, it) },
+                like = { like(commentAndUser.pointComment.index, it) },
+                dislike = { dislike(commentAndUser.pointComment.index, it) },
             )
         }
     }
@@ -261,9 +265,7 @@ private fun CommentCard(
 
 @Composable
 private fun CommentItem(
-    pointCommentAndUser: Pair<PointComment, User>,
-    like: (Boolean) -> Unit,
-    dislike: (Boolean) -> Unit
+    pointCommentAndUser: PointCommentAndUser, like: (Boolean) -> Unit, dislike: (Boolean) -> Unit
 ) {
     var isLiked by remember { mutableStateOf(false) }
     var isDisliked by remember { mutableStateOf(false) }
@@ -271,8 +273,8 @@ private fun CommentItem(
     val dislikeColor by animateColorAsState(targetValue = if (isDisliked) Color.Red else Color.Gray)
     val likeSize by animateFloatAsState(targetValue = if (isLiked) 36f else 24f)
     val dislikeSize by animateFloatAsState(targetValue = if (isDisliked) 36f else 24f)
-    val user = pointCommentAndUser.second
-    val comment = pointCommentAndUser.first
+    val user = pointCommentAndUser.user
+    val comment = pointCommentAndUser.pointComment
     Row(
         modifier = Modifier
             .fillMaxWidth()

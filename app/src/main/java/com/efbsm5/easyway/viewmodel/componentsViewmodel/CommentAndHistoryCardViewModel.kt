@@ -5,7 +5,6 @@ import com.efbsm5.easyway.contract.CommentAndHistoryCardContract
 import com.efbsm5.easyway.data.UserManager
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.models.PointComment
-import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.getCurrentFormattedTime
 import com.efbsm5.easyway.getInitPoint
 import com.efbsm5.easyway.model.ImmutableListWrapper
@@ -16,10 +15,6 @@ import kotlinx.coroutines.Dispatchers
 class CommentAndHistoryCardViewModel() :
     BaseViewModel<CommentAndHistoryCardContract.Event, CommentAndHistoryCardContract.State, CommentAndHistoryCardContract.Effect>() {
 
-    fun changeState(commentCardScreen: CommentCardScreen) {
-        setState { copy(state = commentCardScreen) }
-    }
-
     fun setPoint(easyPoint: EasyPoint) {
         setState { copy(point = easyPoint) }
         setState { copy(state = CommentCardScreen.Comment) }
@@ -27,6 +22,21 @@ class CommentAndHistoryCardViewModel() :
 
     fun changeCommentContent(string: String) {
         setState { copy(commentContent = string) }
+    }
+
+    fun update() {
+        setEffect {
+            CommentAndHistoryCardContract.Effect.Update
+        }
+    }
+
+    fun select(index: Int) {
+        setState {
+            copy(
+                state = if (index == 0) CommentCardScreen.Comment
+                else CommentCardScreen.History
+            )
+        }
     }
 
     override fun createInitialState(): CommentAndHistoryCardContract.State {
@@ -58,15 +68,8 @@ class CommentAndHistoryCardViewModel() :
                 DataRepository.uploadPointComment(
                     comment = it
                 )
-                setState { copy() }
+//                setState { copy() }
             }
-
-
-            _pointComments.value = _pointComments.value.plus(
-                Pair<PointComment, User>(
-                    first = pointComment, second = repository.getUserById(userManager.userId)
-                )
-            )
         }
     }
 
@@ -74,11 +77,11 @@ class CommentAndHistoryCardViewModel() :
     fun likePost(boolean: Boolean) {
         asyncLaunch(Dispatchers.IO) {
             if (boolean) {
-                _point.value = _point.value.copy(likes = _point.value.likes + 1)
-                DataRepository.addLikeForPoint(point.value.pointId)
+                setState { copy(point = point.copy(likes = point.likes + 1)) }
+                DataRepository.addLikeForPoint(currentState.point.pointId)
             } else {
-                _point.value = _point.value.copy(likes = _point.value.likes - 1)
-                DataRepository.decreaseLikeForPoint(point.value.pointId)
+                setState { copy(point = point.copy(likes = point.likes - 1)) }
+                DataRepository.decreaseLikeForPoint(currentState.point.pointId)
             }
         }
     }
@@ -86,11 +89,11 @@ class CommentAndHistoryCardViewModel() :
     fun dislikePost(boolean: Boolean) {
         asyncLaunch(Dispatchers.IO) {
             if (boolean) {
-                _point.value = _point.value.copy(dislikes = _point.value.dislikes + 1)
-                DataRepository.addDisLikeForPoint(point.value.pointId)
+                setState { copy(point = point.copy(dislikes = point.dislikes + 1)) }
+                DataRepository.addDisLikeForPoint(currentState.point.pointId)
             } else {
-                _point.value = _point.value.copy(dislikes = _point.value.dislikes - 1)
-                DataRepository.decreaseDisLikeForPoint(point.value.pointId)
+                setState { copy(point = point.copy(dislikes = point.dislikes - 1)) }
+                DataRepository.decreaseDisLikeForPoint(currentState.point.pointId)
             }
         }
     }
@@ -98,14 +101,14 @@ class CommentAndHistoryCardViewModel() :
     fun likeComment(commentIndex: Int, boolean: Boolean) {
         asyncLaunch(Dispatchers.IO) {
             if (boolean) {
-                _pointComments.value.find { commentAndUser ->
-                    commentAndUser.first.index == commentIndex
-                }!!.first.like + 1
+//               currentState.pointComments.items.find { commentAndUser ->
+//                    commentAndUser.pointComment.index == commentIndex
+//                }!!
                 DataRepository.addDisLikeForPointComment(commentIndex)
             } else {
-                _pointComments.value.find { commentAndUser ->
-                    commentAndUser.first.index == commentIndex
-                }!!.first.like - 1
+//                _pointComments.value.find { commentAndUser ->
+//                    commentAndUser.first.index == commentIndex
+//                }!!.first.like - 1
                 DataRepository.decreaseLikeForPointComment(commentIndex)
             }
         }
@@ -114,14 +117,14 @@ class CommentAndHistoryCardViewModel() :
     fun dislikeComment(commentIndex: Int, boolean: Boolean) {
         asyncLaunch(Dispatchers.IO) {
             if (boolean) {
-                _pointComments.value.find { commentAndUser ->
-                    commentAndUser.first.index == commentIndex
-                }!!.first.dislike + 1
+//                _pointComments.value.find { commentAndUser ->
+//                    commentAndUser.first.index == commentIndex
+//                }!!.first.dislike + 1
                 DataRepository.addDisLikeForPointComment(commentIndex)
             } else {
-                _pointComments.value.find { commentAndUser ->
-                    commentAndUser.first.index == commentIndex
-                }!!.first.dislike - 1
+//                _pointComments.value.find { commentAndUser ->
+//                    commentAndUser.first.index == commentIndex
+//                }!!.first.dislike - 1
                 DataRepository.decreaseDisLikeForPointComment(commentIndex)
             }
         }

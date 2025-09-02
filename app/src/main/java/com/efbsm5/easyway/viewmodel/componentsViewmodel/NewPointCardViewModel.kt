@@ -1,10 +1,9 @@
 package com.efbsm5.easyway.viewmodel.componentsViewmodel
 
-import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.amap.api.maps.model.LatLng
-import com.efbsm5.easyway.LocationSaver
+import com.efbsm5.easyway.data.LocationSaver
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.repo.DataRepository
 import kotlinx.coroutines.Dispatchers
@@ -19,13 +18,12 @@ class NewPointCardViewModel(
     ViewModel() {
     private var _tempPoint = MutableStateFlow(
         EasyPoint(
-            commentId = 0,
             userId = 0,
             name = "",
             type = "",
             info = "",
             location = "",
-            photo = ("https://27142293.s21i.faiusr.com/2/ABUIABACGAAg_I_bmQYokt25kQUwwAc4gAU.jpg".toUri()),
+            photo = ("https://27142293.s21i.faiusr.com/2/ABUIABACGAAg_I_bmQYokt25kQUwwAc4gAU.jpg"),
             refreshTime = "2024-12-29",
             likes = 100,
             dislikes = 10,

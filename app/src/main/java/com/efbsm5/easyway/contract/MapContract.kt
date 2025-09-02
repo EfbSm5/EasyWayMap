@@ -18,6 +18,6 @@ class MapContract {
     ) : IUiState
 
     sealed class Effect : IUiEffect {
-        internal data class Toast(val msg: String?) : Effect()
+        internal data class Toast(val msg: String) : Effect()
     }
 }

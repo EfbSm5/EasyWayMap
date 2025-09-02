@@ -39,12 +39,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.amap.api.maps.model.LatLng
 import com.amap.api.services.core.PoiItemV2
@@ -61,13 +61,10 @@ import com.efbsm5.easyway.viewmodel.componentsViewmodel.FunctionCardViewModel
 
 @Composable
 fun FunctionCard(
-    changeScreen: (CardScreen) -> Unit,
-    viewModel: FunctionCardViewModel,
-    navigate: (LatLng) -> Unit
+    changeScreen: (CardScreen) -> Unit, navigate: (LatLng) -> Unit
 ) {
-    val pointList by viewModel.points.collectAsState()
-    val poiList by viewModel.poiList.collectAsState()
-    val context = LocalContext.current
+    val viewModel: FunctionCardViewModel = viewModel()
+
     FunctionCardScreen(
         onclick = { viewModel.search(context = context, string = it) },
         poiItemV2s = poiList,
@@ -116,13 +113,10 @@ private fun FunctionCardScreen(
             isSearching = true
         }
         if (LatLng(0.0, 0.0) != destination) NavigationDialog(
-            location = destination,
-            name = name,
-            navigate = {
+            location = destination, name = name, navigate = {
                 navigate
                 destination = LatLng(0.0, 0.0)
-            }
-        )
+            })
     }
 }
 

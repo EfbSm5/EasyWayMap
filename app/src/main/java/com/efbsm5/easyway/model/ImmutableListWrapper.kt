@@ -25,4 +25,23 @@ package com.efbsm5.easyway.model
 import androidx.compose.runtime.Immutable
 
 @Immutable
-class ImmutableListWrapper<T : Any>(val items: List<T>)
+class ImmutableListWrapper<T : Any>(val items: List<T>) {
+    fun replace(index: Int, element: T): ImmutableListWrapper<T> {
+        val newList = items.toMutableList().apply {
+            this[index] = element
+        }
+        return ImmutableListWrapper(newList)
+    }
+
+    fun add(element: T): ImmutableListWrapper<T> {
+        val newList = items + element
+        return ImmutableListWrapper(newList)
+    }
+
+    fun remove(index: Int): ImmutableListWrapper<T> {
+        val newList = items.toMutableList().apply {
+            removeAt(index)
+        }
+        return ImmutableListWrapper(newList)
+    }
+}

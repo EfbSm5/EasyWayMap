@@ -1,32 +1,32 @@
 package com.efbsm5.easyway.viewmodel.componentsViewmodel
 
-import android.content.Context
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.amap.api.services.core.PoiItemV2
-import com.efbsm5.easyway.LocationSaver
-import com.efbsm5.easyway.data.models.EasyPoint
-import com.efbsm5.easyway.repo.DataRepository
+import com.efbsm5.easyway.base.BaseViewModel
+import com.efbsm5.easyway.contract.FunctionCardContract
+import com.efbsm5.easyway.model.ImmutableListWrapper
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
-class FunctionCardViewModel(val repository: DataRepository, val locationSaver: LocationSaver) :
-    ViewModel() {
-    private val _poiList = MutableStateFlow(emptyList<PoiItemV2>())
-    private val _points = MutableStateFlow(emptyList<EasyPoint>())
-    val points: StateFlow<List<EasyPoint>> = _points
-    val poiList: StateFlow<List<PoiItemV2>> = _poiList
+class FunctionCardViewModel :
+    BaseViewModel<FunctionCardContract.Event, FunctionCardContract.State, FunctionCardContract.Effect>() {
 
-    fun search(string: String, context: Context) {
-        viewModelScope.launch(Dispatchers.IO) {
-//            searchForPoi(
-//                string, context = context, onPoiSearched = { _poiList.value = it })
-//            repository.getPointByName(string).collect {
-//                _points.value = it
-//            }
+    fun search(string: String) {
+        asyncLaunch(Dispatchers.IO) {
+            searchForPoi(
+                string, context = context, onPoiSearched = { _poiList.value = it })
+            repository.getPointByName(string).collect {
+                _points.value = it
+            }
         }
+    }
+
+    override fun createInitialState(): FunctionCardContract.State {
+        return FunctionCardContract.State(
+            points = ImmutableListWrapper(emptyList()),
+            poiList = ImmutableListWrapper(emptyList())
+        )
+    }
+
+    override fun handleEvents(event: FunctionCardContract.Event) {
+
     }
 
 

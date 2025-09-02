@@ -7,11 +7,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.efbsm5.easyway.contract.MapContract
+import com.efbsm5.easyway.showMsg
 import com.efbsm5.easyway.ui.components.mapcards.CardScreen
 import com.efbsm5.easyway.ui.components.mapcards.MapPageCard
 import com.efbsm5.easyway.viewmodel.pageViewmodel.MapPageViewModel
@@ -20,6 +23,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import io.morfly.compose.bottomsheet.material3.BottomSheetScaffold
 import io.morfly.compose.bottomsheet.material3.rememberBottomSheetScaffoldState
 import io.morfly.compose.bottomsheet.material3.rememberBottomSheetState
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
 
 
 @OptIn(
@@ -39,30 +44,31 @@ fun MapPage() {
             SheetValue.Expanded at contentHeight
         })
 
-//    val scope = rememberCoroutineScope()
-//    LaunchedEffect(Unit) {
-//        scope.launch { sheetState.bottomSheetState.animateTo(BottomSheetValue.HalfExpanded) }
-//    }
-
-//backHandler
+    LaunchedEffect(currentState.cardScreen) {
+        sheetState.animateTo(SheetValue.PartiallyExpanded)
+    }
+    LaunchedEffect(viewmodel.effect) {
+        viewmodel.effect.onEach { effect ->
+            when (effect) {
+                is MapContract.Effect.Toast -> showMsg(effect.msg)
+            }
+        }.collect()
+    }
     BackHandler(
         enabled = currentState.cardScreen != CardScreen.Function,
         onBack = { viewmodel.setScreen(CardScreen.Function) })
 
     BottomSheetScaffold(
-        scaffoldState = rememberBottomSheetScaffoldState(sheetState), sheetContent = {
+        scaffoldState = rememberBottomSheetScaffoldState(sheetState),
+        sheetContent = {
             MapPageCard(
-                onNavigate = { viewmodel.setState(MapState.Route(it)) },
+                onNavigate = viewmodel::navigate,
                 content = currentState.cardScreen,
                 onChangeScreen = viewmodel::setScreen
             )
         },
-
-        //contentChanging
-
         content = {
-            Box(modifier = Modifier.padding(it))
-            {
+            Box(modifier = Modifier.padding(it)) {
 
                 when (currentState.mapState) {
                     MapState.LocationState -> {
@@ -70,7 +76,7 @@ fun MapPage() {
                     }
 
                     MapState.PointState -> {
-                        MultiPointOverlayScreen(onclick = {})
+                        MultiPointOverlayScreen(onclick = viewmodel::clickPoint)
                     }
 
                     is MapState.Route -> {

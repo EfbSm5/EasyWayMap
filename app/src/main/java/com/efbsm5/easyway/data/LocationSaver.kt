@@ -1,13 +1,14 @@
-package com.efbsm5.easyway
+package com.efbsm5.easyway.data
 
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.amap.api.maps.model.LatLng
+import com.efbsm5.easyway.SDKUtils
 
 object LocationSaver {
     private val sharedPreferences: SharedPreferences =
-        SDKUtils.getContext().getSharedPreferences("MapPreferences", Context.MODE_PRIVATE)
+        SDKUtils.Companion.getContext().getSharedPreferences("MapPreferences", Context.MODE_PRIVATE)
 
     var location: LatLng
         get() = with(sharedPreferences) {
