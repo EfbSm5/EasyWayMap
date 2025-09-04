@@ -103,34 +103,91 @@ fun PostScreen(
     onClick: (PostAndUser) -> Unit = {},
     search: (String) -> Unit = {}
 ) {
-    Surface {
+    Surface(
+        modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(8.dp),
+                .padding(12.dp),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TopBar(back = back, text = titleText)
-            BannerSection(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp)
-                    .clip(RoundedCornerShape(8.dp))
-            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                tonalElevation = 4.dp,
+                shadowElevation = 6.dp,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                BannerSection(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             SearchBar(
                 search = search,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .clip(RoundedCornerShape(12.dp))
                     .background(
-                        MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(8.dp)
-                    ),
+                        MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(12.dp)
+                    )
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
             )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
             TabSection(
                 onSelect = { onSelect(it) }, tabs = listOf("全部", "活动", "互助", "分享")
             )
-            PostList(posts = posts.items, onClick = { onClick(it) })
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            PostList(
+                posts = posts.items, onClick = { onClick(it) })
+        }
+    }
+}
+
+@Composable
+private fun SearchBar(search: (String) -> Unit, modifier: Modifier) {
+    var text by rememberSaveable { mutableStateOf("") }
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        TextField(
+            value = text,
+            onValueChange = { text = it },
+            modifier = Modifier.weight(1f),
+            placeholder = { Text("搜索帖子、活动...") },
+            singleLine = true,
+            shape = RoundedCornerShape(8.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        IconButton(
+            onClick = { search(text) },
+            modifier = Modifier
+                .size(48.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+        ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "搜索",
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
@@ -145,33 +202,6 @@ private fun BannerSection(modifier: Modifier) {
     )
 }
 
-@Composable
-private fun SearchBar(search: (String) -> Unit, modifier: Modifier) {
-    var text by rememberSaveable { mutableStateOf("") }
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
-    ) {
-        TextField(
-            value = text, onValueChange = { text = it }, modifier = Modifier.background(
-                MaterialTheme.colorScheme.background, shape = RoundedCornerShape(8.dp)
-            ), placeholder = { Text("搜索") })
-        Spacer(modifier = Modifier.width(20.dp))
-        IconButton(
-            onClick = { search(text) },
-            modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(8.dp))
-        ) {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = "搜索",
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-    }
-}
 
 
 
