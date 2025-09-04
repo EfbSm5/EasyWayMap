@@ -1,27 +1,31 @@
 package com.efbsm5.easyway.viewmodel.componentsViewmodel
 
+import com.amap.api.services.core.PoiItemV2
 import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.FunctionCardContract
 import com.efbsm5.easyway.model.ImmutableListWrapper
+import com.efbsm5.easyway.repo.OnPoiSearched
+import com.efbsm5.easyway.repo.searchForPoi
 import kotlinx.coroutines.Dispatchers
 
 class FunctionCardViewModel :
     BaseViewModel<FunctionCardContract.Event, FunctionCardContract.State, FunctionCardContract.Effect>() {
 
-    fun search(string: String) {
+    fun search(string: String, page: Int) {
         asyncLaunch(Dispatchers.IO) {
             searchForPoi(
-                string, context = context, onPoiSearched = { _poiList.value = it })
-            repository.getPointByName(string).collect {
-                _points.value = it
-            }
+                keyword = string, page = page, onPoiSearched = object : OnPoiSearched {
+                    override fun onPoiSearched(result: List<PoiItemV2>) {
+                        setState { copy(poiList = ImmutableListWrapper(result)) }
+                    }
+                })
         }
+
     }
 
     override fun createInitialState(): FunctionCardContract.State {
         return FunctionCardContract.State(
-            points = ImmutableListWrapper(emptyList()),
-            poiList = ImmutableListWrapper(emptyList())
+            points = ImmutableListWrapper(emptyList()), poiList = ImmutableListWrapper(emptyList())
         )
     }
 

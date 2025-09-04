@@ -30,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,63 +39,63 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
+import com.efbsm5.easyway.SDKUtils
+import com.efbsm5.easyway.contract.NewPointCardContract
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.getInitPoint
 import com.efbsm5.easyway.viewmodel.componentsViewmodel.NewPointCardViewModel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
 import java.io.File
 import java.io.FileOutputStream
 
 @Composable
 fun NewPointCard(
-    changeScreen: (CardScreen) -> Unit,
-    viewModel: NewPointCardViewModel,
-    label: String
+    changeScreen: (CardScreen) -> Unit, label: String
 ) {
-    val context = LocalContext.current
-    val newPoint by viewModel.tempPoint.collectAsState()
-    NewPointCardSurface(
-        label = label,
-        point = newPoint,
-        onInfoValueChange = { viewModel.changeTempPoint(newPoint.copy(info = it)) },
-        onLocationValueChange = { viewModel.changeTempPoint(newPoint.copy(location = it)) },
-        onUploadImage = { uri ->
-            uri?.let { uri1 ->
-                val inputStream = context.contentResolver.openInputStream(uri1)
-                inputStream?.let {
-                    val file = File(context.cacheDir, "temp_image")
-                    val outputStream = FileOutputStream(file)
-                    it.copyTo(outputStream)
-                    outputStream.close()
-                    it.close()
-                    viewModel.changeTempPoint(newPoint.copy(photo = file.path))
-                }
-            }
-        },
-        onSelectType = {
-            viewModel.changeTempPoint(newPoint.copy(type = it))
-        },
-        callback = {
-            if (it) {
-                viewModel.getLocation().apply {
-                    viewModel.changeTempPoint(
-                        newPoint.copy(
-                            lat = latitude, lng = longitude
-                        )
-                    )
+    val viewModel: NewPointCardViewModel = viewModel()
+    val currentState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.onEach { effect ->
+            when (effect) {
+                NewPointCardContract.Effect.Upload -> {}
+                is NewPointCardContract.Effect.UploadPhoto -> {
+                    effect.uri.let { uri1 ->
+                        val inputStream =
+                            SDKUtils.getContext().contentResolver.openInputStream(uri1)
+                        inputStream?.let {
+                            val file = File(SDKUtils.getContext().cacheDir, "temp_image")
+                            val outputStream = FileOutputStream(file)
+                            it.copyTo(outputStream)
+                            outputStream.close()
+                            it.close()
+                            viewModel.upLoadPhoto(file.path)
+                        }
+                    }
                 }
 
-                viewModel.publishPoint()
-                changeScreen(CardScreen.Function)
-            } else {
-                changeScreen(CardScreen.Function)
+                NewPointCardContract.Effect.Back -> {
+                    changeScreen(CardScreen.Function)
+                }
             }
-        },
-        onNameValueChange = { viewModel.changeTempPoint(newPoint.copy(name = it)) },
+        }.collect()
+    }
+
+    NewPointCardSurface(
+        label = label,
+        point = currentState.tempPoint,
+        onInfoValueChange = viewModel::changeInfoValue,
+        onLocationValueChange = viewModel::changeLocation,
+        onUploadImage = {},
+        onSelectType = viewModel::changeType,
+        callback = viewModel::callback,
+        onNameValueChange = viewModel::changeNameValue,
     )
 }
 

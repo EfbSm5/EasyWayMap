@@ -1,9 +1,6 @@
 package com.efbsm5.easyway.ui.components.mapcards
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,8 +17,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.ThumbUp
-import androidx.compose.material.icons.rounded.ThumbUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -39,7 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -53,8 +47,10 @@ import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.models.assistModel.PointCommentAndUser
 import com.efbsm5.easyway.getLatlng
 import com.efbsm5.easyway.model.ImmutableListWrapper
+import com.efbsm5.easyway.ui.components.LikeAndDisLikeButton
 import com.efbsm5.easyway.ui.components.NavigationDialog
 import com.efbsm5.easyway.ui.components.TabSection
+import com.efbsm5.easyway.ui.components.mapcards.CardScreen.NewPoint
 import com.efbsm5.easyway.viewmodel.componentsViewmodel.CommentAndHistoryCardViewModel
 import com.efbsm5.easyway.viewmodel.componentsViewmodel.CommentCardScreen
 import kotlinx.coroutines.flow.collect
@@ -71,11 +67,14 @@ fun CommentAndHistoryCard(
         viewModel.effect.onEach {
             when (it) {
                 CommentAndHistoryCardContract.Effect.Back -> changeScreen(CardScreen.Function)
-                CommentAndHistoryCardContract.Effect.Update -> changeScreen(CardScreen.NewPoint("New point"))
+                CommentAndHistoryCardContract.Effect.Update -> changeScreen(NewPoint("New point"))
+                CommentAndHistoryCardContract.Effect.Comment -> viewModel::publish
             }
         }.collect()
     }
+    LaunchedEffect(Unit) {
 
+    }
     CommentAndHistoryCardScreen(
         point = currentState.point,
         onSelect = viewModel::select,
@@ -161,12 +160,6 @@ fun PointInfo(
     like: (Boolean) -> Unit,
     dislike: (Boolean) -> Unit
 ) {
-    var isLiked by remember { mutableStateOf(false) }
-    var isDisliked by remember { mutableStateOf(false) }
-    val likeColor by animateColorAsState(targetValue = if (isLiked) Color.Red else Color.Gray)
-    val dislikeColor by animateColorAsState(targetValue = if (isDisliked) Color.Red else Color.Gray)
-    val likeSize by animateFloatAsState(targetValue = if (isLiked) 36f else 24f)
-    val dislikeSize by animateFloatAsState(targetValue = if (isDisliked) 36f else 24f)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -193,35 +186,13 @@ fun PointInfo(
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Row(modifier = Modifier.padding(horizontal = 16.dp)) {
-            Icon(
-                Icons.Rounded.ThumbUp,
-                contentDescription = "like",
-                modifier = Modifier
-                    .size(likeSize.dp)
-                    .clickable {
-                        isLiked = !isLiked
-                        if (isDisliked) isDisliked = false
-                        like(isLiked)
-                    },
-                tint = likeColor
-            )
-            Text(easyPoint.likes.toString(), modifier = Modifier.padding(start = 4.dp))
-            Spacer(modifier = Modifier.width(16.dp))
-            Icon(
-                modifier = Modifier
-                    .size(dislikeSize.dp)
-                    .clickable {
-                        isDisliked = !isDisliked
-                        if (isLiked) isLiked = false
-                        dislike(isDisliked)
-                    },
-                painter = painterResource(id = R.drawable.thumb_down),
-                contentDescription = "Dislike",
-                tint = dislikeColor
-            )
-            Text(easyPoint.dislikes.toString(), modifier = Modifier.padding(start = 4.dp))
-        }
+        LikeAndDisLikeButton(
+            like = like,
+            dislike = dislike,
+            likeNum = easyPoint.likes,
+            dislikeNum = easyPoint.dislikes,
+            modifier = Modifier.padding(16.dp)
+        )
         Spacer(modifier = Modifier.height(8.dp))
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
             Text("详细地址", fontWeight = FontWeight.Bold, fontSize = 16.sp)
@@ -267,12 +238,6 @@ private fun CommentCard(
 private fun CommentItem(
     pointCommentAndUser: PointCommentAndUser, like: (Boolean) -> Unit, dislike: (Boolean) -> Unit
 ) {
-    var isLiked by remember { mutableStateOf(false) }
-    var isDisliked by remember { mutableStateOf(false) }
-    val likeColor by animateColorAsState(targetValue = if (isLiked) Color.Red else Color.Gray)
-    val dislikeColor by animateColorAsState(targetValue = if (isDisliked) Color.Red else Color.Gray)
-    val likeSize by animateFloatAsState(targetValue = if (isLiked) 36f else 24f)
-    val dislikeSize by animateFloatAsState(targetValue = if (isDisliked) 36f else 24f)
     val user = pointCommentAndUser.user
     val comment = pointCommentAndUser.pointComment
     Row(
@@ -304,51 +269,60 @@ private fun CommentItem(
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = 8.dp)
             )
-            Row(
+//            Row(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(top = 8.dp),
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                Text(
+//                    text = comment.date,
+//                    style = MaterialTheme.typography.bodyLarge,
+//                    color = Color.Gray
+//                )
+//                Spacer(modifier = Modifier.weight(1f))
+//                Icon(
+//                    Icons.Default.ThumbUp, modifier = Modifier
+//                        .size(likeSize.dp)
+//                        .clickable {
+//                            like(isLiked)
+//                            isLiked = !isLiked
+//                            if (isDisliked) isDisliked = false
+//                        }, contentDescription = "Dislike", tint = likeColor
+//                )
+//                Spacer(modifier = Modifier.width(4.dp))
+//                Text(
+//                    text = if (isLiked) (comment.like + 1).toString() else comment.like.toString(),
+//                    style = MaterialTheme.typography.bodySmall
+//                )
+//                Spacer(modifier = Modifier.width(16.dp))
+//                Icon(
+//                    modifier = Modifier
+//                        .size(dislikeSize.dp)
+//                        .clickable {
+//                            dislike(isDisliked)
+//                            isDisliked = !isDisliked
+//                            if (isLiked) isLiked = false
+//                        },
+//                    painter = painterResource(id = R.drawable.thumb_down),
+//                    contentDescription = "Dislike",
+//                    tint = dislikeColor
+//                )
+//                Spacer(modifier = Modifier.width(4.dp))
+//                Text(
+//                    text = if (isDisliked) (comment.dislike + 1).toString() else comment.dislike.toString(),
+//                    style = MaterialTheme.typography.bodySmall
+//                )
+//            }
+            LikeAndDisLikeButton(
+                like = like,
+                dislike = dislike,
+                likeNum = pointCommentAndUser.pointComment.like,
+                dislikeNum = pointCommentAndUser.pointComment.dislike,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = comment.date,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.Gray
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Icon(
-                    Icons.Default.ThumbUp, modifier = Modifier
-                        .size(likeSize.dp)
-                        .clickable {
-                            like(isLiked)
-                            isLiked = !isLiked
-                            if (isDisliked) isDisliked = false
-                        }, contentDescription = "Dislike", tint = likeColor
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = if (isLiked) (comment.like + 1).toString() else comment.like.toString(),
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Icon(
-                    modifier = Modifier
-                        .size(dislikeSize.dp)
-                        .clickable {
-                            dislike(isDisliked)
-                            isDisliked = !isDisliked
-                            if (isLiked) isLiked = false
-                        },
-                    painter = painterResource(id = R.drawable.thumb_down),
-                    contentDescription = "Dislike",
-                    tint = dislikeColor
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = if (isDisliked) (comment.dislike + 1).toString() else comment.dislike.toString(),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
+                    .padding(top = 8.dp)
+            )
         }
     }
 }

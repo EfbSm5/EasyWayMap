@@ -10,7 +10,7 @@ import com.efbsm5.easyway.viewmodel.componentsViewmodel.CommentCardScreen
 
 class CommentAndHistoryCardContract {
     sealed class Event : IUiEvent {
-        object Comment : Event()
+        data class ChangeComment(val commentContent: String) : Event()
     }
 
     data class State(
@@ -23,6 +23,7 @@ class CommentAndHistoryCardContract {
     sealed class Effect : IUiEffect {
         internal object Back : Effect()
         internal object Update : Effect()
+        internal object Comment : Effect()
 
     }
 }

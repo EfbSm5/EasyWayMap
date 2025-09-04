@@ -4,12 +4,17 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -69,7 +74,10 @@ fun MapPage() {
         },
         content = {
             Box(modifier = Modifier.padding(it)) {
-
+                FloatingActionButton(
+                    modifier = Modifier.align(Alignment.BottomEnd),
+                    onClick = viewmodel::changeScreen,
+                    content = { Icon(Icons.Default.LocationOn, "change map") })
                 when (currentState.mapState) {
                     MapState.LocationState -> {
                         LocationTrackingScreen()
@@ -86,3 +94,4 @@ fun MapPage() {
             }
         })
 }
+

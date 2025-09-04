@@ -3,8 +3,6 @@ package com.efbsm5.easyway.ui.components.mapcards
 import androidx.compose.runtime.Composable
 import com.amap.api.maps.model.LatLng
 import com.efbsm5.easyway.data.models.EasyPoint
-import com.efbsm5.easyway.viewmodel.componentsViewmodel.NewPointCardViewModel
-import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MapPageCard(
@@ -28,9 +26,7 @@ fun MapPageCard(
         }
 
         is CardScreen.NewPoint -> {
-            val newPointCardViewModel: NewPointCardViewModel = koinViewModel()
             NewPointCard(
-                viewModel = newPointCardViewModel,
                 changeScreen = onChangeScreen,
                 label = content.label
             )

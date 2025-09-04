@@ -50,10 +50,9 @@ class CommentAndHistoryCardViewModel() :
 
     override fun handleEvents(event: CommentAndHistoryCardContract.Event) {
         when (event) {
-            CommentAndHistoryCardContract.Event.Comment -> {
-                publish()
-            }
 
+
+            is CommentAndHistoryCardContract.Event.ChangeComment -> TODO()
         }
     }
 

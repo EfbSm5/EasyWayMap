@@ -52,9 +52,11 @@ import com.efbsm5.easyway.R
 import com.efbsm5.easyway.addPoiItem
 import com.efbsm5.easyway.calculateDistance
 import com.efbsm5.easyway.convertToLatLng
+import com.efbsm5.easyway.data.LocationSaver
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.formatDistance
 import com.efbsm5.easyway.getLatlng
+import com.efbsm5.easyway.model.ImmutableListWrapper
 import com.efbsm5.easyway.ui.components.NavigationDialog
 import com.efbsm5.easyway.ui.components.TabSection
 import com.efbsm5.easyway.viewmodel.componentsViewmodel.FunctionCardViewModel
@@ -64,24 +66,27 @@ fun FunctionCard(
     changeScreen: (CardScreen) -> Unit, navigate: (LatLng) -> Unit
 ) {
     val viewModel: FunctionCardViewModel = viewModel()
+    val currentState by viewModel.uiState.collectAsState()
 
     FunctionCardScreen(
-        onclick = { viewModel.search(context = context, string = it) },
-        poiItemV2s = poiList,
+        onclick = {
+            viewModel.search(
+                string = it, page = 1
+            )
+        },
+        poiItemV2s = currentState.poiList,
         changeScreen = changeScreen,
-        location = viewModel.locationSaver.location,
         navigate = navigate,
-        easyPoints = pointList
+        easyPoints = currentState.points
     )
 }
 
 @Composable
 private fun FunctionCardScreen(
     onclick: (String) -> Unit = { },
-    poiItemV2s: List<PoiItemV2> = emptyList(),
-    easyPoints: List<EasyPoint> = emptyList(),
+    poiItemV2s: ImmutableListWrapper<PoiItemV2> = ImmutableListWrapper(emptyList()),
+    easyPoints: ImmutableListWrapper<EasyPoint> = ImmutableListWrapper(emptyList()),
     changeScreen: (CardScreen) -> Unit,
-    location: LatLng,
     navigate: (LatLng) -> Unit
 ) {
     var isSearching by rememberSaveable { mutableStateOf(false) }
@@ -99,11 +104,10 @@ private fun FunctionCardScreen(
         Spacer(Modifier.height(10.dp))
         if (isSearching) {
             SearchPart(
-                poiItemV2s = poiItemV2s,
-                easyPoints = easyPoints,
+                poiItemV2s = poiItemV2s.items,
+                easyPoints = easyPoints.items,
                 onPoiItemV2Selected = { changeScreen(CardScreen.Comment(addPoiItem(it))) },
                 onPointSelected = { changeScreen(CardScreen.Comment(it)) },
-                location = location,
                 navigate = { _destination, _name ->
                     destination = _destination
                     name = _name
@@ -198,7 +202,6 @@ fun SearchPart(
     poiItemV2s: List<PoiItemV2>,
     onPoiItemV2Selected: (poiItem: PoiItemV2) -> Unit,
     onPointSelected: (point: EasyPoint) -> Unit,
-    location: LatLng,
     easyPoints: List<EasyPoint> = emptyList(),
     navigate: (LatLng, String) -> Unit
 ) {
@@ -219,7 +222,7 @@ fun SearchPart(
                     imageRes = poiItem.photos.firstOrNull()?.url,
                     title = poiItem.title,
                     distance = calculateDistance(
-                        location, convertToLatLng(poiItem.latLonPoint)
+                        LocationSaver.location, convertToLatLng(poiItem.latLonPoint)
                     ),
                     navigate = { navigate(convertToLatLng(poiItem.latLonPoint), poiItem.title) },
                     select = { onPoiItemV2Selected(poiItem) })
@@ -230,7 +233,7 @@ fun SearchPart(
                     imageRes = easyPoint.photo,
                     title = easyPoint.name,
                     distance = calculateDistance(
-                        location, easyPoint.getLatlng()
+                        LocationSaver.location, easyPoint.getLatlng()
                     ),
                     navigate = { navigate(easyPoint.getLatlng(), easyPoint.name) },
                     select = { onPointSelected(easyPoint) })

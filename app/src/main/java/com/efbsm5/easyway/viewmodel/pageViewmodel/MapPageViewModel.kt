@@ -17,6 +17,18 @@ class MapPageViewModel : BaseViewModel<MapContract.Event, MapContract.State, Map
         setEvent(MapContract.Event.ChangeScreen(cardScreen))
     }
 
+    fun changeScreen() {
+        if (currentState.mapState == MapState.LocationState) setEvent(
+            MapContract.Event.ChangeState(
+                MapState.PointState
+            )
+        ) else setEvent(
+            MapContract.Event.ChangeState(
+                MapState.LocationState
+            )
+        )
+    }
+
     fun clickPoint(latLng: LatLng) {
         asyncLaunch {
             val point = DataRepository.getPointFromLatLng(latLng)

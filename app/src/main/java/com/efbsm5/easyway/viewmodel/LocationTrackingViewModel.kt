@@ -35,6 +35,7 @@ import com.amap.api.maps.LocationSource.OnLocationChangedListener
 import com.amap.api.maps.model.LatLng
 import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.LocationTrackingContract
+import com.efbsm5.easyway.data.LocationSaver
 import com.efbsm5.easyway.openAppPermissionSettingPage
 import com.efbsm5.easyway.repo.DragDropSelectPointRepository
 import com.efbsm5.easyway.repo.LocationTrackingRepository
@@ -139,6 +140,11 @@ class LocationTrackingViewModel :
                     delay(delayTime)
                     // 显示系统小蓝点
                     mListener?.onLocationChanged(aMapLocation)
+                }
+                LocationSaver.apply {
+                    location = LatLng(aMapLocation.latitude, aMapLocation.longitude)
+                    cityCode = aMapLocation.cityCode
+                    locationDetail = aMapLocation.locationDetail
                 }
             } else {
                 setEffect { LocationTrackingContract.Effect.Toast(msg) }

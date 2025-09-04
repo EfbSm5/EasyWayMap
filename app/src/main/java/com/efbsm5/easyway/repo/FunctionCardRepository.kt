@@ -8,7 +8,7 @@ import com.amap.api.services.poisearch.PoiSearchV2
 import com.amap.api.services.poisearch.PoiSearchV2.OnPoiSearchListener
 import com.efbsm5.easyway.SDKUtils
 
-suspend fun searchForPoi(keyword: String, onPoiSearched: OnPoiSearched) {
+suspend fun searchForPoi(keyword: String, page: Int, onPoiSearched: OnPoiSearched) {
 //    val result = MarkersInSchool.searchFromMarkers(keyword = keyword)
 //    if (result != null) {
 //        onPoiSearched(arrayListOf(result))
@@ -17,7 +17,7 @@ suspend fun searchForPoi(keyword: String, onPoiSearched: OnPoiSearched) {
     ServiceSettings.updatePrivacyAgree(SDKUtils.getContext(), true)
     val query: PoiSearchV2.Query = PoiSearchV2.Query(keyword, "", "027")
     query.pageSize = 5
-    query.pageNum = 1
+    query.pageNum = page
     try {
         val poiSearch = PoiSearchV2(SDKUtils.getContext(), query)
         poiSearch.setOnPoiSearchListener(object : OnPoiSearchListener {
