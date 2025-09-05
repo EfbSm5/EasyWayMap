@@ -4,11 +4,10 @@ import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.DetailContract
 import com.efbsm5.easyway.data.UserManager
 import com.efbsm5.easyway.data.models.PostComment
+import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
 import com.efbsm5.easyway.data.models.assistModel.PostCommentAndUser
 import com.efbsm5.easyway.getCurrentFormattedTime
-import com.efbsm5.easyway.getInitPost
-import com.efbsm5.easyway.getInitUser
 import com.efbsm5.easyway.model.ImmutableListWrapper
 import com.efbsm5.easyway.repo.DataRepository
 import kotlinx.coroutines.Dispatchers
@@ -17,85 +16,180 @@ class DetailViewModel :
     BaseViewModel<DetailContract.Event, DetailContract.State, DetailContract.Effect>() {
 
     fun setPostAndUser(postAndUser: PostAndUser) {
-        setEvent(DetailContract.Event.Loading(postAndUser))
+        setEvent(DetailContract.Event.Load(postAndUser))
+    }
+
+    fun onEvent(event: DetailContract.Event) {
+        setEvent(event)
     }
 
     override fun createInitialState(): DetailContract.State {
-        return DetailContract.State(
-            post = getInitPost(),
-            user = getInitUser(),
-            comments = ImmutableListWrapper(emptyList<PostCommentAndUser>()),
-            commentString = "",
-            error = null,
-            showTextField = false
-        )
+        return DetailContract.State()
     }
 
     override fun handleEvents(event: DetailContract.Event) {
         when (event) {
-            is DetailContract.Event.Loading -> {
-                asyncLaunch(Dispatchers.IO) {
-                    val user = event.postAndUser.user
-                    val post = event.postAndUser.post
-                    val newComment = DataRepository.getPostAndComments(currentState.user.id)
-                    setState {
-                        copy(
-                            user = user,
-                            post = post,
-                            comments = ImmutableListWrapper(newComment)
+            is DetailContract.Event.Load -> load()
+            is DetailContract.Event.ChangeInput -> setState { copy(input = event.value) }
+            DetailContract.Event.SendComment -> send()
+            is DetailContract.Event.ToggleLikePost -> onLikeClick()
+            is DetailContract.Event.ShowInput -> setState { copy(showTextField = event.boolean) }
+            is DetailContract.Event.ToggleDisLikeComment -> TODO()
+            is DetailContract.Event.ToggleLikeComment -> TODO()
+        }
+
+    }
+
+    private fun load() = asyncLaunch(Dispatchers.IO) {
+        setState { copy(loading = true) }
+        currentState.post?.let {
+            runCatching { DataRepository.getPostAndComments(it.id) }.onSuccess { comments ->
+                setState { copy(loading = false, comments = comments) }
+            }.onFailure {
+                setState { copy(loading = false, error = "加载失败") }
+                setEffect { DetailContract.Effect.Toast("加载失败") }
+            }
+        }
+    }
+
+    private fun send() = asyncLaunch(Dispatchers.IO) {
+        val text = currentState.input.trim()
+        if (text.isBlank()) return@asyncLaunch
+        setState { copy(sending = true) }
+        val oldComments = currentState.comments
+        val tempComment = PostComment(
+            postId = currentState.post?.id ?: 0,
+            userId = UserManager.userId,
+            content = text,
+            date = getCurrentFormattedTime()
+        )
+        val tempCommentAndUser = PostCommentAndUser(
+            postComment = tempComment, user = User(
+                UserManager.userId, UserManager.name, UserManager.avatar
+            )
+        )
+        setState { copy(comments = oldComments + tempCommentAndUser, input = "") }
+        runCatching { DataRepository.uploadPostComment(tempComment) }.onFailure {
+            setState { copy(comments = oldComments) }
+            setEffect { (DetailContract.Effect.Toast("发送失败")) }
+        }
+        setState { copy(sending = false) }
+    }
+
+
+    fun onLikeClick() {
+        val snapshot = currentState.post
+        val targetLiked = !snapshot!!.likedByMe
+        val delta = if (targetLiked) 1 else -1
+
+        // 1. 乐观
+        setState {
+            copy(
+                post = snapshot.copy(
+                    likedByMe = targetLiked, like = (snapshot.like + delta).coerceAtLeast(0)
+                )
+            )
+        }
+
+        // 2. 异步请求
+        asyncLaunch(Dispatchers.IO) {
+            val res = runCatching {
+                if (targetLiked) DataRepository.addLikeForPost(snapshot.id)
+                else DataRepository.decreaseLikeForPost(snapshot.id)
+            }
+            res.onFailure {
+                // 3. 回滚
+                setState { copy(post = snapshot) }
+                setEffect { DetailContract.Effect.Toast("稍后重试") }
+            }.onSuccess { serverPostOrCount ->
+                // 4. 可选：校正
+                // 如果服务器返回最终 likeCount 和 liked，优先使用服务端
+                setState {
+                    copy(
+                        post = post!!.copy(
+                            like = serverPostOrCount?.like ?: 0,
+                            likedByMe = serverPostOrCount?.likedByMe ?: false
                         )
-                    }
-                }
-            }
-
-            is DetailContract.Event.EditComment -> {
-                setState { copy(commentString = event.string) }
-            }
-
-            DetailContract.Event.Upload -> {
-                asyncLaunch {
-
+                    )
                 }
             }
         }
     }
 
-    fun likePost(boolean: Boolean) {
-        asyncLaunch(Dispatchers.IO) {
-            if (boolean) {
-                setState { copy(post.copy(like = post.like + 1)) }
-                DataRepository.addLikeForPost(currentState.post.id)
-            } else {
-                setState { copy(post.copy(like = post.like + 1)) }
-                DataRepository.decreaseLikeForPost(currentState.post.id)
-            }
-        }
-    }
 
-    fun likeComment(boolean: Boolean, commentIndex: Int) {
-        asyncLaunch(Dispatchers.IO) {
-            if (boolean) {
-                val newList = ImmutableListWrapper(
-                    currentState.comments.items.modifyCommentAt(
-                        commentIndex,
-                        modify = { comment ->
-                            comment.copy(like = comment.like + 1)
-                        },
+    fun likeComment(commentIndex: Int) {
+        val snapshot = currentState
+        if (commentIndex !in snapshot.comments.indices) return
+
+        val oldItem = snapshot.comments[commentIndex]
+        val oldComment = oldItem.postComment
+        val commentId = oldComment.id
+
+        // 如果该评论的点赞操作正在进行，直接忽略（阻止并发）
+        if (snapshot.likeOps[commentId] is LikeOpState.Working) return
+
+        val targetLiked = !oldComment.liked
+        val delta = if (targetLiked) 1 else -1
+        val newLikeCount = (oldComment.like + delta).coerceAtLeast(0)
+
+        // 1. 乐观更新列表
+        val newList = snapshot.comments.toMutableList()
+        newList[commentIndex] = oldItem.copy(
+            postComment = oldComment.copy(
+                liked = targetLiked,
+                like = newLikeCount
+            )
+        )
+
+        // 2. 写入状态（标记该评论操作中）
+        _state.update {
+            it.copy(
+                comments = newList,
+                likeOps = it.likeOps + (commentId to LikeOpState.Working)
+            )
+        }
+
+        // 3. 发起异步请求
+        viewModelScope.launch {
+            val result = runCatching {
+                if (targetLiked)
+                    repository.likeComment(commentId)
+                else
+                    repository.unlikeComment(commentId)
+            }
+
+            result.onSuccess { server ->
+                // 4. 用服务器值校正（如果服务器返回）
+                _state.update { cur ->
+                    val idx = cur.comments.indexOfFirst { it.postComment.id == commentId }
+                    if (idx == -1) return@update cur // 已被移除
+                    val currentItem = cur.comments[idx]
+                    val corrected = currentItem.copy(
+                        postComment = currentItem.postComment.copy(
+                            like = server.getOrNull()?.like ?: currentItem.postComment.like,
+                            liked = server.getOrNull()?.liked ?: currentItem.postComment.liked
+                        )
                     )
-                )
-                setState { copy(comments = newList) }
-                DataRepository.addLikeForPostComment(currentState.comments.items[commentIndex].postComment.index)
-            } else {
-                val newList = ImmutableListWrapper(
-                    currentState.comments.items.modifyCommentAt(
-                        commentIndex,
-                        modify = { comment ->
-                            comment.copy(like = comment.like - 1)
-                        },
+                    cur.copy(
+                        comments = cur.comments.toMutableList().apply { this[idx] = corrected },
+                        likeOps = cur.likeOps - commentId // 回归 Idle
                     )
-                )
-                setState { copy(comments = newList) }
-                DataRepository.decreaseLikeForPostComment(currentState.comments.items[commentIndex].postComment.index)
+                }
+            }.onFailure { e ->
+                // 5. 回滚（恢复 oldComment）
+                _state.update { cur ->
+                    val idx = cur.comments.indexOfFirst { it.postComment.id == commentId }
+                    if (idx == -1) return@update cur
+                    val rollbackList = cur.comments.toMutableList()
+                    rollbackList[idx] = oldItem // 直接还原旧 item
+                    cur.copy(
+                        comments = rollbackList,
+                        likeOps = cur.likeOps + (commentId to LikeOpState.Error(
+                            e.message ?: "失败"
+                        ))
+                    )
+                }
+
             }
         }
     }
@@ -128,31 +222,6 @@ class DetailViewModel :
         }
     }
 
-    fun comment(string: String) {
-        if (currentState.commentString != null) {
-            asyncLaunch(Dispatchers.IO) {
-                val postComment = PostComment(
-                    postId = currentState.post.id,
-                    userId = UserManager.userId,
-                    content = currentState.commentString ?: "",
-                    like = 0,
-                    dislike = 0,
-                    date = getCurrentFormattedTime()
-                )
-                val user = DataRepository.getUserById(UserManager.userId)
-                DataRepository.uploadPostComment(postComment)
-                setState {
-                    copy(
-                        comments = ImmutableListWrapper(
-                            currentState.comments.items + PostCommentAndUser(
-                                postComment = postComment, user = user
-                            )
-                        ), commentString = ""
-                    )
-                }
-            }
-        }
-    }
 
     fun back() {
         setEffect { DetailContract.Effect.Back }
@@ -168,10 +237,6 @@ class DetailViewModel :
                 commentAndUser
             }
         }
-    }
-
-    fun changeShowTextField(boolean: Boolean) {
-        setState { copy(showTextField = boolean) }
     }
 
 }

@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
@@ -81,13 +82,14 @@ fun FunctionCard(
     )
 }
 
+@Preview
 @Composable
 private fun FunctionCardScreen(
     onclick: (String) -> Unit = { },
     poiItemV2s: ImmutableListWrapper<PoiItemV2> = ImmutableListWrapper(emptyList()),
     easyPoints: ImmutableListWrapper<EasyPoint> = ImmutableListWrapper(emptyList()),
-    changeScreen: (CardScreen) -> Unit,
-    navigate: (LatLng) -> Unit
+    changeScreen: (CardScreen) -> Unit = {},
+    navigate: (LatLng) -> Unit = {}
 ) {
     var isSearching by rememberSaveable { mutableStateOf(false) }
     var destination by rememberSaveable { mutableStateOf(LatLng(0.0, 0.0)) }

@@ -22,12 +22,13 @@ data class Post(
     @ColumnInfo(name = "title") @SerializedName("title") var title: String,
     @ColumnInfo(name = "type") @SerializedName("type") var type: Int,
     @ColumnInfo(name = "date") @SerializedName("date") var date: String,
-    @ColumnInfo(name = "like") @SerializedName("like") var like: Int,
+    @ColumnInfo(name = "like") @SerializedName("like") var like: Int = 0,
     @ColumnInfo(name = "content") @SerializedName("content") var content: String,
     @SerializedName("lat") var lat: Double,
     @SerializedName("lng") var lng: Double,
     @SerializedName("position") var position: String,
     @ColumnInfo(name = "userId") @SerializedName("userId") var userId: Int,
-    @SerializedName("photo") var photo: List<String>
+    @SerializedName("photo") var photo: List<String>,
+    @SerializedName("likedByMe") var likedByMe: Boolean = false
 )
 

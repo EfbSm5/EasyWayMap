@@ -14,5 +14,14 @@ object UserManager {
         set(value) {
             prefs.edit { putInt("userId", value) }
         }
-
+    var name: String
+        get() = prefs.getString("name", " ") ?: ""
+        set(value) {
+            prefs.edit { putString("name", value) }
+        }
+    var avatar: String
+        get() = prefs.getString("avatar", " ") ?: ""
+        set(value) {
+            prefs.edit { putString("avatar", value) }
+        }
 }

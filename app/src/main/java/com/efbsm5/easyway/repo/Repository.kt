@@ -170,12 +170,14 @@ object DataRepository {
         return database.pointsDao().searchEasyPointsByName(string)
     }
 
-    suspend fun addLikeForPost(postId: Int) {
+    suspend fun addLikeForPost(postId: Int): Post? {
         database.postDao().increaseLike(postId)
+        return database.postDao().getPostById(id = postId)
     }
 
-    suspend fun decreaseLikeForPost(postId: Int) {
+    suspend fun decreaseLikeForPost(postId: Int): Post? {
         database.postDao().decreaseLike(postId)
+        return database.postDao().getPostById(id = postId)
     }
 
 }

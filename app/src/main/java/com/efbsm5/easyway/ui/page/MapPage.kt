@@ -3,6 +3,8 @@ package com.efbsm5.easyway.ui.page
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
@@ -13,9 +15,12 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.efbsm5.easyway.contract.MapContract
@@ -28,6 +33,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import io.morfly.compose.bottomsheet.material3.BottomSheetScaffold
 import io.morfly.compose.bottomsheet.material3.rememberBottomSheetScaffoldState
 import io.morfly.compose.bottomsheet.material3.rememberBottomSheetState
+import io.morfly.compose.bottomsheet.material3.requireSheetVisibleHeightDp
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 
@@ -37,6 +43,7 @@ import kotlinx.coroutines.flow.onEach
     ExperimentalPermissionsApi::class,
     ExperimentalFoundationApi::class
 )
+@Preview
 @Composable
 fun MapPage() {
     val viewmodel: MapPageViewModel = viewModel()
@@ -48,7 +55,7 @@ fun MapPage() {
             SheetValue.PartiallyExpanded at offset(percent = 50)
             SheetValue.Expanded at contentHeight
         })
-
+    val bottomPadding by remember { derivedStateOf { sheetState.requireSheetVisibleHeightDp() } }
     LaunchedEffect(currentState.cardScreen) {
         sheetState.animateTo(SheetValue.PartiallyExpanded)
     }
@@ -73,14 +80,20 @@ fun MapPage() {
             )
         },
         content = {
-            Box(modifier = Modifier.padding(it)) {
+            Box(
+                modifier = Modifier
+                    .padding(it)
+                    .fillMaxSize()
+            ) {
                 FloatingActionButton(
-                    modifier = Modifier.align(Alignment.BottomEnd),
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .offset(y = -bottomPadding - 20.dp),
                     onClick = viewmodel::changeScreen,
                     content = { Icon(Icons.Default.LocationOn, "change map") })
                 when (currentState.mapState) {
                     MapState.LocationState -> {
-                        LocationTrackingScreen()
+//                        LocationTrackingScreen()
                     }
 
                     MapState.PointState -> {
@@ -88,7 +101,7 @@ fun MapPage() {
                     }
 
                     is MapState.Route -> {
-                        RoutePlanScreen()
+//                        RoutePlanScreen()
                     }
                 }
             }

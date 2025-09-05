@@ -27,8 +27,10 @@ data class PostComment(
     @ColumnInfo(name = "postId") @SerializedName("postId") val postId: Int,
     @ColumnInfo(name = "userId") @SerializedName("userId") val userId: Int,
     @SerializedName("content") var content: String,
-    @SerializedName("like") var like: Int,
-    @SerializedName("dislike") var dislike: Int,
+    @SerializedName("like") var like: Int = 0,
+    @SerializedName("dislike") var dislike: Int = 0,
     @SerializedName("date") val date: String,
+    @SerializedName("likedByMe") val likedByMe: Boolean = false,
+    @SerializedName("dislikedByMe") val dislikedByMe: Boolean = false,
 )
 

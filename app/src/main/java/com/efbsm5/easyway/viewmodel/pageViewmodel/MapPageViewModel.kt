@@ -47,7 +47,7 @@ class MapPageViewModel : BaseViewModel<MapContract.Event, MapContract.State, Map
 
     override fun createInitialState(): MapContract.State {
         return MapContract.State(
-            mapState = MapState.PointState, cardScreen = CardScreen.Function
+            mapState = MapState.LocationState, cardScreen = CardScreen.Function
         )
     }
 
