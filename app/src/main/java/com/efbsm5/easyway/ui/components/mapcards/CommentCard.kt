@@ -42,7 +42,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.amap.api.maps.model.LatLng
 import com.efbsm5.easyway.R
-import com.efbsm5.easyway.contract.CommentAndHistoryCardContract
+import com.efbsm5.easyway.contract.card.CommentAndHistoryCardContract
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.models.assistModel.PointCommentAndUser
 import com.efbsm5.easyway.getLatlng
@@ -51,8 +51,8 @@ import com.efbsm5.easyway.ui.components.LikeAndDisLikeButton
 import com.efbsm5.easyway.ui.components.NavigationDialog
 import com.efbsm5.easyway.ui.components.TabSection
 import com.efbsm5.easyway.ui.components.mapcards.CardScreen.NewPoint
-import com.efbsm5.easyway.viewmodel.componentsViewmodel.CommentAndHistoryCardViewModel
-import com.efbsm5.easyway.viewmodel.componentsViewmodel.CommentCardScreen
+import com.efbsm5.easyway.viewmodel.cardViewmodel.CommentAndHistoryCardViewModel
+import com.efbsm5.easyway.viewmodel.cardViewmodel.CommentCardScreen
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 
@@ -109,7 +109,8 @@ private fun CommentAndHistoryCardScreen(
     like: (Boolean) -> Unit,
     dislike: (Boolean) -> Unit,
     likeComment: (Int, Boolean) -> Unit,
-    dislikeComment: (Int, Boolean) -> Unit
+    dislikeComment: (Int, Boolean) -> Unit,
+    selectedIndex: Int = 0
 ) {
     var comment by rememberSaveable { mutableStateOf(false) }
     var destination by rememberSaveable { mutableStateOf(LatLng(0.0, 0.0)) }
@@ -127,6 +128,7 @@ private fun CommentAndHistoryCardScreen(
         TabSection(
             onSelect = onSelect,
             tabs = listOf("评论", "历史"),
+            selectedIndex = selectedIndex
         )
         when (state) {
             CommentCardScreen.Comment -> CommentCard(

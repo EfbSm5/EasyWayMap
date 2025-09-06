@@ -20,28 +20,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package com.efbsm5.easyway.dialog
+package com.efbsm5.easyway.ui.components.melody
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
-import com.efbsm5.easyway.R
-import com.efbsm5.easyway.ui.components.melody.SimpleDialog
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 
-/**
- * ShowOpenGPSDialog
- * @author 被风吹过的夏天
- * @email developer_melody@163.com
- * @github: https://github.com/TheMelody/OmniMap
- * created 2022/10/10 15:31
- */
 @Composable
-internal fun ShowOpenGPSDialog(onPositiveClick: () -> Unit, onDismiss: () -> Unit) {
-    SimpleDialog(
-        positiveButtonResId = R.string.gd_map_location_gps_dialog_ok,
-        negativeButtonResId = R.string.gd_map_location_gps_dialog_cancel,
-        content = stringResource(id = R.string.gd_map_location_gps_no_open),
-        onPositiveClick = onPositiveClick,
-        onNegativeClick = onDismiss,
-        onDismiss = onDismiss
-    )
+fun MapMenuButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Button(
+        modifier = modifier.padding(2.dp),
+        contentPadding = PaddingValues(2.dp),
+        colors = ButtonDefaults.buttonColors(
+        ).copy(
+            disabledContentColor = MaterialTheme.colorScheme.onPrimary, contentColor = Color.Black
+        ),
+        onClick = onClick
+    ) {
+        Text(text = text, style = MaterialTheme.typography.bodyMedium)
+    }
 }

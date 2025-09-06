@@ -37,8 +37,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.amap.api.services.core.PoiItemV2
-import com.efbsm5.easyway.MapPoiItem
-import com.efbsm5.easyway.ui.components.EmptyResultText
+import com.efbsm5.easyway.ui.components.MapPoiItem
+import com.efbsm5.easyway.ui.components.melody.EmptyResultText
 
 @Composable
 internal fun DragDropPoiResultList(

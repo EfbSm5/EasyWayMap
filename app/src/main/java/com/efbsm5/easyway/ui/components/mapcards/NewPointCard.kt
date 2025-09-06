@@ -45,10 +45,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.efbsm5.easyway.SDKUtils
-import com.efbsm5.easyway.contract.NewPointCardContract
+import com.efbsm5.easyway.contract.card.NewPointCardContract
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.getInitPoint
-import com.efbsm5.easyway.viewmodel.componentsViewmodel.NewPointCardViewModel
+import com.efbsm5.easyway.viewmodel.cardViewmodel.NewPointCardViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import java.io.File

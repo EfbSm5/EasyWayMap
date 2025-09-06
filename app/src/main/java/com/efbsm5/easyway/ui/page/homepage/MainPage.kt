@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.getInitUser
-import com.efbsm5.easyway.viewmodel.pageViewmodel.HomePageState
+import com.efbsm5.easyway.viewmodel.HomePageState
 
 
 @Preview

@@ -20,28 +20,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package com.efbsm5.easyway.dialog
+package com.efbsm5.easyway.contract.map
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
-import com.efbsm5.easyway.R
-import com.efbsm5.easyway.ui.components.melody.SimpleDialog
+import com.amap.api.maps.model.LatLng
+import com.amap.api.services.core.PoiItemV2
+import com.efbsm5.easyway.state.IUiEffect
+import com.efbsm5.easyway.state.IUiEvent
+import com.efbsm5.easyway.state.IUiState
 
 /**
- * ShowOpenGPSDialog
+ * DragDropSelectPointContract
  * @author 被风吹过的夏天
  * @email developer_melody@163.com
  * @github: https://github.com/TheMelody/OmniMap
- * created 2022/10/10 15:31
+ * created 2022/10/10 09:33
  */
-@Composable
-internal fun ShowOpenGPSDialog(onPositiveClick: () -> Unit, onDismiss: () -> Unit) {
-    SimpleDialog(
-        positiveButtonResId = R.string.gd_map_location_gps_dialog_ok,
-        negativeButtonResId = R.string.gd_map_location_gps_dialog_cancel,
-        content = stringResource(id = R.string.gd_map_location_gps_no_open),
-        onPositiveClick = onPositiveClick,
-        onNegativeClick = onDismiss,
-        onDismiss = onDismiss
-    )
+class DragDropSelectPointContract {
+    sealed class Event : IUiEvent {
+        object ShowOpenGPSDialog : Event()
+        object HideOpenGPSDialog : Event()
+    }
+
+    data class State(
+        // 是否点击了强制定位
+        val isClickForceStartLocation: Boolean,
+        // 是否打开了系统GPS权限
+        val isOpenGps: Boolean?,
+        // 是否显示打开GPS的确认弹框
+        val isShowOpenGPSDialog: Boolean,
+        // 当前用户自身定位所在的位置
+        val currentLocation: LatLng?,
+        // 当前手持设备的方向
+        val currentRotation: Float,
+        // poi列表
+        val poiItems: List<PoiItemV2>?,
+    ) : IUiState
+
+    sealed class Effect : IUiEffect {
+        internal data class Toast(val msg: String?) : Effect()
+        internal data class Selected(val location: String) : Effect()
+    }
 }

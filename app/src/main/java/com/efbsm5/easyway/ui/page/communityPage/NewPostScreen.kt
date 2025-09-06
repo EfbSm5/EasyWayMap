@@ -54,11 +54,11 @@ import coil.compose.rememberAsyncImagePainter
 import com.efbsm5.easyway.LocationPoiActivity
 import com.efbsm5.easyway.R
 import com.efbsm5.easyway.SDKUtils
-import com.efbsm5.easyway.contract.NewPostContract.Effect
+import com.efbsm5.easyway.contract.community.NewPostContract.Effect
 import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.getInitPost
 import com.efbsm5.easyway.ui.components.TopBar
-import com.efbsm5.easyway.viewmodel.pageViewmodel.NewPostViewModel
+import com.efbsm5.easyway.viewmodel.communityViewModel.NewPostViewModel
 
 
 @Composable

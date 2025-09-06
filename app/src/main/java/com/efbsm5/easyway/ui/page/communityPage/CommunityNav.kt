@@ -10,7 +10,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
 import com.efbsm5.easyway.showMsg
-import com.efbsm5.easyway.viewmodel.pageViewmodel.DetailViewModel
+import com.efbsm5.easyway.viewmodel.communityViewModel.CommunityViewModel
+import com.efbsm5.easyway.viewmodel.communityViewModel.DetailViewModel
 
 @Composable
 fun CommunityNav(back: () -> Unit) {
@@ -22,11 +23,15 @@ fun CommunityNav(back: () -> Unit) {
         contentAlignment = Alignment.Center
     ) {
         composable("CommunitySquare") {
-            CommunitySquarePage(
-                back = back, onChangeState = {
+            val viewModel: CommunityViewModel = viewModel()
+            CommunitySquareRoute(
+                back = back,
+                onSelectPost = {
                     navController.navigate("Detail")
                     navController.currentBackStackEntry?.savedStateHandle?.set("postAndUser", it)
-                })
+                },
+                viewModel = viewModel
+            )
         }
         composable("Detail") { backStackEntry ->
             val data = navController.previousBackStackEntry

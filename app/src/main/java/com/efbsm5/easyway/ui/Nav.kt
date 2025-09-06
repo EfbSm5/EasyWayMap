@@ -30,9 +30,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.efbsm5.easyway.ui.page.MapPage
 import com.efbsm5.easyway.ui.page.communityPage.CommunityNav
 import com.efbsm5.easyway.ui.page.homepage.HomePage
+import com.efbsm5.easyway.ui.page.map.MapPage
 
 @Preview
 @Composable

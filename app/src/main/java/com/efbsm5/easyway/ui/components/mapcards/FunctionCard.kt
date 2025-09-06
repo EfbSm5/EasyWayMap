@@ -60,7 +60,7 @@ import com.efbsm5.easyway.getLatlng
 import com.efbsm5.easyway.model.ImmutableListWrapper
 import com.efbsm5.easyway.ui.components.NavigationDialog
 import com.efbsm5.easyway.ui.components.TabSection
-import com.efbsm5.easyway.viewmodel.componentsViewmodel.FunctionCardViewModel
+import com.efbsm5.easyway.viewmodel.cardViewmodel.FunctionCardViewModel
 
 @Composable
 fun FunctionCard(

@@ -22,13 +22,11 @@ import kotlinx.coroutines.flow.Flow
 object DataRepository {
     private val database = AppDataBase.getDatabase(SDKUtils.getContext())
 
-    fun getAllPoints(): Flow<List<EasyPointSimplify>> {
-        return database.pointsDao().loadAllPoints()
-    }
+    fun getAllPoints(): Flow<List<EasyPointSimplify>> = database.pointsDao().loadAllPoints()
 
-    suspend fun getAllPosts(): List<Post> {
-        return database.postDao().getAllPosts()
-    }
+
+    fun getAllPosts(): List<Post> = database.postDao().getAllPosts()
+
 
     suspend fun getPostAndUser(): List<PostAndUser> {
         return database.postDao().getPostWithUser()
@@ -180,4 +178,21 @@ object DataRepository {
         return database.postDao().getPostById(id = postId)
     }
 
+}
+
+enum class ReactionType { LIKE, DISLIKE }
+
+data class ReactionResult(
+    val id: Long,
+    val likeCount: Int,
+    val dislikeCount: Int,
+    val userReaction: ReactionType? // 当前用户最终状态
+)
+
+interface CommentReactionRepository {
+    suspend fun setReactionForPostComment(
+        commentId: Long,
+        reaction: ReactionType?,
+    ): ReactionResult
+    // reaction = null 表示取消任何反应
 }

@@ -7,7 +7,7 @@ import com.efbsm5.easyway.model.ImmutableListWrapper
 import com.efbsm5.easyway.state.IUiEffect
 import com.efbsm5.easyway.state.IUiEvent
 import com.efbsm5.easyway.state.IUiState
-import com.efbsm5.easyway.viewmodel.pageViewmodel.HomePageState
+import com.efbsm5.easyway.viewmodel.HomePageState
 
 class ShowPageContract {
     sealed class Event : IUiEvent

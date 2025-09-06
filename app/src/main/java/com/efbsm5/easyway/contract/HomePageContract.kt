@@ -6,7 +6,7 @@ import com.efbsm5.easyway.data.models.assistModel.PointCommentAndUser
 import com.efbsm5.easyway.state.IUiEffect
 import com.efbsm5.easyway.state.IUiEvent
 import com.efbsm5.easyway.state.IUiState
-import com.efbsm5.easyway.viewmodel.pageViewmodel.HomePageState
+import com.efbsm5.easyway.viewmodel.HomePageState
 
 class HomePageContract {
     sealed class Event : IUiEvent

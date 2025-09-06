@@ -72,7 +72,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.efbsm5.easyway.R
-import com.efbsm5.easyway.contract.DetailContract
+import com.efbsm5.easyway.contract.community.DetailContract
 import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
@@ -80,7 +80,7 @@ import com.efbsm5.easyway.data.models.assistModel.PostCommentAndUser
 import com.efbsm5.easyway.ui.components.MediaGrid
 import com.efbsm5.easyway.ui.components.ReactionButton
 import com.efbsm5.easyway.ui.components.UserAvatar
-import com.efbsm5.easyway.viewmodel.pageViewmodel.DetailViewModel
+import com.efbsm5.easyway.viewmodel.communityViewModel.DetailViewModel
 
 @Composable
 fun DetailRoute(
@@ -105,7 +105,7 @@ fun DetailRoute(
     }
 
     DetailScreen(
-        state = uiState, onBack = onBack, onEvent = viewModel::onEvent
+        state = uiState, onBack = viewModel::back, onEvent = viewModel::onEvent
     )
 }
 
