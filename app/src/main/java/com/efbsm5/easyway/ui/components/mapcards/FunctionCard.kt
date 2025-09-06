@@ -205,7 +205,8 @@ fun SearchPart(
     onPoiItemV2Selected: (poiItem: PoiItemV2) -> Unit,
     onPointSelected: (point: EasyPoint) -> Unit,
     easyPoints: List<EasyPoint> = emptyList(),
-    navigate: (LatLng, String) -> Unit
+    navigate: (LatLng, String) -> Unit,
+    selectedIndex: Int = 0
 ) {
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
     LazyColumn(
@@ -213,7 +214,7 @@ fun SearchPart(
     ) {
         item {
             TabSection(
-                tabs = listOf("无障碍地点", "全部地点"), onSelect = {
+                tabs = listOf("无障碍地点", "全部地点"), selectedIndex = selectedIndex, onSelect = {
                     selectedTabIndex = it
                 })
         }

@@ -51,7 +51,7 @@ fun openAppPermissionSettingPage() {
     }
 }
 
-fun showToast(message: String?) {
+fun showMsg(message: String?) {
     if (message.isNullOrBlank()) return
     val showToastResult = runCatching {
         Toast.makeText(SDKUtils.getContext(), message, Toast.LENGTH_SHORT).show()

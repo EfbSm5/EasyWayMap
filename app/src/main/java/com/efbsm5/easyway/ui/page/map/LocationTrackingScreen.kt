@@ -34,7 +34,7 @@ import com.amap.api.maps.model.LatLng
 import com.efbsm5.easyway.contract.map.LocationTrackingContract
 import com.efbsm5.easyway.dialog.ShowOpenGPSDialog
 import com.efbsm5.easyway.launcher.handlerGPSLauncher
-import com.efbsm5.easyway.showToast
+import com.efbsm5.easyway.showMsg
 import com.efbsm5.easyway.ui.components.requestMultiplePermission
 import com.efbsm5.easyway.viewmodel.mapViewModel.LocationTrackingViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -62,7 +62,7 @@ internal fun LocationTrackingScreen() {
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.onEach {
             if (it is LocationTrackingContract.Effect.Toast) {
-                showToast(it.msg)
+                showMsg(it.msg)
             }
         }.collect()
     }

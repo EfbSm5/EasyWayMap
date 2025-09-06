@@ -84,14 +84,18 @@ import com.efbsm5.easyway.viewmodel.communityViewModel.DetailViewModel
 
 @Composable
 fun DetailRoute(
-    postAndUser: PostAndUser, onBack: () -> Unit, viewModel: DetailViewModel
+    postAndUser: PostAndUser?,
+    postId: Int?,
+    onBack: () -> Unit,
+    viewModel: DetailViewModel,
+    onLikeUpdated: (PostAndUser) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
 
     // 初始化数据（仅一次）
-    LaunchedEffect(postAndUser.user.id) {
-        viewModel.setPostAndUser(postAndUser)
+    LaunchedEffect(Unit) {
+        postAndUser?.let { viewModel.setPostAndUser(postAndUser) } ?: viewModel.getPost(postId!!)
     }
 
     // 收集一次性 Effect

@@ -8,7 +8,6 @@ import com.efbsm5.easyway.state.IUiState
 class CommunityContract {
     sealed class Event : IUiEvent {
         data object Loading : Event()
-        data object Click : Event()
         data class TabSelect(val int: Int) : Event()
         data class ClickPost(val postAndUser: PostAndUser) : Event()
         data class EditText(val string: String) : Event()

@@ -24,15 +24,23 @@ interface PostCommentDao {
     @Query("DELETE FROM postComment WHERE `index` = :index")
     fun deleteCommentByIndex(index: Int)
 
-    @Query("UPDATE postComment SET `like` = `like` + 1 WHERE `index` = :id")
+    @Query("UPDATE postComment SET `like` = `like` + 1  WHERE `index` = :id")
     fun increaseLikes(id: Int)
 
-    @Query("UPDATE postComment SET `like` = `like` - 1 WHERE `index` = :id")
+    @Query("UPDATE postComment SET `like` = CASE WHEN `like` > 0 THEN `like` - 1 ELSE 0 END WHERE `index` = :id")
     fun decreaseLikes(id: Int)
 
     @Query("UPDATE postComment SET dislike = dislike + 1 WHERE `index` = :id")
     fun increaseDislikes(id: Int)
 
-    @Query("UPDATE postComment SET dislike = dislike - 1 WHERE `index` = :id")
+    @Query("UPDATE postComment SET dislike = CASE WHEN dislike > 0 THEN dislike - 1 ELSE 0 END WHERE `index` = :id")
     fun decreaseDislikes(id: Int)
+
+    @Query("SELECT 'like', dislike FROM postComment WHERE 'index' = :commentId LIMIT 1")
+    suspend fun getCounts(commentId: Int): PostCommentCounts?
 }
+
+data class PostCommentCounts(
+    val likes: Int,
+    val dislikes: Int
+)

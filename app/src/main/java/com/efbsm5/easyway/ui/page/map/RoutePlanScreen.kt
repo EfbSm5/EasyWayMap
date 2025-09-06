@@ -44,7 +44,7 @@ import com.efbsm5.easyway.model.BusRouteDataState
 import com.efbsm5.easyway.model.DrivingRouteDataState
 import com.efbsm5.easyway.model.RideRouteDataState
 import com.efbsm5.easyway.model.WalkRouteDataState
-import com.efbsm5.easyway.showToast
+import com.efbsm5.easyway.showMsg
 import com.efbsm5.easyway.ui.components.melody.MapMenuButton
 import com.efbsm5.easyway.ui.components.melody.RedCenterLoading
 import com.efbsm5.easyway.ui.components.melody.RoadTrafficSwitch
@@ -75,7 +75,7 @@ internal fun RoutePlanScreen() {
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.onEach {
             if (it is RoutePlanContract.Effect.Toast) {
-                showToast(it.msg)
+                showMsg(it.msg)
             }
         }.collect()
     }

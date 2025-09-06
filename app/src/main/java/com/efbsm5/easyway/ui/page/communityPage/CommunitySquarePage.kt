@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
@@ -46,6 +47,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.efbsm5.easyway.R
 import com.efbsm5.easyway.contract.community.CommunityContract
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
+import com.efbsm5.easyway.ui.FabConfig
+import com.efbsm5.easyway.ui.LocalScaffoldController
+import com.efbsm5.easyway.ui.components.AppTopBar
 import com.efbsm5.easyway.ui.components.PostList
 import com.efbsm5.easyway.ui.components.TabSection
 import com.efbsm5.easyway.viewmodel.communityViewModel.CommunityViewModel
@@ -54,10 +58,18 @@ import com.efbsm5.easyway.viewmodel.communityViewModel.CommunityViewModel
 fun CommunitySquareRoute(
     back: () -> Unit,
     onSelectPost: (PostAndUser) -> Unit,
+    onCreateNew: () -> Unit,
     viewModel: CommunityViewModel = viewModel()
 ) {
     val currentState by viewModel.uiState.collectAsState()
-
+    val controller = LocalScaffoldController.current
+    controller.setFab(
+        FabConfig(
+            icon = Icons.Default.Add,
+            onClick = onCreateNew,
+            visible = true,
+        )
+    )
     // 收集一次性事件
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
@@ -69,9 +81,7 @@ fun CommunitySquareRoute(
     }
 
     CommunitySquareScreen(
-        state = currentState,
-        onEvent = TODO(),
-        back = viewModel::back
+        state = currentState, onEvent = viewModel::onEvent, back = viewModel::back
     )
 }
 
@@ -102,6 +112,9 @@ fun CommunitySquareScreen(
     LazyColumn(
         state = listState, modifier = Modifier.fillMaxSize()
     ) {
+        item {
+            AppTopBar(title = "test", onBack = back)
+        }
         item("banner") {
             BannerCard(
                 modifier = Modifier
@@ -120,8 +133,7 @@ fun CommunitySquareScreen(
             TabSection(
                 selectedIndex = state.selectedTab,
                 tabs = listOf("全部", "活动", "互助", "分享"),
-                onSelect = { onEvent(CommunityContract.Event.TabSelect(it)) }
-            )
+                onSelect = { onEvent(CommunityContract.Event.TabSelect(it)) })
         }
 
         if (!state.isLoading && state.searchText.isNotBlank()) {

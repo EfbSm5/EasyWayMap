@@ -1,125 +1,204 @@
 package com.efbsm5.easyway.ui
 
-import androidx.compose.foundation.layout.Column
+import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Place
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination
-import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import com.efbsm5.easyway.ui.page.communityPage.CommunityNav
+import androidx.navigation.navArgument
+import com.efbsm5.easyway.data.models.assistModel.PostAndUser
+import com.efbsm5.easyway.ui.components.AppTopBar
+import com.efbsm5.easyway.ui.components.BottomNavigationBar
+import com.efbsm5.easyway.ui.page.communityPage.CommunitySquareRoute
+import com.efbsm5.easyway.ui.page.communityPage.DetailRoute
+import com.efbsm5.easyway.ui.page.communityPage.NewPostPage
 import com.efbsm5.easyway.ui.page.homepage.HomePage
 import com.efbsm5.easyway.ui.page.map.MapPage
+import com.efbsm5.easyway.viewmodel.communityViewModel.CommunityViewModel
+import com.efbsm5.easyway.viewmodel.communityViewModel.DetailViewModel
+import com.efbsm5.easyway.viewmodel.communityViewModel.NewPostViewModel
 
-@Preview
+@SuppressLint("UnrememberedGetBackStackEntry")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EasyWay() {
     val navController = rememberNavController()
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navController.currentDestination
+    val scaffoldController = remember { ScaffoldController() }
+    val snackBarHostState = remember { SnackbarHostState() }
+    CompositionLocalProvider(LocalScaffoldController provides scaffoldController) {
 
-    Scaffold(
-        bottomBar = {
+        val fabConfig = scaffoldController.fabConfig
+        val topBarConfig = scaffoldController.topBarConfig
+//        val bottomBarConfig = scaffoldController.bottomBarConfig
+
+        Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }, topBar = {
+            if (topBarConfig.show && topBarConfig.title != null) {
+                AppTopBar(
+                    title = topBarConfig.title, onBack = topBarConfig.back
+                )
+            }
+        }, bottomBar = {
+//            if (bottomBarConfig.show) {
+//                bottomBarConfig.content?.invoke()
+//            }
             BottomNavigationBar(
-                navController = navController, currentDestination = navBackStackEntry?.destination
+                navController = navController, currentDestination = currentDestination
             )
-        }, modifier = Modifier
-            .fillMaxSize()
-            .imePadding()
-    ) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = "MapPage",
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            composable("MapPage") {
-                MapPage()
-            }
-            composable("Community") {
-                CommunityNav(
-                    back = { navController.navigate("MapPage") })
-            }
-            composable("Home") {
-                HomePage()
-            }
-        }
-    }
-}
-
-@Composable
-private fun BottomNavigationBar(
-    navController: NavController, currentDestination: NavDestination?
-) {
-    NavigationBar(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(CircleShape)
-    ) {
-        BottomBarItems.forEach { dest ->
-            val selected = currentDestination?.hierarchy?.any { it.route == dest.route } == true
-
-            NavigationBarItem(selected = selected, onClick = {
-                if (!selected) {
-                    navController.navigateBottom(dest)
-                } else {
-//                        navController.handleReselect(dest.route)
+        }, floatingActionButton = {
+            AnimatedContent(
+                targetState = fabConfig, label = "fabChange"
+            ) { cfg ->
+                if (cfg != null && cfg.visible) {
+                    if (cfg.text != null) {
+                        ExtendedFloatingActionButton(
+                            onClick = cfg.onClick,
+                            expanded = cfg.extended,
+                            icon = { Icon(cfg.icon, contentDescription = cfg.text) },
+                            text = { Text(cfg.text) },
+                            containerColor = cfg.containerColor
+                                ?: FloatingActionButtonDefaults.containerColor,
+                            contentColor = cfg.contentColor
+                                ?: FloatingActionButtonDefaults.containerColor
+                        )
+                    } else {
+                        FloatingActionButton(
+                            onClick = cfg.onClick,
+                            containerColor = cfg.containerColor
+                                ?: FloatingActionButtonDefaults.containerColor,
+                            contentColor = cfg.contentColor
+                                ?: FloatingActionButtonDefaults.containerColor
+                        ) {
+                            Icon(cfg.icon, contentDescription = null)
+                        }
+                    }
                 }
-            }, icon = {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(dest.icon, contentDescription = dest.label)
-                    Text(dest.label, style = MaterialTheme.typography.labelSmall)
+            }
+        }) { innerPadding ->
+            NavHost(
+                navController = navController,
+                startDestination = RootRoute.Map.route,
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+            ) {
+                composable(RootRoute.Map.route) { MapPage() }
+                composable(RootRoute.Home.route) { HomePage() }
+
+                // 嵌套社区图
+                navigation(
+                    startDestination = CommunityRoute.Square.route,
+                    route = RootRoute.CommunityGraph.route
+                ) {
+                    composable(CommunityRoute.Square.route) { entry ->
+                        val viewModel: CommunityViewModel = viewModel(entry)
+                        CommunitySquareRoute(
+                            back = { navController.popBackStack() },
+                            onSelectPost = { postAndUser ->
+                                // 方式 B：把完整对象暂存（Square entry 的 handle）
+                                entry.savedStateHandle["postAndUser"] = postAndUser
+                                // 跳转 Detail，采用方式 A 传 ID
+                                navController.navigate(
+                                    CommunityRoute.Detail.build(postAndUser.post.id)
+                                )
+                            },
+                            onCreateNew = {
+                                navController.navigate(CommunityRoute.NewPost.route)
+                            },
+                            viewModel = viewModel
+                        )
+
+                        // 监听 Detail 回传的更新（例如点赞数变了）
+                        val updated by entry.savedStateHandle.getStateFlow<PostAndUser?>(
+                            "updatedPost", null
+                        ).collectAsState()
+
+                        LaunchedEffect(updated) {
+                            if (updated != null) {
+                                viewModel.updateSingle(updated!!)
+                                entry.savedStateHandle["updatedPost"] = null
+                            }
+                        }
+                    }
+
+                    composable(
+                        route = CommunityRoute.Detail.route, arguments = listOf(
+                            navArgument(CommunityRoute.Detail.ARG_POST_ID) {
+                                type = NavType.IntType
+                            })
+                    ) { detailEntry ->
+                        val squareEntry =
+                            navController.getBackStackEntry(CommunityRoute.Square.route)
+                        val cached = squareEntry.savedStateHandle.get<PostAndUser>("postAndUser")
+
+                        val postId =
+                            detailEntry.arguments?.getInt(CommunityRoute.Detail.ARG_POST_ID)
+                        val viewModel: DetailViewModel = viewModel(detailEntry)
+
+                        // 如果缓存对象不存在，可用 postId 去仓库再拉
+                        DetailRoute(
+                            onBack = { navController.popBackStack() },
+                            postAndUser = cached,
+                            postId = postId,
+                            viewModel = viewModel,
+                            onLikeUpdated = { updated ->
+                                squareEntry.savedStateHandle["updatedPost"] = updated
+                            })
+                    }
+
+                    composable(CommunityRoute.NewPost.route) { newEntry ->
+                        val viewModel: NewPostViewModel = viewModel()
+                        NewPostPage(
+                            back = { navController.popBackStack() },
+                            onPostSuccess = { newPostAndUser ->
+                                // 通知 Square 刷新或直接插入
+                                val squareEntry =
+                                    navController.getBackStackEntry(CommunityRoute.Square.route)
+                                squareEntry.savedStateHandle["newPost"] = newPostAndUser
+                                navController.popBackStack()
+                            }, viewModel = viewModel
+                        )
+                    }
                 }
-            })
+            }
         }
     }
 }
 
-fun NavController.navigateBottom(destination: BottomDestination) {
-    this.navigate(destination.route) {
-        launchSingleTop = true
-        restoreState = true
-        popUpTo(this@navigateBottom.graph.startDestinationId) {
-            saveState = true
-        }
+
+sealed class RootRoute(val route: String) {
+    data object Map : RootRoute("map")
+    data object Home : RootRoute("home")
+    data object CommunityGraph : RootRoute("community_graph")
+}
+
+sealed class CommunityRoute(val route: String) {
+    data object Square : CommunityRoute("community_square")
+    data object NewPost : CommunityRoute("community_new")
+    data object Detail : CommunityRoute("community_detail/{postId}") {
+        fun build(postId: Int) = "community_detail/$postId"
+        const val ARG_POST_ID = "postId"
     }
 }
-
-sealed class BottomDestination(
-    val route: String, val icon: ImageVector, val label: String
-) {
-    data object Map : BottomDestination("map", Icons.Default.Place, "Map")
-    data object Community :
-        BottomDestination("community_root", Icons.Default.AccountBox, "Community")
-
-    data object Home : BottomDestination("home", Icons.Default.Home, "Home")
-}
-
-val BottomBarItems = listOf(
-    BottomDestination.Map, BottomDestination.Community, BottomDestination.Home
-)
 

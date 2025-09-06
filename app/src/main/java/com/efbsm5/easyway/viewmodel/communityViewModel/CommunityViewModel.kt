@@ -2,7 +2,7 @@ package com.efbsm5.easyway.viewmodel.communityViewModel
 
 import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.community.CommunityContract
-import com.efbsm5.easyway.model.ImmutableListWrapper
+import com.efbsm5.easyway.data.models.assistModel.PostAndUser
 import com.efbsm5.easyway.repo.CommunityRepository
 import kotlinx.coroutines.Dispatchers
 
@@ -23,26 +23,57 @@ class CommunityViewModel :
                     val posts = CommunityRepository.fetchPosts()
                     setState {
                         copy(
-                            isLoading = false,
-                            postItems = ImmutableListWrapper(posts)
+                            isLoading = false, rawPosts = posts
                         )
                     }
                 }
             }
 
-            CommunityContract.Event.Click -> {
-
+            is CommunityContract.Event.ClickPost -> {
+                setEffect { CommunityContract.Effect.SelectedPost(event.postAndUser) }
             }
 
-            is CommunityContract.Event.ClickPost -> TODO()
-            is CommunityContract.Event.EditText -> TODO()
-            CommunityContract.Event.Submit -> TODO()
-            is CommunityContract.Event.TabSelect -> TODO()
+            is CommunityContract.Event.EditText -> {
+                setState { copy(searchText = event.string) }
+            }
+
+            CommunityContract.Event.Submit -> submit()
+            is CommunityContract.Event.TabSelect -> {
+                setState { copy(selectedTab = event.int) }
+            }
         }
     }
 
     fun onEvent(event: CommunityContract.Event) {
         setEvent(event)
+    }
+
+    fun updateSingle(updated: PostAndUser, insertIfMissing: Boolean = false) {
+        setState {
+            copy(rawPosts = change(updated = updated, insertIfMissing = insertIfMissing))
+        }
+    }
+
+    private fun submit() {
+        asyncLaunch(Dispatchers.IO) {
+
+        }
+    }
+
+
+    private fun change(updated: PostAndUser, insertIfMissing: Boolean = false): List<PostAndUser> {
+        val old = currentState.rawPosts
+        val idx = old.indexOfFirst { it.post.id == updated.post.id }
+        if (idx == -1) {
+            if (!insertIfMissing) return old
+            return listOf(updated) + old
+        }
+        // 不做无变化替换
+        val current = old[idx]
+        if (current == updated) return old
+        val list = old.toMutableList()
+        list[idx] = updated
+        return list
     }
 
     fun back() {

@@ -14,8 +14,9 @@ interface PostDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(dynamicPost: Post)
 
+    @Transaction
     @Query("SELECT * FROM post WHERE id = :id")
-    fun getPostById(id: Int): Post?
+    fun getPostById(id: Int): PostAndUser
 
     @Query("SELECT * FROM post")
     fun getAllPosts(): List<Post>

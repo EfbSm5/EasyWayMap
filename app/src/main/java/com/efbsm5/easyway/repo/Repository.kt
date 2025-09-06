@@ -1,7 +1,6 @@
 package com.efbsm5.easyway.repo
 
 
-import android.net.Uri
 import com.amap.api.maps.model.LatLng
 import com.efbsm5.easyway.SDKUtils
 import com.efbsm5.easyway.data.UserManager
@@ -17,182 +16,172 @@ import com.efbsm5.easyway.data.models.assistModel.PostCommentAndUser
 import com.efbsm5.easyway.getCurrentFormattedTime
 import com.efbsm5.easyway.getInitPoint
 import com.efbsm5.easyway.getInitUser
-import kotlinx.coroutines.flow.Flow
 
 object DataRepository {
+
     private val database = AppDataBase.getDatabase(SDKUtils.getContext())
 
-    fun getAllPoints(): Flow<List<EasyPointSimplify>> = database.pointsDao().loadAllPoints()
+    private val postCommentDao get() = database.postCommentDao()
+    private val postDao get() = database.postDao()
+    private val pointDao get() = database.pointsDao()
+    private val pointCommentDao get() = database.pointCommentDao()
+    private val userDao get() = database.userDao()
+
+    enum class ReactionType { LIKE, DISLIKE }
+
+    enum class TargetType { POST, POINT, POST_COMMENT, POINT_COMMENT }
+
+    fun getAllPoints(): Result<List<EasyPointSimplify>> = runCatching { pointDao.loadAllPoints() }
+    fun getAllPosts(): Result<List<Post>> = runCatching { postDao.getAllPosts() }
+    fun getPostAndUser(): Result<List<PostAndUser>> = runCatching { postDao.getPostWithUser() }
+    fun getPostComments(id: Int): Result<List<PostCommentAndUser>> =
+        runCatching { postDao.getPostWithComment(id).comments }
+
+    fun getPost(id: Int): Result<PostAndUser> = runCatching { postDao.getPostById(id) }
+    fun getUserById(userId: Int): Result<User> =
+        runCatching { userDao.getUserById(userId) ?: getInitUser() }
 
 
-    fun getAllPosts(): List<Post> = database.postDao().getAllPosts()
-
-
-    suspend fun getPostAndUser(): List<PostAndUser> {
-        return database.postDao().getPostWithUser()
-    }
-
-    suspend fun getPostAndComments(id: Int): List<PostCommentAndUser> {
-        return database.postDao().getPostWithComment(id).comments
-    }
-
-    suspend fun getUserById(userId: Int): User {
-        return database.userDao().getUserById(userId) ?: getInitUser()
-    }
-
-    suspend fun addLikeForPointComment(commentIndex: Int) {
-        database.pointCommentDao().increaseLikes(commentIndex)
-    }
-
-    suspend fun decreaseLikeForPointComment(commentIndex: Int) {
-        database.pointCommentDao().decreaseLikes(commentIndex)
-    }
-
-    suspend fun addDisLikeForPointComment(commentIndex: Int) {
-        database.pointCommentDao().increaseDislikes(commentIndex)
-    }
-
-    suspend fun decreaseDisLikeForPointComment(commentIndex: Int) {
-        database.pointCommentDao().decreaseDislikes(commentIndex)
-    }
-
-    suspend fun addLikeForPostComment(commentIndex: Int) {
-        database.postCommentDao().increaseLikes(commentIndex)
-    }
-
-    suspend fun decreaseLikeForPostComment(commentIndex: Int) {
-        database.postCommentDao().decreaseLikes(commentIndex)
-    }
-
-    suspend fun addDisLikeForPostComment(commentIndex: Int) {
-        database.postCommentDao().increaseDislikes(commentIndex)
-    }
-
-    suspend fun decreaseDisLikeForPostComment(commentIndex: Int) {
-        database.postCommentDao().decreaseDislikes(commentIndex)
-    }
-
-    suspend fun addLikeForPoint(pointId: Int) {
-        database.pointsDao().increaseLikes(pointId)
-    }
-
-    suspend fun decreaseLikeForPoint(pointId: Int) {
-        database.pointsDao().decreaseLikes(pointId)
-    }
-
-    suspend fun addDisLikeForPoint(pointId: Int) {
-        database.pointsDao().increaseDislikes(pointId)
-    }
-
-    suspend fun decreaseDisLikeForPoint(pointId: Int) {
-        database.pointsDao().decreaseDislikes(pointId)
-    }
-
-    suspend fun uploadPost(post: Post, photos: List<Uri>) {
-        val id = database.postDao().getCount() + 1
-        val date = getCurrentFormattedTime()
-        val photo = emptyList<String>().toMutableList()
-//        photos.forEach { uri ->
-//            httpClient.uploadImage(
-//                context, uri,
-//                callback = {
-//                    if (it != null) {
-//                        photo.add(it)
-//                    }
-//                },
-//            )
+//    private fun adjustCounters(
+//        targetType: TargetType,
+//        targetId: Int,
+//        increment: ReactionType? = null,
+//        decrement: ReactionType? = null
+//    ) {
+//        when (targetType) {
+//            TargetType.POST -> {
+//                if (increment == ReactionType.LIKE) postDao.increaseLike(targetId)
+//                if (decrement == ReactionType.LIKE) postDao.decreaseLike(targetId)
+//            }
+//
+//            TargetType.POINT -> {
+//                if (increment == ReactionType.LIKE) pointDao.increaseLikes(targetId)
+//                if (increment == ReactionType.DISLIKE) pointDao.increaseDislikes(targetId)
+//                if (decrement == ReactionType.LIKE) pointDao.decreaseLikes(targetId)
+//                if (decrement == ReactionType.DISLIKE) pointDao.decreaseDislikes(targetId)
+//            }
+//
+//            TargetType.POST_COMMENT -> {
+//                if (increment == ReactionType.LIKE) postCommentDao.increaseLikes(targetId)
+//                if (increment == ReactionType.DISLIKE) postCommentDao.increaseDislikes(targetId)
+//                if (decrement == ReactionType.LIKE) postCommentDao.decreaseLikes(targetId)
+//                if (decrement == ReactionType.DISLIKE) postCommentDao.decreaseDislikes(targetId)
+//            }
+//
+//            TargetType.POINT_COMMENT -> {
+//                if (increment == ReactionType.LIKE) pointCommentDao.increaseLikes(targetId)
+//                if (increment == ReactionType.DISLIKE) pointCommentDao.increaseDislikes(targetId)
+//                if (decrement == ReactionType.LIKE) pointCommentDao.decreaseLikes(targetId)
+//                if (decrement == ReactionType.DISLIKE) pointCommentDao.decreaseDislikes(targetId)
+//            }
 //        }
-        val post = Post(
-            id = id,
+//    }
+
+    fun uploadPost(post: Post) {
+        val date = getCurrentFormattedTime()
+        val entity = Post(
             title = post.title,
             date = date,
-            like = 0,
             content = post.content,
             lng = post.lng,
             lat = post.lat,
             position = post.position,
             userId = UserManager.userId,
             type = post.type,
-            photo = photo,
+            photo = post.photo,
         )
-        database.postDao().insert(post)
+        postDao.insert(entity)
     }
 
-
-    suspend fun uploadPoint(easyPoint: EasyPoint) {
-        var photoUri: String = ""
-//        easyPoint.photo?.let { uri ->
-//            httpClient.uploadImage(
-//                context, uri,
-//                callback = {
-//                    photoUri = it
-//                },
-//            )
-//        }
-        EasyPoint(
-            pointId = database.pointsDao().getCount() + 1,
+    fun uploadPoint(easyPoint: EasyPoint) {
+        val entity = EasyPoint(
             name = easyPoint.name,
             type = easyPoint.type,
             info = easyPoint.info,
             location = easyPoint.location,
-            photo = photoUri,
+            photo = easyPoint.photo,
             refreshTime = getCurrentFormattedTime(),
-            likes = 0,
-            dislikes = 0,
             lat = easyPoint.lat,
             lng = easyPoint.lng,
             userId = UserManager.userId,
-        ).let {
-            database.pointsDao().insert(it)
-        }
+        )
+        pointDao.insert(entity)
     }
 
-    suspend fun uploadPostComment(comment: PostComment) {
-        database.postCommentDao().insert(comment)
+    fun uploadPostComment(comment: PostComment): Result<Unit> =
+        runCatching { postCommentDao.insert(comment) }
+
+    fun uploadPointComment(comment: PointComment): Result<Unit> =
+        runCatching { pointCommentDao.insert(comment) }
+
+    fun getPointFromLatLng(latLng: LatLng): Result<EasyPoint> = runCatching {
+        pointDao.getPointByLatLng(latLng.latitude, latLng.longitude) ?: getInitPoint(
+            latLng
+        )
     }
 
-    suspend fun uploadPointComment(comment: PointComment) {
-        database.pointCommentDao().insert(comment)
+    fun getPointByUserId(userId: Int): Result<List<EasyPoint>> =
+        runCatching { pointDao.getPointByUserId(userId) }
+
+    fun getPointByName(string: String): Result<List<EasyPoint>> =
+        runCatching { pointDao.searchEasyPointsByName(string) }
+
+    fun addLikeForPost(postId: Int) {
+        postDao.increaseLike(postId)
     }
 
-    suspend fun getPointFromLatLng(latLng: LatLng): EasyPoint {
-        return database.pointsDao().getPointByLatLng(latLng.latitude, latLng.longitude)
-            ?: getInitPoint(latLng)
+    fun decreaseLikeForPost(postId: Int) {
+        postDao.increaseLike(postId)
     }
 
-    suspend fun getPointByUserId(userId: Int): Flow<List<EasyPoint>> {
-        return database.pointsDao().getPointByUserId(userId)
+    fun addLikeForPointComment(commentIndex: Int) {
+        pointCommentDao.increaseLikes(commentIndex)
     }
 
-    suspend fun getPointByName(string: String): Flow<List<EasyPoint>> {
-        return database.pointsDao().searchEasyPointsByName(string)
+    fun decreaseLikeForPointComment(commentIndex: Int) {
+        pointCommentDao.decreaseLikes(commentIndex)
     }
 
-    suspend fun addLikeForPost(postId: Int): Post? {
-        database.postDao().increaseLike(postId)
-        return database.postDao().getPostById(id = postId)
+    fun addDisLikeForPointComment(commentIndex: Int) {
+        pointCommentDao.increaseDislikes(commentIndex)
     }
 
-    suspend fun decreaseLikeForPost(postId: Int): Post? {
-        database.postDao().decreaseLike(postId)
-        return database.postDao().getPostById(id = postId)
+    fun decreaseDisLikeForPointComment(commentIndex: Int) {
+        pointCommentDao.decreaseDislikes(commentIndex)
     }
+
+    fun addLikeForPostComment(commentIndex: Int) {
+        postCommentDao.increaseLikes(commentIndex)
+    }
+
+    fun decreaseLikeForPostComment(commentIndex: Int) {
+        postCommentDao.decreaseLikes(commentIndex)
+    }
+
+    fun addDisLikeForPostComment(commentIndex: Int) {
+        postCommentDao.increaseDislikes(commentIndex)
+    }
+
+    fun decreaseDisLikeForPostComment(commentIndex: Int) {
+        postCommentDao.decreaseDislikes(commentIndex)
+    }
+
+    fun addLikeForPoint(pointId: Int) {
+        pointDao.increaseLikes(pointId)
+    }
+
+    fun decreaseLikeForPoint(pointId: Int) {
+        pointDao.decreaseLikes(pointId)
+    }
+
+    fun addDisLikeForPoint(pointId: Int) {
+        pointDao.increaseDislikes(pointId)
+    }
+
+    fun decreaseDisLikeForPoint(pointId: Int) {
+        pointDao.decreaseDislikes(pointId)
+    }
+
 
 }
 
-enum class ReactionType { LIKE, DISLIKE }
-
-data class ReactionResult(
-    val id: Long,
-    val likeCount: Int,
-    val dislikeCount: Int,
-    val userReaction: ReactionType? // 当前用户最终状态
-)
-
-interface CommentReactionRepository {
-    suspend fun setReactionForPostComment(
-        commentId: Long,
-        reaction: ReactionType?,
-    ): ReactionResult
-    // reaction = null 表示取消任何反应
-}

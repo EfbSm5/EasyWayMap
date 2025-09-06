@@ -18,6 +18,15 @@ class DetailViewModel :
         setEvent(DetailContract.Event.Load(postAndUser))
     }
 
+    fun getPost(postId: Int) {
+        asyncLaunch(Dispatchers.IO) {
+            val r = DataRepository.getPost(postId)
+            r.onSuccess { setEvent(DetailContract.Event.Load(it)) }.onFailure {
+                setState { copy(error = "error no post") }
+            }
+        }
+    }
+
     fun onEvent(event: DetailContract.Event) {
         setEvent(event)
     }
@@ -33,8 +42,8 @@ class DetailViewModel :
             DetailContract.Event.SendComment -> send()
             is DetailContract.Event.ToggleLikePost -> onLikeClick()
             is DetailContract.Event.ShowInput -> setState { copy(showTextField = event.boolean) }
-            is DetailContract.Event.ToggleDisLikeComment -> TODO()
-            is DetailContract.Event.ToggleLikeComment -> TODO()
+            is DetailContract.Event.ToggleDisLikeComment -> dislikeComment(event.index)
+            is DetailContract.Event.ToggleLikeComment -> likeComment(event.index)
         }
 
     }
@@ -42,7 +51,7 @@ class DetailViewModel :
     private fun load() = asyncLaunch(Dispatchers.IO) {
         setState { copy(loading = true) }
         currentState.post?.let {
-            runCatching { DataRepository.getPostAndComments(it.id) }.onSuccess { comments ->
+            DataRepository.getPostComments(it.id).onSuccess { comments ->
                 setState { copy(loading = false, comments = comments) }
             }.onFailure {
                 setState { copy(loading = false, error = "加载失败") }
@@ -106,8 +115,8 @@ class DetailViewModel :
                 setState {
                     copy(
                         post = post!!.copy(
-                            like = serverPostOrCount?.like ?: 0,
-                            likedByMe = serverPostOrCount?.likedByMe ?: false
+                            like = snapshot.like + 1,
+                            likedByMe = !snapshot.likedByMe
                         )
                     )
                 }

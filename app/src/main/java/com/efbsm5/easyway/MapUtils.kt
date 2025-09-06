@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
 import android.util.Log
-import android.widget.Toast
 import androidx.core.net.toUri
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.Poi
@@ -60,12 +59,6 @@ fun convertToLatLonPoint(latLng: LatLng): LatLonPoint {
 
 fun convertToLatLng(latLonPoint: LatLonPoint): LatLng {
     return LatLng(latLonPoint.latitude, latLonPoint.longitude)
-}
-
-fun showMsg(text: String) {
-    Toast.makeText(
-        SDKUtils.getContext(), text, Toast.LENGTH_SHORT
-    ).show()
 }
 
 fun getCurrentFormattedTime(): String {

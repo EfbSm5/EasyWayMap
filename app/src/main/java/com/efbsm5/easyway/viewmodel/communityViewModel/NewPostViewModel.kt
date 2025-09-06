@@ -3,21 +3,19 @@ package com.efbsm5.easyway.viewmodel.communityViewModel
 import android.net.Uri
 import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.community.NewPostContract
-import com.efbsm5.easyway.getInitPost
+import com.efbsm5.easyway.repo.DataRepository
 
 class NewPostViewModel :
     BaseViewModel<NewPostContract.Event, NewPostContract.State, NewPostContract.Effect>() {
 
     override fun createInitialState(): NewPostContract.State {
-        return NewPostContract.State(
-            post = getInitPost(), dialogData = null, error = null
-        )
+        return NewPostContract.State()
     }
 
     override fun handleEvents(event: NewPostContract.Event) {
         when (event) {
             NewPostContract.Event.Loading -> {
-
+                setState { copy(isLoading = false) }
             }
 
             is NewPostContract.Event.ChangeDialogData -> {
@@ -31,7 +29,31 @@ class NewPostViewModel :
             is NewPostContract.Event.EditTitle -> {
                 setState { copy(post = post.copy(title = event.string)) }
             }
+
+            is NewPostContract.Event.PickPhotoDialogResult -> {
+                setState { copy(previewPhoto = event.uri) }
+            }
+
+            NewPostContract.Event.Publish -> {
+                push()
+            }
+
+            is NewPostContract.Event.SelectedCategory -> {
+                setState { copy(onSelectedCategory = event.int) }
+            }
+
+            is NewPostContract.Event.TitleChanged -> {
+                setState { copy(post = post.copy(title = event.string)) }
+            }
         }
+    }
+
+    fun onEvent(event: NewPostContract.Event) {
+        setEvent(event)
+    }
+
+    fun onEffect(effect: NewPostContract.Effect) {
+        setEffect { effect }
     }
 
     fun getPicture(uri: Uri?) {
@@ -42,39 +64,17 @@ class NewPostViewModel :
         }
     }
 
-    fun push() {
-        asyncLaunch { }
-    }
-
-    private fun updatePhotos(newPhotos: List<Uri>) {
-
-    }
-
-    fun changeContent(string: String) {
-        setEvent(NewPostContract.Event.EditContent(string))
-    }
-
-    fun changeTitle(string: String) {
-        setEvent(NewPostContract.Event.EditTitle(string))
-    }
-
     fun setLocation(location: String) {
         setState { copy(post = post.copy(position = location)) }
     }
 
-    fun selectIndex(index: Int) {
-        setState { copy(post = post.copy(type = index)) }
+    private fun push() {
+        asyncLaunch {
+            DataRepository.uploadPost(currentState.post)
+            setEffect { NewPostContract.Effect.Upload }
+
+        }
     }
 
-    fun back() {
-        setEffect { NewPostContract.Effect.Back }
-    }
 
-    fun getLocation() {
-        setEffect { NewPostContract.Effect.GetLocation }
-    }
-
-    fun getPhoto() {
-        setEffect { NewPostContract.Effect.GetPhoto }
-    }
 }

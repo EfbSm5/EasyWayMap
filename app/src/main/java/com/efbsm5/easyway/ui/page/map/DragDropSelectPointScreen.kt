@@ -42,7 +42,7 @@ import com.efbsm5.easyway.R
 import com.efbsm5.easyway.contract.map.DragDropSelectPointContract
 import com.efbsm5.easyway.dialog.ShowOpenGPSDialog
 import com.efbsm5.easyway.launcher.handlerGPSLauncher
-import com.efbsm5.easyway.showToast
+import com.efbsm5.easyway.showMsg
 import com.efbsm5.easyway.ui.components.melody.ForceStartLocationButton
 import com.efbsm5.easyway.ui.components.melody.UIMarkerInScreenCenter
 import com.efbsm5.easyway.ui.components.requestMultiplePermission
@@ -88,7 +88,7 @@ internal fun DragDropSelectPointScreen(onSelected: (String) -> Unit) {
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.onEach {
             if (it is DragDropSelectPointContract.Effect.Toast) {
-                showToast(it.msg)
+                showMsg(it.msg)
             }
             if (it is DragDropSelectPointContract.Effect.Selected) {
                 onSelected(it.location)

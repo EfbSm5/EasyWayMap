@@ -6,26 +6,19 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.models.assistModel.EasyPointSimplify
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PointsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(point: EasyPoint)
 
-    @Query("SELECT COUNT(*) FROM point")
-    fun getCount(): Int
-
     @Query("select pointId,name,lat,lng from point order by pointId desc ")
-    fun loadAllPoints(): Flow<List<EasyPointSimplify>>
-
-    @Query("select pointId,name,lat,lng from point order by pointId desc ")
-    fun loadAllPointsByOnce(): List<EasyPointSimplify>
+    fun loadAllPoints(): List<EasyPointSimplify>
 
     @Query("SELECT * FROM point WHERE pointId = :id")
     fun getPointById(id: Int): EasyPoint?
 
-    @Query("UPDATE point SET `like` = `like` + 1 WHERE pointId = :id")
+    @Query("UPDATE point SET `like` = `like` + 1 WHERE pointId = :id ")
     fun increaseLikes(id: Int)
 
     @Query("UPDATE point SET `like` = `like` -1 WHERE pointId = :id")
@@ -47,8 +40,8 @@ interface PointsDao {
     fun deleteAll(ids: List<Int>)
 
     @Query("SELECT * FROM point WHERE userId=:userId")
-    fun getPointByUserId(userId: Int): Flow<List<EasyPoint>>
+    fun getPointByUserId(userId: Int): List<EasyPoint>
 
     @Query("SELECT * FROM point WHERE name LIKE '%' || :searchString || '%'")
-    fun searchEasyPointsByName(searchString: String): Flow<List<EasyPoint>>
+    fun searchEasyPointsByName(searchString: String): List<EasyPoint>
 }
