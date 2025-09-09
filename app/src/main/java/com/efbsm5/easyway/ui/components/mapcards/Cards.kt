@@ -5,6 +5,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.amap.api.maps.model.LatLng
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.viewmodel.cardViewmodel.CommentAndHistoryCardViewModel
+import com.efbsm5.easyway.viewmodel.cardViewmodel.FunctionCardViewModel
 
 @Composable
 fun MapPageCard(
@@ -16,6 +17,7 @@ fun MapPageCard(
         is CardScreen.Comment -> {
             val viewModel: CommentAndHistoryCardViewModel = viewModel()
             CommentAndHistoryCard(
+                point = content.easyPoint,
                 navigate = onNavigate,
                 changeScreen = onChangeScreen,
                 viewModel = viewModel
@@ -23,9 +25,11 @@ fun MapPageCard(
         }
 
         CardScreen.Function -> {
+            val viewModel: FunctionCardViewModel = viewModel()
             FunctionCard(
                 changeScreen = onChangeScreen,
                 navigate = onNavigate,
+                viewModel = viewModel
             )
         }
 

@@ -49,10 +49,6 @@ class CommunityViewModel :
         }
     }
 
-    fun onEvent(event: CommunityContract.Event) {
-        setEvent(event)
-    }
-
     fun updateSingle(updated: PostAndUser, insertIfMissing: Boolean = false) {
         setState {
             copy(rawPosts = change(updated = updated, insertIfMissing = insertIfMissing))

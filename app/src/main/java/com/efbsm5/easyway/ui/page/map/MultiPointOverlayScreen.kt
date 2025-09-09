@@ -64,7 +64,7 @@ internal fun MultiPointOverlayScreen(onclick: (LatLng) -> Unit) {
             modifier = Modifier.matchParentSize(),
             uiSettings = currentState.uiSettings,
             cameraPositionState = cameraPositionState,
-            onMapLoaded = viewModel::initMultiPointData
+//            onMapLoaded = viewModel::initMultiPointData
         ) {
             MultiPointOverlay(
                 enable = true,

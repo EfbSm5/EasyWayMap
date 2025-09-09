@@ -13,8 +13,8 @@ class FunctionCardContract {
 
     @Immutable
     data class State(
-        val points: ImmutableListWrapper<EasyPoint>,
-        val poiList: ImmutableListWrapper<PoiItemV2>
+        val points: ImmutableListWrapper<EasyPoint> = ImmutableListWrapper(emptyList()),
+        val poiList: ImmutableListWrapper<PoiItemV2> = ImmutableListWrapper(emptyList())
     ) : IUiState
 
     sealed class Effect : IUiEffect {

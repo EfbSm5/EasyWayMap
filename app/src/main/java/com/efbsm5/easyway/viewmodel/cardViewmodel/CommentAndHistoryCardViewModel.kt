@@ -20,28 +20,20 @@ class CommentAndHistoryCardViewModel() :
         setState { copy(state = CommentCardScreen.Comment) }
     }
 
-    fun changeCommentContent(string: String) {
+    private fun changeCommentContent(string: String) {
         setState { copy(commentContent = string) }
     }
 
-    fun onEvent(event: CommentAndHistoryCardContract.Event) {
-        setEvent(event)
+    fun onEffect(effect: CommentAndHistoryCardContract.Effect) {
+        setEffect { effect }
     }
 
-    fun update() {
+    private fun update() {
         setEffect {
             CommentAndHistoryCardContract.Effect.Update
         }
     }
 
-    fun select(index: Int) {
-        setState {
-            copy(
-                state = if (index == 0) CommentCardScreen.Comment
-                else CommentCardScreen.History
-            )
-        }
-    }
 
     override fun createInitialState(): CommentAndHistoryCardContract.State {
         return CommentAndHistoryCardContract.State(
@@ -54,17 +46,21 @@ class CommentAndHistoryCardViewModel() :
 
     override fun handleEvents(event: CommentAndHistoryCardContract.Event) {
         when (event) {
+            is CommentAndHistoryCardContract.Event.ChangeComment -> changeCommentContent(event.commentContent)
+            is CommentAndHistoryCardContract.Event.DislikeComment -> dislikeComment(
+                event.int,
+                event.boolean
+            )
 
+            is CommentAndHistoryCardContract.Event.DislikePoint -> dislikePost(event.boolean)
+            is CommentAndHistoryCardContract.Event.LikeComment -> likeComment(
+                event.int,
+                event.boolean
+            )
 
-            is CommentAndHistoryCardContract.Event.ChangeComment -> TODO()
-            is CommentAndHistoryCardContract.Event.DislikeComment -> TODO()
-            is CommentAndHistoryCardContract.Event.DislikePoint -> TODO()
-            is CommentAndHistoryCardContract.Event.LikeComment -> TODO()
-            is CommentAndHistoryCardContract.Event.LikePoint -> TODO()
-            is CommentAndHistoryCardContract.Event.Navigate -> TODO()
-            CommentAndHistoryCardContract.Event.PublishComment -> TODO()
-            is CommentAndHistoryCardContract.Event.SelectTab -> TODO()
-            CommentAndHistoryCardContract.Event.Update -> TODO()
+            is CommentAndHistoryCardContract.Event.LikePoint -> likePost(event.boolean)
+            CommentAndHistoryCardContract.Event.Update -> update()
+            is CommentAndHistoryCardContract.Event.ChangeState -> setState { copy(state = event.commentCardScreen) }
         }
     }
 

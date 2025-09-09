@@ -25,6 +25,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
@@ -45,9 +46,13 @@ import com.efbsm5.easyway.viewmodel.communityViewModel.NewPostViewModel
 @Composable
 fun EasyWay() {
     val navController = rememberNavController()
-    val currentDestination = navController.currentDestination
+    navController.currentDestination
+    val nav = navController.currentBackStackEntryAsState().value?.destination
     val scaffoldController = remember { ScaffoldController() }
     val snackBarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(nav?.route) {
+        scaffoldController.refresh()
+    }
     CompositionLocalProvider(LocalScaffoldController provides scaffoldController) {
 
         val fabConfig = scaffoldController.fabConfig
@@ -57,7 +62,7 @@ fun EasyWay() {
         Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }, topBar = {
             if (topBarConfig.show && topBarConfig.title != null) {
                 AppTopBar(
-                    title = topBarConfig.title, onBack = topBarConfig.back
+                    title = topBarConfig.title, onBack = topBarConfig.back,
                 )
             }
         }, bottomBar = {
@@ -65,7 +70,7 @@ fun EasyWay() {
 //                bottomBarConfig.content?.invoke()
 //            }
             BottomNavigationBar(
-                navController = navController, currentDestination = currentDestination
+                navController = navController, currentDestination = nav
             )
         }, floatingActionButton = {
             AnimatedContent(
@@ -82,8 +87,7 @@ fun EasyWay() {
                                 ?: FloatingActionButtonDefaults.containerColor,
                             contentColor = cfg.contentColor
                                 ?: FloatingActionButtonDefaults.containerColor,
-
-                            )
+                        )
                     } else {
                         FloatingActionButton(
                             onClick = cfg.onClick,
@@ -107,11 +111,11 @@ fun EasyWay() {
                     .fillMaxSize()
             ) {
                 composable(RootRoute.Map.route) {
-                    scaffoldController.refresh()
+//                    scaffoldController.refresh()
                     MapPage()
                 }
                 composable(RootRoute.Home.route) {
-                    scaffoldController.refresh()
+//                    scaffoldController.refresh()
                     HomePage()
                 }
 
@@ -121,12 +125,11 @@ fun EasyWay() {
                     route = RootRoute.CommunityGraph.route
                 ) {
                     composable(CommunityRoute.Square.route) { entry ->
-                        scaffoldController.refresh()
+//                        scaffoldController.refresh()
                         val viewModel: CommunityViewModel = viewModel(entry)
                         CommunitySquareRoute(
                             back = { navController.popBackStack() },
                             onSelectPost = { postAndUser ->
-                                // 方式 B：把完整对象暂存（Square entry 的 handle）
                                 entry.savedStateHandle["postAndUser"] = postAndUser
                                 // 跳转 Detail，采用方式 A 传 ID
                                 navController.navigate(

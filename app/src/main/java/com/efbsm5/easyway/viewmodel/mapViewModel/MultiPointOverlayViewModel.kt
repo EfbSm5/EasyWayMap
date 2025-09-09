@@ -22,15 +22,10 @@
 
 package com.efbsm5.easyway.viewmodel.mapViewModel
 
-import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.MultiPointItem
-import com.efbsm5.easyway.BuildConfig
 import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.map.MultiPointOverlayContract
-import com.efbsm5.easyway.data.WuhanBoxGenerator
-import com.efbsm5.easyway.repo.DataRepository
 import com.efbsm5.easyway.repo.MultiPointOverlayRepository
-import kotlinx.coroutines.Dispatchers
 
 /**
  * MultiPointOverlayViewModel
@@ -55,40 +50,6 @@ class MultiPointOverlayViewModel :
         when (event) {
             is MultiPointOverlayContract.Event.MultiPointClick -> {
                 setState { copy(clickPointLatLng = event.pointItem.latLng) }
-            }
-        }
-    }
-
-    fun initMultiPointData() = asyncLaunch(Dispatchers.IO) {
-        if (BuildConfig.DEBUG) {
-            val list: MutableList<MultiPointItem> = mutableListOf()
-            try {
-                repeat(10) {
-                    list.add(MultiPointItem(WuhanBoxGenerator.random()))
-                }
-            } catch (e: Exception) {
-
-            }
-            setState {
-                copy(
-                    isLoading = false, multiPointItems = list
-                )
-            }
-        } else {
-            val r = DataRepository.getAllPoints()
-            r.onSuccess { pointList ->
-                pointList.map { pointSimplify ->
-                    MultiPointItem(LatLng(pointSimplify.lat, pointSimplify.lng))
-                }.let {
-                    setState {
-                        copy(
-                            isLoading = false, multiPointItems = it
-                        )
-                    }
-                }
-            }.onFailure {
-                setState { copy(isLoading = false) }
-                setEffect { MultiPointOverlayContract.Effect.Toast("error") }
             }
         }
     }

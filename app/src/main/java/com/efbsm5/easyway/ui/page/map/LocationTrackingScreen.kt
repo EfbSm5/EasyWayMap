@@ -29,16 +29,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.amap.api.maps.CameraUpdateFactory
+import com.amap.api.maps.model.BitmapDescriptorFactory
 import com.amap.api.maps.model.CameraPosition
 import com.amap.api.maps.model.LatLng
 import com.efbsm5.easyway.contract.map.LocationTrackingContract
 import com.efbsm5.easyway.dialog.ShowOpenGPSDialog
 import com.efbsm5.easyway.launcher.handlerGPSLauncher
+import com.efbsm5.easyway.repo.MultiPointOverlayRepository
 import com.efbsm5.easyway.showMsg
 import com.efbsm5.easyway.ui.components.requestMultiplePermission
 import com.efbsm5.easyway.viewmodel.mapViewModel.LocationTrackingViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.melody.map.gd_compose.GDMap
+import com.melody.map.gd_compose.overlay.Marker
+import com.melody.map.gd_compose.overlay.MultiPointOverlay
+import com.melody.map.gd_compose.overlay.rememberMarkerState
 import com.melody.map.gd_compose.position.rememberCameraPositionState
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
@@ -59,6 +64,10 @@ internal fun LocationTrackingScreen() {
         // 不预加载显示默认北京的位置
         position = CameraPosition(LatLng(0.0, 0.0), 11f, 0f, 0f)
     }
+    var firstValue by remember { mutableStateOf<LatLng?>(null) }
+    val markerState = rememberMarkerState()
+
+
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.onEach {
             if (it is LocationTrackingContract.Effect.Toast) {
@@ -85,6 +94,10 @@ internal fun LocationTrackingScreen() {
 
     LaunchedEffect(currentState.locationLatLng) {
         if (null == currentState.locationLatLng) return@LaunchedEffect
+        if (null == firstValue)
+            firstValue = currentState.locationLatLng
+    }
+    LaunchedEffect(firstValue) {
         cameraPosition.move(CameraUpdateFactory.newLatLng(currentState.locationLatLng))
     }
 
@@ -112,6 +125,20 @@ internal fun LocationTrackingScreen() {
             uiSettings = currentState.mapUiSettings,
             locationSource = viewModel,
             onMapLoaded = viewModel::checkGpsStatus
-        )
+        ) {
+            MultiPointOverlay(
+                enable = true,
+                icon = MultiPointOverlayRepository.initMultiPointIcon(),
+                multiPointItems = MultiPointOverlayRepository.initMultiPointItemList(),
+                onClick = {}
+            )
+            Marker(
+                icon = BitmapDescriptorFactory.defaultMarker(),
+                state = markerState,
+                visible = false,
+                isClickable = false
+            )
+        }
+
     }
 }

@@ -26,7 +26,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,8 +39,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.efbsm5.easyway.ui.components.SearchBar
 import io.morfly.compose.bottomsheet.material3.BottomSheetScaffold
+import io.morfly.compose.bottomsheet.material3.BottomSheetState
 import io.morfly.compose.bottomsheet.material3.rememberBottomSheetScaffoldState
-import io.morfly.compose.bottomsheet.material3.rememberBottomSheetState
 import kotlin.math.pow
 
 enum class SheetValue { Collapsed, PartiallyExpanded, Expanded }
@@ -50,30 +49,25 @@ enum class SheetValue { Collapsed, PartiallyExpanded, Expanded }
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun MapScreen(
+    sheetState: BottomSheetState<SheetValue>,
     sheetContent: @Composable (ColumnScope.() -> Unit) = {},
     mapPlace: @Composable (() -> Unit) = {},
     onClickChange: () -> Unit = {},
     onClickLocation: () -> Unit = {},
     searchText: String = "",
-    onSearchText: (String) -> Unit = {},
+    editText: (String) -> Unit = {},
     search: () -> Unit = {}
 ) {
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current
-    rememberCoroutineScope()
 
     val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
 
-    val collapsedHeightDp = 100.dp
-    val collapsedHeightPx = with(density) { collapsedHeightDp.toPx() }
+//    val collapsedHeightDp = 100.dp
+    val collapsedHeightPx = with(density) { 0.dp.toPx() }
     val collapsedOffsetPx = screenHeightPx - collapsedHeightPx  // 顶部到 Collapsed 顶部的距离
 
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.PartiallyExpanded, defineValues = {
-            SheetValue.Collapsed at height(collapsedHeightDp)
-            SheetValue.PartiallyExpanded at offset(percent = 60)
-            SheetValue.Expanded at contentHeight
-        })
+
     val scaffoldState = rememberBottomSheetScaffoldState(sheetState)
 
     val partialOffsetPx = screenHeightPx * 0.60f
@@ -182,7 +176,7 @@ fun MapScreen(
                         )
                     },
                 searchBarText = searchText,
-                onChange = { onSearchText(it) },
+                onChange = { editText(it) },
                 onSearch = { search() },
                 placeHolder = "搜索地点、公交、地铁..."
             )

@@ -5,9 +5,8 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,244 +17,390 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.rememberAsyncImagePainter
-import com.efbsm5.easyway.SDKUtils
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.efbsm5.easyway.contract.card.NewPointCardContract
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.getInitPoint
 import com.efbsm5.easyway.viewmodel.cardViewmodel.NewPointCardViewModel
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
-import java.io.File
-import java.io.FileOutputStream
+
+// 设施类别常量（可后续本地化）
+private val CATEGORY_OPTIONS = listOf(
+    "无障碍电梯",
+    "无障碍厕所",
+    "停车位",
+    "公共交通",
+    "轮椅租赁",
+    "爱心站点",
+    "AED",
+    "坡道",
+    "无障碍汽车",
+    "其他"
+)
 
 @Composable
 fun NewPointCard(
-    changeScreen: (CardScreen) -> Unit, label: String
-) {
-    val viewModel: NewPointCardViewModel = viewModel()
-    val currentState by viewModel.uiState.collectAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.effect.onEach { effect ->
-            when (effect) {
-                NewPointCardContract.Effect.Upload -> {}
-                is NewPointCardContract.Effect.UploadPhoto -> {
-                    effect.uri.let { uri1 ->
-                        val inputStream =
-                            SDKUtils.getContext().contentResolver.openInputStream(uri1)
-                        inputStream?.let {
-                            val file = File(SDKUtils.getContext().cacheDir, "temp_image")
-                            val outputStream = FileOutputStream(file)
-                            it.copyTo(outputStream)
-                            outputStream.close()
-                            it.close()
-                            viewModel.upLoadPhoto(file.path)
-                        }
-                    }
-                }
-
-                NewPointCardContract.Effect.Back -> {
-                    changeScreen(CardScreen.Function)
-                }
-            }
-        }.collect()
-    }
-
-    NewPointCardSurface(
-        label = label,
-        point = currentState.tempPoint,
-        onInfoValueChange = viewModel::changeInfoValue,
-        onLocationValueChange = viewModel::changeLocation,
-        onUploadImage = {},
-        onSelectType = viewModel::changeType,
-        callback = viewModel::callback,
-        onNameValueChange = viewModel::changeNameValue,
-    )
-}
-
-@Composable
-private fun NewPointCardSurface(
+    changeScreen: (CardScreen) -> Unit,
     label: String,
+    viewModel: NewPointCardViewModel = viewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Effect 处理
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                NewPointCardContract.Effect.Upload -> {
+                    // 可添加上传中提示
+                }
+
+                is NewPointCardContract.Effect.UploadPhoto -> {
+                    // 已在内部处理（如果需要可在此做 UI 提示）
+                }
+
+                NewPointCardContract.Effect.Back -> changeScreen(CardScreen.Function)
+            }
+        }
+    }
+
+    NewPointForm(
+        title = label,
+        point = uiState.tempPoint,
+        onNameChange = viewModel::changeNameValue,
+        onInfoChange = viewModel::changeInfoValue,
+        onLocationChange = viewModel::changeLocation,
+        onTypeChange = viewModel::changeType,
+        onUploadImage = { uri ->
+            uri?.let {
+//                viewModel.handlePhotoUri(it) // 你可以在 VM 中封装读取文件逻辑
+            }
+        },
+        onSubmit = { viewModel.callback(true) },
+        onCancel = { viewModel.callback(false) })
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NewPointForm(
+    title: String,
     point: EasyPoint = getInitPoint(),
-    onInfoValueChange: (String) -> Unit = {},
-    onLocationValueChange: (String) -> Unit = {},
-    onNameValueChange: (String) -> Unit = {},
-    onUploadImage: (Uri?) -> Unit = {},
-    onSelectType: (String) -> Unit = {},
-    callback: (Boolean) -> Unit = {},
+    onNameChange: (String) -> Unit,
+    onInfoChange: (String) -> Unit,
+    onLocationChange: (String) -> Unit,
+    onTypeChange: (String) -> Unit,
+    onUploadImage: (Uri?) -> Unit,
+    onSubmit: () -> Unit,
+    onCancel: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .padding(16.dp)
-            .background(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(8.dp))
-            .padding(16.dp),
-        verticalArrangement = Arrangement.SpaceEvenly,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Column(modifier = Modifier.fillMaxWidth()) {
-            DropdownField(onSelectType = { onSelectType(it) })
-            Spacer(modifier = Modifier.height(16.dp))
-            TextFieldWithText(
-                label = "设施名", text = point.name
-            ) { onNameValueChange(it) }
-            Spacer(modifier = Modifier.height(16.dp))
-            TextFieldWithText(label = "设施说明", text = point.info) { onInfoValueChange(it) }
-            Spacer(modifier = Modifier.height(16.dp))
-            TextFieldWithText(
-                label = "所在位置", text = point.location
-            ) { onLocationValueChange(it) }
-            Spacer(modifier = Modifier.height(16.dp))
-            UploadImageSection { onUploadImage(it) }
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Button(
-                onClick = {
-                    callback(true)
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-            ) {
-                Text(text = "确认上传", color = MaterialTheme.colorScheme.onPrimary)
-            }
-            Button(
-                onClick = { callback(false) },
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-            ) {
-                Text(text = "取消", color = MaterialTheme.colorScheme.onSecondary)
-            }
-        }
-    }
-}
+    rememberCoroutineScope()
 
-@Composable
-private fun DropdownField(
-    onSelectType: (String) -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-    var selectedOption by remember { mutableStateOf("") }
-    Column {
-        Text(
-            text = "设施类别",
-            style = TextStyle(fontSize = 16.sp),
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
-        Box(
-            modifier = Modifier
-                .border(1.dp, Color.Gray)
-                .padding(8.dp)
-                .fillMaxWidth()
-                .clickable { expanded = true }) {
-            Text(text = selectedOption.ifEmpty { "请选择" })
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            listOf(
-                "无障碍电梯",
-                "无障碍厕所",
-                "停车位",
-                "公共交通",
-                "轮椅租赁",
-                "爱心站点",
-                "AED",
-                "坡道",
-                "无障碍汽车",
-                "其他"
-            ).forEach { option ->
-                DropdownMenuItem(onClick = {
-                    onSelectType(option)
-                    expanded = false
-                    selectedOption = option
-                }, text = { Text(option) })
-            }
-        }
-    }
-}
+    // 本地 UI 状态（表单）
+    var facilityName by rememberSaveable { mutableStateOf(point.name) }
+    var facilityInfo by rememberSaveable { mutableStateOf(point.info) }
+    var facilityLocation by rememberSaveable { mutableStateOf(point.location) }
+    var facilityType by rememberSaveable { mutableStateOf(point.type) }
+    var imageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
 
-@Composable
-private fun TextFieldWithText(label: String, text: String, onValueChange: (String) -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            text = label,
-            style = TextStyle(fontSize = 16.sp),
-            modifier = Modifier
-                .width(70.dp)
-                .wrapContentWidth(Alignment.CenterHorizontally)
-        )
-        TextField(
-            value = text, onValueChange = { onValueChange(it) }, modifier = Modifier.weight(1f)
-        )
-    }
-}
+    // 校验逻辑
+    val isNameValid = facilityName.trim().length in 2..30
+    val isTypeValid = facilityType.isNotBlank()
+    val isLocationValid = facilityLocation.trim().isNotEmpty()
+    val isFormValid = isNameValid && isTypeValid && isLocationValid
 
-@Composable
-private fun UploadImageSection(onChoosePicture: (Uri?) -> Unit) {
-    var selectedImageUri: Uri? by remember { mutableStateOf(null) }
+    // 回写到外层（只要变更就同步）
+    LaunchedEffect(facilityName) { onNameChange(facilityName) }
+    LaunchedEffect(facilityInfo) { onInfoChange(facilityInfo) }
+    LaunchedEffect(facilityLocation) { onLocationChange(facilityLocation) }
+    LaunchedEffect(facilityType) { onTypeChange(facilityType) }
+
+    // 选择图片 Launcher
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            onChoosePicture(result.data?.data)
-            selectedImageUri = result.data?.data
+    ) { res ->
+        if (res.resultCode == Activity.RESULT_OK) {
+            val uri = res.data?.data
+            imageUri = uri
+            onUploadImage(uri)
         }
     }
-    Column {
-        Text(text = "上传图片", style = TextStyle(fontSize = 16.sp))
-        Box(
+
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp), shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
             modifier = Modifier
-                .size(100.dp)
-                .background(MaterialTheme.colorScheme.onBackground)
-                .border(1.dp, MaterialTheme.colorScheme.primary)
-                .clickable {
-                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "image/*"
-                    }
-                    launcher.launch(intent)
-                }, contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 18.dp, vertical = 14.dp),
+            horizontalAlignment = Alignment.Start
         ) {
-            if (selectedImageUri != null) {
-                Image(
-                    painter = rememberAsyncImagePainter(model = selectedImageUri),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize()
+
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+            )
+            Spacer(Modifier.height(12.dp))
+            HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
+
+            Spacer(Modifier.height(16.dp))
+
+            // 类别选择
+            TypeSelector(
+                selected = facilityType, onSelected = { facilityType = it })
+
+            Spacer(Modifier.height(16.dp))
+
+            // 设施名
+            OutlinedTextField(
+                value = facilityName,
+                onValueChange = { facilityName = it },
+                label = { Text("设施名 *") },
+                singleLine = true,
+                supportingText = {
+                    if (!isNameValid && facilityName.isNotBlank()) Text("长度需在 2-30 字之间")
+                },
+                isError = !isNameValid && facilityName.isNotEmpty(),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(Modifier.height(14.dp))
+
+            // 说明
+            OutlinedTextField(
+                value = facilityInfo,
+                onValueChange = { facilityInfo = it },
+                label = { Text("设施说明") },
+                placeholder = { Text("可描述可用情况、开放时间、注意事项等") },
+                minLines = 3,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(Modifier.height(14.dp))
+
+            // 所在位置
+            OutlinedTextField(
+                value = facilityLocation,
+                onValueChange = { facilityLocation = it },
+                label = { Text("所在位置 *") },
+                singleLine = false,
+                supportingText = {
+                    if (!isLocationValid && facilityLocation.isNotBlank()) Text("请输入位置描述")
+                },
+                isError = !isLocationValid && facilityLocation.isNotEmpty(),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(Modifier.height(18.dp))
+
+            // 图片上传
+            UploadImageBlock(imageUri = imageUri, onPick = {
+                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "image/*"
+                }
+                launcher.launch(intent)
+            }, onClear = {
+                imageUri = null
+                onUploadImage(null)
+            })
+
+            Spacer(Modifier.height(8.dp))
+            AssistChip(
+                onClick = {},
+                label = { Text("提示：仅上传与该设施相关的清晰照片") },
+                colors = AssistChipDefaults.assistChipColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)
+                ),
+                leadingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = false)
+                })
+
+            Spacer(Modifier.height(26.dp))
+
+            // 操作按钮
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                    onClick = { onCancel() },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                ) {
+                    Text("取消")
+                }
+                Button(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp), enabled = isFormValid, onClick = {
+                        if (isFormValid) onSubmit()
+                    }) {
+                    Text("确认上传")
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+            if (!isFormValid) {
+                Text(
+                    text = "请完善带 * 的必填项后再提交",
+                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.error)
                 )
-            } else {
-                Text(text = "严禁上传无关图片", color = Color.Red, fontSize = 12.sp)
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TypeSelector(
+    selected: String, onSelected: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Column {
+        Text(
+            text = "设施类别 *",
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(bottom = 6.dp)
+        )
+        ExposedDropdownMenuBox(
+            expanded = expanded, onExpandedChange = { expanded = !expanded }) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth(),
+                value = selected,
+                onValueChange = {},
+                readOnly = true,
+                placeholder = { Text("请选择类别") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                CATEGORY_OPTIONS.forEach { option ->
+                    DropdownMenuItem(text = {
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                option, maxLines = 1, overflow = TextOverflow.Ellipsis
+                            )
+                            if (option == selected) {
+                                Text("已选", color = MaterialTheme.colorScheme.primary)
+                            }
+                        }
+                    }, onClick = {
+                        onSelected(option)
+                        expanded = false
+                    })
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun UploadImageBlock(
+    imageUri: Uri?, onPick: () -> Unit, onClear: () -> Unit
+) {
+    Column {
+        Text(
+            text = "图片（可选）",
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(bottom = 6.dp)
+        )
+        Surface(
+            modifier = Modifier
+                .clip(RoundedCornerShape(14.dp))
+                .clickable { onPick() },
+            tonalElevation = 2.dp,
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+        ) {
+            Box(
+                modifier = Modifier
+                    .height(160.dp)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Crossfade(targetState = imageUri, label = "imageCrossfade") { uri ->
+                    if (uri == null) {
+                        Text(
+                            "点击选择图片", style = MaterialTheme.typography.bodyMedium.copy(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        )
+                    } else {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current).data(uri)
+                                .crossfade(true).build(),
+                            contentDescription = "设施照片",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+                if (imageUri != null) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(6.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
+                            .clickable { onClear() }
+                            .padding(horizontal = 10.dp, vertical = 4.dp)) {
+                        Text(
+                            "移除", style = MaterialTheme.typography.labelSmall.copy(
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+}

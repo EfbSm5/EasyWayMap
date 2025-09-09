@@ -14,9 +14,6 @@ import com.efbsm5.easyway.viewmodel.cardViewmodel.CommentCardScreen
 class CommentAndHistoryCardContract {
     sealed class Event : IUiEvent {
         data class ChangeComment(val commentContent: String) : Event()
-        data class Navigate(val latLng: LatLng) : Event()
-        data class SelectTab(val int: Int) : Event()
-        data object PublishComment : Event()
         data object Update : Event()
         data class LikePoint(val boolean: Boolean) : Event()
         data class DislikePoint(val boolean: Boolean) : Event()
@@ -40,6 +37,7 @@ class CommentAndHistoryCardContract {
         internal object Back : Effect()
         internal object Update : Effect()
         internal object Comment : Effect()
+        internal data class Navigate(val latLng: LatLng) : Effect()
 
     }
 }

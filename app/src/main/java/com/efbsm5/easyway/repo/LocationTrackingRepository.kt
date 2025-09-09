@@ -57,7 +57,9 @@ object LocationTrackingRepository {
                 // 设置小蓝点的图标
                 myLocationIcon(locationIcon)
                 // 设置定位的类型为定位模式 ，可以由定位、跟随或地图根据面向方向旋转几种
-                myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE)
+                myLocationType(
+                    MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE_NO_CENTER
+                )
                 // 设置圆形的边框颜色
                 strokeColor(Color.BLACK)
                 // 设置圆形的填充颜色
@@ -71,7 +73,7 @@ object LocationTrackingRepository {
     fun initMapUiSettings(): MapUiSettings {
         return MapUiSettings(
             // 高德地图右上角：显示【定位按钮】
-            myLocationButtonEnabled = true,
+            myLocationButtonEnabled = false,
             isZoomGesturesEnabled = true,
             isScrollGesturesEnabled = true,
         )

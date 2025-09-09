@@ -23,6 +23,10 @@ class FunctionCardViewModel :
 
     }
 
+    fun handlePhotoUri() {
+
+    }
+
     override fun createInitialState(): FunctionCardContract.State {
         return FunctionCardContract.State(
             points = ImmutableListWrapper(emptyList()), poiList = ImmutableListWrapper(emptyList())

@@ -241,7 +241,7 @@ private fun CategoryChip(
         tonalElevation = if (selected) 4.dp else 0.dp,
         modifier = Modifier
             .clip(RoundedCornerShape(24.dp))
-
+            .clickable(onClick = onClick)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale

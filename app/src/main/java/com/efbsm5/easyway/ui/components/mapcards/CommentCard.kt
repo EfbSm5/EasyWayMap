@@ -41,7 +41,6 @@ import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
@@ -73,6 +72,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -95,10 +95,12 @@ import kotlinx.coroutines.flow.onEach
 
 @Composable
 fun CommentAndHistoryCard(
+    point: EasyPoint,
     navigate: (LatLng) -> Unit,
     changeScreen: (CardScreen) -> Unit,
     viewModel: CommentAndHistoryCardViewModel = viewModel()
 ) {
+
     val currentState by viewModel.uiState.collectAsState()
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.onEach {
@@ -106,20 +108,25 @@ fun CommentAndHistoryCard(
                 CommentAndHistoryCardContract.Effect.Back -> changeScreen(CardScreen.Function)
                 CommentAndHistoryCardContract.Effect.Update -> changeScreen(NewPoint("New point"))
                 CommentAndHistoryCardContract.Effect.Comment -> viewModel::publish
+                is CommentAndHistoryCardContract.Effect.Navigate -> navigate(it.latLng)
             }
         }.collect()
     }
+    LaunchedEffect(Unit) {
+        viewModel.setPoint(point)
+    }
     CommentAndHistoryInnerScreen(
-        state = currentState,
-        onEvent = viewModel::onEvent
+        state = currentState, onEvent = viewModel::handleEvents, onEffect = viewModel::onEffect
     )
 }
 
+@Preview
 
 @Composable
 private fun CommentAndHistoryInnerScreen(
-    state: CommentAndHistoryCardContract.State,
-    onEvent: (CommentAndHistoryCardContract.Event) -> Unit
+    state: CommentAndHistoryCardContract.State = CommentAndHistoryCardContract.State(),
+    onEvent: (CommentAndHistoryCardContract.Event) -> Unit = {},
+    onEffect: (CommentAndHistoryCardContract.Effect) -> Unit = {}
 ) {
     // 局部 UI 控制状态
     var showCommentSheet by rememberSaveable { mutableStateOf(false) }
@@ -246,7 +253,7 @@ private fun CommentAndHistoryInnerScreen(
             visible = showCommentSheet,
             onDismiss = { showCommentSheet = false },
             onSend = {
-                onEvent(CommentAndHistoryCardContract.Event.PublishComment)
+                onEffect(CommentAndHistoryCardContract.Effect.Comment)
                 showCommentSheet = false
             })
 
@@ -258,7 +265,7 @@ private fun CommentAndHistoryInnerScreen(
                 text = { Text("是否使用地图进行导航？") },
                 confirmButton = {
                     TextButton(onClick = {
-                        onEvent(CommentAndHistoryCardContract.Event.Navigate(navTarget!!))
+                        onEffect(CommentAndHistoryCardContract.Effect.Navigate(navTarget!!))
                         navTarget = null
                         navName = null
                     }) { Text("确定") }
@@ -363,7 +370,9 @@ private fun PointHeaderCard(
                     modifier = Modifier
                 )
             }
-            Divider(Modifier.padding(top = 8.dp))
+            HorizontalDivider(
+                Modifier.padding(top = 8.dp), DividerDefaults.Thickness, DividerDefaults.color
+            )
             InfoRow(Icons.Outlined.LocationOn, "详细地址", easyPoint.location)
             InfoRow(Icons.Outlined.Info, "更新日期", easyPoint.refreshTime)
             Spacer(Modifier.height(8.dp))
@@ -550,7 +559,7 @@ private fun CommentInputBottomSheet(
     if (!visible) return
 
     // 动画高度
-    val transition = updateTransition(targetState = visible, label = "sheet")
+    val transition = updateTransition(targetState = true, label = "sheet")
     val alpha by transition.animateFloat(label = "alpha") { if (it) 1f else 0f }
     val offsetY by transition.animateDp(label = "offset") {
         if (it) 0.dp else 400.dp

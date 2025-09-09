@@ -81,7 +81,7 @@ fun CommunitySquareRoute(
     }
 
     CommunitySquareScreen(
-        state = currentState, onEvent = viewModel::onEvent, back = viewModel::back
+        state = currentState, onEvent = viewModel::handleEvents, back = viewModel::back
     )
 }
 
