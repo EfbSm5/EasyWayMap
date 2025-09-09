@@ -7,6 +7,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 
 class ScaffoldController {
     var fabConfig by mutableStateOf<FabConfig?>(null)
@@ -18,6 +20,12 @@ class ScaffoldController {
 
     fun setFab(config: FabConfig?) {
         fabConfig = config
+    }
+
+    fun refresh() {
+        fabConfig = null
+        topBarConfig = TopBarConfig()
+//        bottomBarConfig = BottomBarConfig()
     }
 
     fun setTopBar(config: TopBarConfig) {
@@ -47,7 +55,8 @@ data class FabConfig(
     val extended: Boolean = false,
     val visible: Boolean = false,
     val containerColor: Color? = null,
-    val contentColor: Color? = null
+    val contentColor: Color? = null,
+    val offset: Dp = 0.dp
 )
 
 data class TopBarConfig(

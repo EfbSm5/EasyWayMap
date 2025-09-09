@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.foundation.layout)
     implementation(libs.androidx.foundation)
+    implementation(libs.androidx.ui.graphics)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -88,7 +89,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.ui.test.junit4)
+//    androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.koin.android)
@@ -99,7 +100,7 @@ dependencies {
     implementation("io.morfly.compose:advanced-bottomsheet-material3:0.1.0")
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
-    testImplementation(libs.junit)
+//    testImplementation(libs.junit)
 
 
 }

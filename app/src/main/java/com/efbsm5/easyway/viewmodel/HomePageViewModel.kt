@@ -15,11 +15,15 @@ class HomePageViewModel :
 
     init {
         asyncLaunch(Dispatchers.IO) {
-            DataRepository.getUserById(UserManager.userId).let {
+            val r = DataRepository.getUserById(UserManager.userId)
+            r.onSuccess {
                 setState { copy(user = it) }
+            }.onFailure {
+                setState { copy(user = getInitUser()) }
             }
         }
     }
+
 
     fun getUserPoint() {
         asyncLaunch(Dispatchers.IO) {

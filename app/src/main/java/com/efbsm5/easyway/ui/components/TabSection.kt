@@ -8,7 +8,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Divider
+import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
@@ -40,7 +41,7 @@ fun TabSection(
     enableDivider: Boolean = false,
     indicator: @Composable (tabPositions: List<TabPosition>) -> Unit = { tabPositions ->
         if (tabPositions.isNotEmpty()) {
-            TabRowDefaults.Indicator(
+            TabRowDefaults.SecondaryIndicator(
                 modifier = Modifier
                     .tabIndicatorOffset(tabPositions[selectedIndex])
                     .height(3.dp),
@@ -71,8 +72,9 @@ fun TabSection(
                 indicator = indicator,
                 divider = {
                     if (enableDivider) {
-                        Divider(
+                        HorizontalDivider(
                             modifier = Modifier.fillMaxWidth(),
+                            thickness = DividerDefaults.Thickness,
                             color = MaterialTheme.colorScheme.outlineVariant
                         )
                     }
@@ -86,8 +88,9 @@ fun TabSection(
                 indicator = indicator,
                 divider = {
                     if (enableDivider) {
-                        Divider(
+                        HorizontalDivider(
                             modifier = Modifier.fillMaxWidth(),
+                            thickness = DividerDefaults.Thickness,
                             color = MaterialTheme.colorScheme.outlineVariant
                         )
                     }

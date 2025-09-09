@@ -35,12 +35,5 @@ interface PostCommentDao {
 
     @Query("UPDATE postComment SET dislike = CASE WHEN dislike > 0 THEN dislike - 1 ELSE 0 END WHERE `index` = :id")
     fun decreaseDislikes(id: Int)
-
-    @Query("SELECT 'like', dislike FROM postComment WHERE 'index' = :commentId LIMIT 1")
-    suspend fun getCounts(commentId: Int): PostCommentCounts?
 }
 
-data class PostCommentCounts(
-    val likes: Int,
-    val dislikes: Int
-)

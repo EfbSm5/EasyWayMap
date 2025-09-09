@@ -3,7 +3,7 @@ package com.efbsm5.easyway.viewmodel.communityViewModel
 import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.community.CommunityContract
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
-import com.efbsm5.easyway.repo.CommunityRepository
+import com.efbsm5.easyway.repo.DataRepository
 import kotlinx.coroutines.Dispatchers
 
 class CommunityViewModel :
@@ -20,12 +20,17 @@ class CommunityViewModel :
         when (event) {
             CommunityContract.Event.Loading -> {
                 asyncLaunch(Dispatchers.IO) {
-                    val posts = CommunityRepository.fetchPosts()
-                    setState {
-                        copy(
-                            isLoading = false, rawPosts = posts
-                        )
+                    val r = DataRepository.getAllPosts()
+                    r.onSuccess {
+                        setState {
+                            copy(
+                                isLoading = false, rawPosts = it
+                            )
+                        }
+                    }.onFailure {
+                        setState { copy(error = "error", isLoading = false) }
                     }
+
                 }
             }
 

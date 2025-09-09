@@ -64,7 +64,7 @@ sealed class BottomDestination(
 ) {
     data object Map : BottomDestination("map", Icons.Default.Place, "Map")
     data object Community :
-        BottomDestination("community_root", Icons.Default.AccountBox, "Community")
+        BottomDestination("community_graph", Icons.Default.AccountBox, "Community")
 
     data object Home : BottomDestination("home", Icons.Default.Home, "Home")
 }

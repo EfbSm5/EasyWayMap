@@ -32,7 +32,7 @@ object DataRepository {
     enum class TargetType { POST, POINT, POST_COMMENT, POINT_COMMENT }
 
     fun getAllPoints(): Result<List<EasyPointSimplify>> = runCatching { pointDao.loadAllPoints() }
-    fun getAllPosts(): Result<List<Post>> = runCatching { postDao.getAllPosts() }
+    fun getAllPosts(): Result<List<PostAndUser>> = runCatching { postDao.getAllPosts() }
     fun getPostAndUser(): Result<List<PostAndUser>> = runCatching { postDao.getPostWithUser() }
     fun getPostComments(id: Int): Result<List<PostCommentAndUser>> =
         runCatching { postDao.getPostWithComment(id).comments }

@@ -1,6 +1,7 @@
 package com.efbsm5.easyway.contract.card
 
 import android.net.Uri
+import androidx.compose.runtime.Immutable
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.state.IUiEffect
 import com.efbsm5.easyway.state.IUiEvent
@@ -12,6 +13,7 @@ class NewPointCardContract {
         data class ChangeInfo(val string: String) : Event()
     }
 
+    @Immutable
     data class State(
         val tempPoint: EasyPoint
 

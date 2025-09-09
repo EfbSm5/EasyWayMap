@@ -31,7 +31,6 @@ import com.efbsm5.easyway.data.WuhanBoxGenerator
 import com.efbsm5.easyway.repo.DataRepository
 import com.efbsm5.easyway.repo.MultiPointOverlayRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.map
 
 /**
  * MultiPointOverlayViewModel
@@ -76,21 +75,24 @@ class MultiPointOverlayViewModel :
                 )
             }
         } else {
-            DataRepository.getAllPoints().map { pointSimplifies ->
-                pointSimplifies.map { pointSimplify ->
+            val r = DataRepository.getAllPoints()
+            r.onSuccess { pointList ->
+                pointList.map { pointSimplify ->
                     MultiPointItem(LatLng(pointSimplify.lat, pointSimplify.lng))
+                }.let {
+                    setState {
+                        copy(
+                            isLoading = false, multiPointItems = it
+                        )
+                    }
                 }
-            }.collect {
-                setState {
-                    copy(
-                        isLoading = false, multiPointItems = it
-                    )
-                }
+            }.onFailure {
+                setState { copy(isLoading = false) }
+                setEffect { MultiPointOverlayContract.Effect.Toast("error") }
             }
         }
-
-
     }
+
 
     fun onMultiPointItemClick(pointItem: MultiPointItem) {
         setEvent(MultiPointOverlayContract.Event.MultiPointClick(pointItem))

@@ -3,6 +3,7 @@ package com.efbsm5.easyway.ui
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -80,15 +81,17 @@ fun EasyWay() {
                             containerColor = cfg.containerColor
                                 ?: FloatingActionButtonDefaults.containerColor,
                             contentColor = cfg.contentColor
-                                ?: FloatingActionButtonDefaults.containerColor
-                        )
+                                ?: FloatingActionButtonDefaults.containerColor,
+
+                            )
                     } else {
                         FloatingActionButton(
                             onClick = cfg.onClick,
                             containerColor = cfg.containerColor
                                 ?: FloatingActionButtonDefaults.containerColor,
                             contentColor = cfg.contentColor
-                                ?: FloatingActionButtonDefaults.containerColor
+                                ?: FloatingActionButtonDefaults.containerColor,
+                            modifier = Modifier.offset(y = -cfg.offset)
                         ) {
                             Icon(cfg.icon, contentDescription = null)
                         }
@@ -103,8 +106,14 @@ fun EasyWay() {
                     .padding(innerPadding)
                     .fillMaxSize()
             ) {
-                composable(RootRoute.Map.route) { MapPage() }
-                composable(RootRoute.Home.route) { HomePage() }
+                composable(RootRoute.Map.route) {
+                    scaffoldController.refresh()
+                    MapPage()
+                }
+                composable(RootRoute.Home.route) {
+                    scaffoldController.refresh()
+                    HomePage()
+                }
 
                 // 嵌套社区图
                 navigation(
@@ -112,6 +121,7 @@ fun EasyWay() {
                     route = RootRoute.CommunityGraph.route
                 ) {
                     composable(CommunityRoute.Square.route) { entry ->
+                        scaffoldController.refresh()
                         val viewModel: CommunityViewModel = viewModel(entry)
                         CommunitySquareRoute(
                             back = { navController.popBackStack() },
@@ -151,7 +161,7 @@ fun EasyWay() {
                         val squareEntry =
                             navController.getBackStackEntry(CommunityRoute.Square.route)
                         val cached = squareEntry.savedStateHandle.get<PostAndUser>("postAndUser")
-
+                        scaffoldController.refresh()
                         val postId =
                             detailEntry.arguments?.getInt(CommunityRoute.Detail.ARG_POST_ID)
                         val viewModel: DetailViewModel = viewModel(detailEntry)
@@ -169,6 +179,7 @@ fun EasyWay() {
 
                     composable(CommunityRoute.NewPost.route) { newEntry ->
                         val viewModel: NewPostViewModel = viewModel()
+                        scaffoldController.refresh()
                         NewPostPage(
                             back = { navController.popBackStack() },
                             onPostSuccess = { newPostAndUser ->
@@ -177,7 +188,8 @@ fun EasyWay() {
                                     navController.getBackStackEntry(CommunityRoute.Square.route)
                                 squareEntry.savedStateHandle["newPost"] = newPostAndUser
                                 navController.popBackStack()
-                            }, viewModel = viewModel
+                            },
+                            viewModel = viewModel
                         )
                     }
                 }

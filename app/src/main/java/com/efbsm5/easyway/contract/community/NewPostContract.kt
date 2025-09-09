@@ -1,6 +1,7 @@
 package com.efbsm5.easyway.contract.community
 
 import android.net.Uri
+import androidx.compose.runtime.Immutable
 import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.getInitPost
 import com.efbsm5.easyway.state.IUiEffect
@@ -21,6 +22,7 @@ class NewPostContract {
 
     }
 
+    @Immutable
     data class State(
         val isLoading: Boolean = true,
         val post: Post = getInitPost(),

@@ -1,5 +1,6 @@
 package com.efbsm5.easyway.contract.community
 
+import androidx.compose.runtime.Immutable
 import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
@@ -19,6 +20,7 @@ class DetailContract {
         data class ShowInput(val boolean: Boolean) : Event()
     }
 
+    @Immutable
     data class State(
         val loading: Boolean = true,
         val user: User? = null,

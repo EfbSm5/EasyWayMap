@@ -51,5 +51,7 @@ class MultiPointOverlayContract {
         val multiPointItems: List<MultiPointItem>
     ) : IUiState
 
-    sealed class Effect : IUiEffect
+    sealed class Effect : IUiEffect {
+        data class Toast(val string: String) : Effect()
+    }
 }

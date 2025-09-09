@@ -1,5 +1,6 @@
 package com.efbsm5.easyway.contract.community
 
+import androidx.compose.runtime.Immutable
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
 import com.efbsm5.easyway.state.IUiEffect
 import com.efbsm5.easyway.state.IUiEvent
@@ -14,6 +15,7 @@ class CommunityContract {
         data object Submit : Event()
     }
 
+    @Immutable
     data class State(
         val isLoading: Boolean = false,
         val isRefreshing: Boolean = false,

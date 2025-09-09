@@ -24,6 +24,10 @@ class CommentAndHistoryCardViewModel() :
         setState { copy(commentContent = string) }
     }
 
+    fun onEvent(event: CommentAndHistoryCardContract.Event) {
+        setEvent(event)
+    }
+
     fun update() {
         setEffect {
             CommentAndHistoryCardContract.Effect.Update
@@ -53,6 +57,14 @@ class CommentAndHistoryCardViewModel() :
 
 
             is CommentAndHistoryCardContract.Event.ChangeComment -> TODO()
+            is CommentAndHistoryCardContract.Event.DislikeComment -> TODO()
+            is CommentAndHistoryCardContract.Event.DislikePoint -> TODO()
+            is CommentAndHistoryCardContract.Event.LikeComment -> TODO()
+            is CommentAndHistoryCardContract.Event.LikePoint -> TODO()
+            is CommentAndHistoryCardContract.Event.Navigate -> TODO()
+            CommentAndHistoryCardContract.Event.PublishComment -> TODO()
+            is CommentAndHistoryCardContract.Event.SelectTab -> TODO()
+            CommentAndHistoryCardContract.Event.Update -> TODO()
         }
     }
 

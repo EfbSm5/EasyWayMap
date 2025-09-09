@@ -18,8 +18,9 @@ interface PostDao {
     @Query("SELECT * FROM post WHERE id = :id")
     fun getPostById(id: Int): PostAndUser
 
+    @Transaction
     @Query("SELECT * FROM post")
-    fun getAllPosts(): List<Post>
+    fun getAllPosts(): List<PostAndUser>
 
 
     @Query("DELETE FROM post WHERE id = :id")
