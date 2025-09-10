@@ -14,14 +14,6 @@ class NewPostViewModel :
 
     override fun handleEvents(event: NewPostContract.Event) {
         when (event) {
-            NewPostContract.Event.Loading -> {
-                setState { copy(isLoading = false) }
-            }
-
-            is NewPostContract.Event.ChangeDialogData -> {
-                setState { copy(dialogData = event.data) }
-            }
-
             is NewPostContract.Event.EditContent -> {
                 setState { copy(post = post.copy(content = event.string)) }
             }
@@ -35,7 +27,7 @@ class NewPostViewModel :
             }
 
             NewPostContract.Event.Publish -> {
-                push()
+                publish()
             }
 
             is NewPostContract.Event.SelectedCategory -> {
@@ -46,10 +38,6 @@ class NewPostViewModel :
                 setState { copy(post = post.copy(title = event.string)) }
             }
         }
-    }
-
-    fun onEvent(event: NewPostContract.Event) {
-        setEvent(event)
     }
 
     fun onEffect(effect: NewPostContract.Effect) {
@@ -68,11 +56,10 @@ class NewPostViewModel :
         setState { copy(post = post.copy(position = location)) }
     }
 
-    private fun push() {
+    private fun publish() {
         asyncLaunch {
             DataRepository.uploadPost(currentState.post)
             setEffect { NewPostContract.Effect.Upload }
-
         }
     }
 

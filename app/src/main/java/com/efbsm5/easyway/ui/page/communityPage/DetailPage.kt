@@ -48,7 +48,6 @@ import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -77,35 +76,46 @@ import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
 import com.efbsm5.easyway.data.models.assistModel.PostCommentAndUser
+import com.efbsm5.easyway.showMsg
 import com.efbsm5.easyway.ui.components.MediaGrid
 import com.efbsm5.easyway.ui.components.ReactionButton
 import com.efbsm5.easyway.ui.components.UserAvatar
 import com.efbsm5.easyway.viewmodel.communityViewModel.DetailViewModel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
 
 @Composable
 fun DetailRoute(
-    postAndUser: PostAndUser?,
-    postId: Int?,
+    postAndUser: PostAndUser,
     onBack: () -> Unit,
     viewModel: DetailViewModel,
     onLikeUpdated: (PostAndUser) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val snackBarHostState = remember { SnackbarHostState() }
 
-    // 初始化数据（仅一次）
     LaunchedEffect(Unit) {
-        postAndUser?.let { viewModel.setPostAndUser(postAndUser) } ?: viewModel.getPost(postId!!)
+        postAndUser.let { viewModel.setPostAndUser(postAndUser) }
     }
 
-    // 收集一次性 Effect
     LaunchedEffect(Unit) {
-        viewModel.effect.collect { effect ->
+        viewModel.effect.onEach { effect ->
             when (effect) {
                 DetailContract.Effect.Back -> onBack()
-                is DetailContract.Effect.Toast -> snackBarHostState.showSnackbar(effect.string)
+                is DetailContract.Effect.Toast -> showMsg(effect.string)
+                is DetailContract.Effect.Liked -> {
+                    val snapshot = postAndUser.post
+                    val delta = if (effect.boolean) 1 else -1
+                    onLikeUpdated(
+                        postAndUser.copy(
+                            post = snapshot.copy(
+                                likedByMe = effect.boolean,
+                                like = (snapshot.like + delta).coerceAtLeast(0)
+                            )
+                        )
+                    )
+                }
             }
-        }
+        }.collect()
     }
 
     DetailScreen(

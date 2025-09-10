@@ -8,7 +8,6 @@ import com.efbsm5.easyway.state.IUiState
 
 class CommunityContract {
     sealed class Event : IUiEvent {
-        data object Loading : Event()
         data class TabSelect(val int: Int) : Event()
         data class ClickPost(val postAndUser: PostAndUser) : Event()
         data class EditText(val string: String) : Event()
@@ -17,11 +16,9 @@ class CommunityContract {
 
     @Immutable
     data class State(
-        val isLoading: Boolean = false,
-        val isRefreshing: Boolean = false,
+        val filterPosts: List<PostAndUser> = emptyList(),
         val error: String? = null,
-        val rawPosts: List<PostAndUser> = emptyList(),
-        val filteredPosts: List<PostAndUser> = emptyList(), // 根据 tab / 搜索
+        val isRefreshing: Boolean = false,
         val selectedTab: Int = 0,
         val searchText: String = ""
     ) : IUiState

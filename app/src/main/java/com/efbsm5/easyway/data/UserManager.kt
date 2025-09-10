@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.efbsm5.easyway.SDKUtils
+import com.efbsm5.easyway.data.models.User
 
 object UserManager {
     private val prefs: SharedPreferences =
@@ -24,4 +25,12 @@ object UserManager {
         set(value) {
             prefs.edit { putString("avatar", value) }
         }
+
+    fun getUser(): User {
+        return User(
+            id = userId,
+            name = name,
+            avatar = avatar
+        )
+    }
 }

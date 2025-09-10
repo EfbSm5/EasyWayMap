@@ -18,15 +18,6 @@ class DetailViewModel :
         setEvent(DetailContract.Event.Load(postAndUser))
     }
 
-    fun getPost(postId: Int) {
-        asyncLaunch(Dispatchers.IO) {
-            val r = DataRepository.getPost(postId)
-            r.onSuccess { setEvent(DetailContract.Event.Load(it)) }.onFailure {
-                setState { copy(error = "error no post") }
-            }
-        }
-    }
-
     fun onEvent(event: DetailContract.Event) {
         setEvent(event)
     }
@@ -89,7 +80,7 @@ class DetailViewModel :
         val snapshot = currentState.post
         val targetLiked = !snapshot!!.likedByMe
         val delta = if (targetLiked) 1 else -1
-
+        setEffect { DetailContract.Effect.Liked(targetLiked) }
         // 1. 乐观
         setState {
             copy(
@@ -98,7 +89,6 @@ class DetailViewModel :
                 )
             )
         }
-
         // 2. 异步请求
         asyncLaunch(Dispatchers.IO) {
             val res = runCatching {
@@ -270,10 +260,7 @@ class DetailViewModel :
 ////                    )
 //                    )
 //                }
-
         }
-
-
     }
 
     fun back() {

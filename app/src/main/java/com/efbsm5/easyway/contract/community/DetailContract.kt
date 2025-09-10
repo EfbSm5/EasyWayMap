@@ -35,5 +35,6 @@ class DetailContract {
     sealed class Effect : IUiEffect {
         object Back : Effect()
         internal class Toast(val string: String) : Effect()
+        internal class Liked(val boolean: Boolean) : Effect()
     }
 }

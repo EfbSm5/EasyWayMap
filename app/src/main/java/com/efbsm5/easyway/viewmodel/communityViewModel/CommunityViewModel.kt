@@ -3,36 +3,15 @@ package com.efbsm5.easyway.viewmodel.communityViewModel
 import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.community.CommunityContract
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
-import com.efbsm5.easyway.repo.DataRepository
 import kotlinx.coroutines.Dispatchers
 
 class CommunityViewModel :
     BaseViewModel<CommunityContract.Event, CommunityContract.State, CommunityContract.Effect>() {
-
-    init {
-        setEvent(CommunityContract.Event.Loading)
-    }
-
     override fun createInitialState(): CommunityContract.State = CommunityContract.State()
 
 
     override fun handleEvents(event: CommunityContract.Event) {
         when (event) {
-            CommunityContract.Event.Loading -> {
-                asyncLaunch(Dispatchers.IO) {
-                    val r = DataRepository.getAllPosts()
-                    r.onSuccess {
-                        setState {
-                            copy(
-                                isLoading = false, rawPosts = it
-                            )
-                        }
-                    }.onFailure {
-                        setState { copy(error = "error", isLoading = false) }
-                    }
-
-                }
-            }
 
             is CommunityContract.Event.ClickPost -> {
                 setEffect { CommunityContract.Effect.SelectedPost(event.postAndUser) }
@@ -51,8 +30,12 @@ class CommunityViewModel :
 
     fun updateSingle(updated: PostAndUser, insertIfMissing: Boolean = false) {
         setState {
-            copy(rawPosts = change(updated = updated, insertIfMissing = insertIfMissing))
+            copy(filterPosts = change(updated = updated, insertIfMissing = insertIfMissing))
         }
+    }
+
+    fun selectPost(posts: List<PostAndUser>) {
+        setState { copy(filterPosts = posts) }
     }
 
     private fun submit() {
@@ -63,7 +46,7 @@ class CommunityViewModel :
 
 
     private fun change(updated: PostAndUser, insertIfMissing: Boolean = false): List<PostAndUser> {
-        val old = currentState.rawPosts
+        val old = currentState.filterPosts
         val idx = old.indexOfFirst { it.post.id == updated.post.id }
         if (idx == -1) {
             if (!insertIfMissing) return old

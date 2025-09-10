@@ -32,12 +32,11 @@ object DataRepository {
     enum class TargetType { POST, POINT, POST_COMMENT, POINT_COMMENT }
 
     fun getAllPoints(): Result<List<EasyPointSimplify>> = runCatching { pointDao.loadAllPoints() }
-    fun getAllPosts(): Result<List<PostAndUser>> = runCatching { postDao.getAllPosts() }
+
     fun getPostAndUser(): Result<List<PostAndUser>> = runCatching { postDao.getPostWithUser() }
     fun getPostComments(id: Int): Result<List<PostCommentAndUser>> =
         runCatching { postDao.getPostWithComment(id).comments }
 
-    fun getPost(id: Int): Result<PostAndUser> = runCatching { postDao.getPostById(id) }
     fun getUserById(userId: Int): Result<User> =
         runCatching { userDao.getUserById(userId) ?: getInitUser() }
 
@@ -127,7 +126,7 @@ object DataRepository {
         runCatching { pointDao.searchEasyPointsByName(string) }
 
     fun addLikeForPost(postId: Int) {
-        postDao.increaseLike(postId)
+        runCatching { postDao.increaseLike(postId) }
     }
 
     fun decreaseLikeForPost(postId: Int) {

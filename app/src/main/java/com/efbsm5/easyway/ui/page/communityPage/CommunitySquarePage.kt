@@ -59,7 +59,9 @@ fun CommunitySquareRoute(
     back: () -> Unit,
     onSelectPost: (PostAndUser) -> Unit,
     onCreateNew: () -> Unit,
-    viewModel: CommunityViewModel = viewModel()
+    viewModel: CommunityViewModel = viewModel(),
+    posts: List<PostAndUser>,
+    loading: Boolean
 ) {
     val currentState by viewModel.uiState.collectAsState()
     val controller = LocalScaffoldController.current
@@ -70,6 +72,9 @@ fun CommunitySquareRoute(
             visible = true,
         )
     )
+    LaunchedEffect(posts) {
+        viewModel.selectPost(posts)
+    }
     // 收集一次性事件
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
@@ -81,7 +86,11 @@ fun CommunitySquareRoute(
     }
 
     CommunitySquareScreen(
-        state = currentState, onEvent = viewModel::handleEvents, back = viewModel::back
+        state = currentState,
+        onEvent = viewModel::handleEvents,
+        back = viewModel::back,
+        isLoading = loading,
+        filteredPosts = currentState.filterPosts,
     )
 }
 
@@ -89,21 +98,22 @@ fun CommunitySquareRoute(
 @Composable
 fun CommunitySquareScreen(
     state: CommunityContract.State,
+    isLoading: Boolean,
+    filteredPosts: List<PostAndUser>,
     onEvent: (CommunityContract.Event) -> Unit,
     back: () -> Unit,
-    modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
-    if (state.isLoading && state.rawPosts.isEmpty()) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    if (isLoading && filteredPosts.isEmpty()) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
         CommunitySquareSkeleton()
     }
 
     // 全屏错误
-    if (state.error != null && state.rawPosts.isEmpty()) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    if (state.error != null && filteredPosts.isEmpty()) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(state.error)
         }
 
@@ -136,7 +146,7 @@ fun CommunitySquareScreen(
                 onSelect = { onEvent(CommunityContract.Event.TabSelect(it)) })
         }
 
-        if (!state.isLoading && state.searchText.isNotBlank()) {
+        if (!isLoading && state.searchText.isNotBlank()) {
             item("activeSearchTag") {
 //                    AssistChip(
 //                        onClick = { /* 可加清空逻辑 */ },
@@ -146,7 +156,7 @@ fun CommunitySquareScreen(
             }
         }
 
-        if (state.filteredPosts.isEmpty()) {
+        if (filteredPosts.isEmpty()) {
             item("empty") {
                 Box(
                     Modifier
@@ -159,12 +169,12 @@ fun CommunitySquareScreen(
         } else {
             item {
                 PostList(
-                    posts = state.filteredPosts,
+                    posts = filteredPosts,
                     onClickPost = { onEvent(CommunityContract.Event.ClickPost(it)) })
             }
         }
 
-        if (state.isLoading && state.filteredPosts.isNotEmpty()) {
+        if (isLoading && filteredPosts.isNotEmpty()) {
             item("loadingMore") {
                 Row(
                     Modifier

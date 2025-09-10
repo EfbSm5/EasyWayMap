@@ -67,9 +67,13 @@ import com.efbsm5.easyway.R
 import com.efbsm5.easyway.SDKUtils
 import com.efbsm5.easyway.contract.community.NewPostContract
 import com.efbsm5.easyway.contract.community.NewPostContract.Effect
+import com.efbsm5.easyway.data.UserManager
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
-import com.efbsm5.easyway.ui.components.AppTopBar
+import com.efbsm5.easyway.ui.LocalScaffoldController
+import com.efbsm5.easyway.ui.TopBarConfig
 import com.efbsm5.easyway.viewmodel.communityViewModel.NewPostViewModel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
 
 
 @Composable
@@ -100,25 +104,32 @@ fun NewPostPage(
             type = "image/*"
         }
     }
-    LaunchedEffect(viewModel.effect) {
-        when (viewModel.effect) {
-            Effect.GetPhoto -> {
-                locationLauncher.launch(
-                    locationIntent
+    LaunchedEffect(Unit) {
+        viewModel.effect.onEach {
+            when (it) {
+                Effect.Back -> back()
+                Effect.GetLocation -> {
+                    photoLauncher.launch(photoIntent)
+                }
+
+                Effect.GetPhoto -> {
+                    locationLauncher.launch(locationIntent)
+                }
+
+                Effect.Upload -> onPostSuccess(
+                    PostAndUser(
+                        currentState.post,
+                        UserManager.getUser()
+                    )
                 )
             }
+        }.collect()
 
-            Effect.GetLocation -> {
-                photoLauncher.launch(photoIntent)
-            }
-
-            Effect.Back -> back()
-        }
     }
 
     PostScreen(
         state = currentState,
-        onEvent = viewModel::onEvent,
+        onEvent = viewModel::handleEvents,
         onEffect = viewModel::onEffect,
         back = back
     )
@@ -132,17 +143,21 @@ private fun PostScreen(
     onEffect: (Effect) -> Unit,
     back: () -> Unit
 ) {
-    // 统一滚动
     val scrollState = rememberScrollState()
-
+    val scaffoldController = LocalScaffoldController.current
+    scaffoldController.setTopBar(
+        TopBarConfig(
+            title = stringResource(R.string.addPost),
+            back = back,
+            show = true
+        )
+    )
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .imePadding()
                 .navigationBarsPadding()
         ) {
-            AppTopBar(onBack = back, title = stringResource(R.string.addPost))
-
             Column(
                 modifier = Modifier
                     .verticalScroll(scrollState)
@@ -181,7 +196,6 @@ private fun PostScreen(
                 Spacer(Modifier.height(28.dp))
             }
 
-            // 底部发布按钮悬浮/固定在底部
             Surface(
                 tonalElevation = 6.dp, shadowElevation = 8.dp
             ) {

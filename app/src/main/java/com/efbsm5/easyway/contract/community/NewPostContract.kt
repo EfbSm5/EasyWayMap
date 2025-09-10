@@ -10,10 +10,8 @@ import com.efbsm5.easyway.state.IUiState
 
 class NewPostContract {
     sealed class Event : IUiEvent {
-        data object Loading : Event()
         data class EditTitle(val string: String) : Event()
         data class EditContent(val string: String) : Event()
-        data class ChangeDialogData(val data: String) : Event()
 
         data class SelectedCategory(val int: Int) : Event()
         data class TitleChanged(val string: String) : Event()
@@ -24,9 +22,7 @@ class NewPostContract {
 
     @Immutable
     data class State(
-        val isLoading: Boolean = true,
         val post: Post = getInitPost(),
-        val dialogData: String? = null,
         val error: String? = null,
         val previewPhoto: Uri? = null,
         val onSelectedCategory: Int = 0
