@@ -23,6 +23,7 @@
 package com.efbsm5.easyway.contract.map
 
 import com.amap.api.maps.model.LatLng
+import com.amap.api.maps.model.MultiPointItem
 import com.efbsm5.easyway.state.IUiEffect
 import com.efbsm5.easyway.state.IUiEvent
 import com.efbsm5.easyway.state.IUiState
@@ -41,6 +42,8 @@ class LocationTrackingContract {
     sealed class Event : IUiEvent {
         object ShowOpenGPSDialog : Event()
         object HideOpenGPSDialog : Event()
+        data class ClickPoint(val multiPointItem: MultiPointItem) : Event()
+
     }
 
     data class State(
@@ -52,11 +55,14 @@ class LocationTrackingContract {
         val grantLocationPermission: Boolean,
         // 当前位置的经纬度
         val locationLatLng: LatLng?,
+        val isLoading: Boolean = true,
         val mapProperties: MapProperties,
-        val mapUiSettings: MapUiSettings
+        val mapUiSettings: MapUiSettings,
+        val clickedPoint: LatLng?
     ) : IUiState
 
     sealed class Effect : IUiEffect {
         internal data class Toast(val msg: String?) : Effect()
+        internal data class ClickPoint(val multiPointItem: MultiPointItem) : Effect()
     }
 }

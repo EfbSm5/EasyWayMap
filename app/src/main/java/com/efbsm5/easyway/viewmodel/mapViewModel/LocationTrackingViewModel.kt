@@ -33,6 +33,7 @@ import com.amap.api.location.AMapLocationListener
 import com.amap.api.maps.LocationSource
 import com.amap.api.maps.LocationSource.OnLocationChangedListener
 import com.amap.api.maps.model.LatLng
+import com.amap.api.maps.model.MultiPointItem
 import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.map.LocationTrackingContract
 import com.efbsm5.easyway.data.LocationSaver
@@ -65,7 +66,8 @@ class LocationTrackingViewModel :
             isShowOpenGPSDialog = false,
             grantLocationPermission = false,
             locationLatLng = null,
-            isOpenGps = null
+            isOpenGps = null,
+            clickedPoint = null
         )
     }
 
@@ -78,8 +80,11 @@ class LocationTrackingViewModel :
             is LocationTrackingContract.Event.HideOpenGPSDialog -> {
                 setState { copy(isShowOpenGPSDialog = false) }
             }
+
+            is LocationTrackingContract.Event.ClickPoint -> clickPoint(event.multiPointItem)
         }
     }
+
 
     /**
      * 检查系统GPS开关是否打开
@@ -92,6 +97,11 @@ class LocationTrackingViewModel :
         } else {
             hideOpenGPSDialog()
         }
+    }
+
+    private fun clickPoint(multiPointItem: MultiPointItem) {
+        setState { copy(clickedPoint = multiPointItem.latLng) }
+        setEffect { LocationTrackingContract.Effect.ClickPoint(multiPointItem) }
     }
 
     fun hideOpenGPSDialog() {

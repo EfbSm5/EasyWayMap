@@ -2,6 +2,7 @@ package com.efbsm5.easyway.contract.map
 
 import androidx.compose.runtime.Immutable
 import com.amap.api.maps.model.LatLng
+import com.amap.api.maps.model.MultiPointItem
 import com.efbsm5.easyway.state.IUiEffect
 import com.efbsm5.easyway.state.IUiEvent
 import com.efbsm5.easyway.state.IUiState
@@ -12,7 +13,7 @@ class MapContract {
         data class ChangeState(val mapState: MapState) : Event()
         data class ChangeScreen(val cardScreen: CardScreen) : Event()
         data object AddPoint : Event()
-        data class ClickPoint(val latLng: LatLng) : Event()
+        data class ClickPoint(val multiPointItem: MultiPointItem) : Event()
         data object SwitchMap : Event()
         data class Navigate(val latLng: LatLng) : Event()
         data class EditText(val string: String) : Event()
@@ -32,7 +33,6 @@ class MapContract {
 }
 
 sealed interface MapState {
-    data object PointState : MapState
     data object LocationState : MapState
     data class Route(val destination: LatLng) : MapState
 }

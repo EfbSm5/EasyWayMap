@@ -26,6 +26,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -53,7 +54,6 @@ import com.efbsm5.easyway.ui.route.DrivingRouteOverlayContent
 import com.efbsm5.easyway.ui.route.RideRouteOverlayContent
 import com.efbsm5.easyway.ui.route.WalkRouteOverlayContent
 import com.efbsm5.easyway.viewmodel.mapViewModel.RoutePlanViewModel
-import com.google.accompanist.flowlayout.FlowRow
 import com.melody.map.gd_compose.GDMap
 import com.melody.map.gd_compose.position.rememberCameraPositionState
 import kotlinx.coroutines.flow.collect

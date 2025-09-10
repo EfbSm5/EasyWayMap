@@ -46,7 +46,6 @@ import com.efbsm5.easyway.viewmodel.communityViewModel.NewPostViewModel
 @Composable
 fun EasyWay() {
     val navController = rememberNavController()
-    navController.currentDestination
     val nav = navController.currentBackStackEntryAsState().value?.destination
     val scaffoldController = remember { ScaffoldController() }
     val snackBarHostState = remember { SnackbarHostState() }
@@ -111,11 +110,9 @@ fun EasyWay() {
                     .fillMaxSize()
             ) {
                 composable(RootRoute.Map.route) {
-//                    scaffoldController.refresh()
                     MapPage()
                 }
                 composable(RootRoute.Home.route) {
-//                    scaffoldController.refresh()
                     HomePage()
                 }
 
@@ -125,7 +122,6 @@ fun EasyWay() {
                     route = RootRoute.CommunityGraph.route
                 ) {
                     composable(CommunityRoute.Square.route) { entry ->
-//                        scaffoldController.refresh()
                         val viewModel: CommunityViewModel = viewModel(entry)
                         CommunitySquareRoute(
                             back = { navController.popBackStack() },
@@ -164,7 +160,6 @@ fun EasyWay() {
                         val squareEntry =
                             navController.getBackStackEntry(CommunityRoute.Square.route)
                         val cached = squareEntry.savedStateHandle.get<PostAndUser>("postAndUser")
-                        scaffoldController.refresh()
                         val postId =
                             detailEntry.arguments?.getInt(CommunityRoute.Detail.ARG_POST_ID)
                         val viewModel: DetailViewModel = viewModel(detailEntry)
@@ -182,7 +177,6 @@ fun EasyWay() {
 
                     composable(CommunityRoute.NewPost.route) { newEntry ->
                         val viewModel: NewPostViewModel = viewModel()
-                        scaffoldController.refresh()
                         NewPostPage(
                             back = { navController.popBackStack() },
                             onPostSuccess = { newPostAndUser ->

@@ -10,6 +10,7 @@ import android.os.Build
 import android.util.Log
 import androidx.core.net.toUri
 import com.amap.api.maps.model.LatLng
+import com.amap.api.maps.model.MultiPointItem
 import com.amap.api.maps.model.Poi
 import com.amap.api.services.core.LatLonPoint
 import com.amap.api.services.core.PoiItemV2
@@ -53,6 +54,12 @@ fun Context.startMapApp(dstLat: Double, dstLon: Double, dstName: String) {
     }
 }
 
+fun Poi.convertToMultiPointItem(): MultiPointItem {
+    val item = MultiPointItem(this.coordinate)
+    item.title = this.name
+    return item
+}
+
 fun convertToLatLonPoint(latLng: LatLng): LatLonPoint {
     return LatLonPoint(latLng.latitude, latLng.longitude)
 }
@@ -80,18 +87,14 @@ fun calculateDistance(point1: LatLng, point2: LatLng): Float {
 }
 
 @SuppressLint("QueryPermissionsNeeded")
-fun onNavigate(context: Context, latLng: LatLng) {
+fun onNavigate(latLng: LatLng) {
     val uri = "geo:${latLng.latitude},${latLng.longitude}".toUri()
     val intent = Intent(Intent.ACTION_VIEW, uri)
-    if (intent.resolveActivity(context.packageManager) != null) {
-        context.startActivity(intent)
+    if (intent.resolveActivity(SDKUtils.getContext().packageManager) != null) {
+        SDKUtils.getContext().startActivity(intent)
     } else {
         showMsg("未找到地图应用")
     }
-}
-
-fun locationToLatlng(location: Location): LatLng {
-    return LatLng(location.latitude, location.longitude)
 }
 
 fun Float.formatDistance(): String {
@@ -146,23 +149,6 @@ fun getInitPost(): Post {
 
 fun EasyPoint.getLatlng(): LatLng {
     return LatLng(this.lat, this.lng)
-}
-
-fun poiToEasyPoint(poi: Poi): EasyPoint {
-    return EasyPoint(
-        pointId = 0,
-        name = poi.name,
-        type = "一般点",
-        info = "无详细描述",
-        location = "无详细描述",
-        photo = null,
-        refreshTime = "未知",
-        likes = 0,
-        dislikes = 0,
-        lat = poi.coordinate.latitude,
-        lng = poi.coordinate.longitude,
-        userId = 0,
-    )
 }
 
 fun addPoiItem(poiItemV2: PoiItemV2): EasyPoint {

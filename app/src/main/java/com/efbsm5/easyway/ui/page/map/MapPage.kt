@@ -56,8 +56,6 @@ fun MapPage() {
     BackHandler(
         enabled = currentState.cardScreen != CardScreen.Function,
         onBack = { viewmodel.onEvent(MapContract.Event.ChangeScreen(CardScreen.Function)) })
-//    rememberBottomSheetScaffoldState(sheetState)
-
     MapScreen(
         sheetState = sheetState,
         sheetContent = {
@@ -69,16 +67,8 @@ fun MapPage() {
         mapPlace = {
             when (currentState.mapState) {
                 MapState.LocationState -> {
-                    LocationTrackingScreen()
-                }
-
-                MapState.PointState -> {
-                    MultiPointOverlayScreen(onclick = {
-                        viewmodel.onEvent(
-                            MapContract.Event.ClickPoint(
-                                it
-                            )
-                        )
+                    LocationTrackingScreen(onClick = {
+                        viewmodel.handleEvents(MapContract.Event.ClickPoint(it))
                     })
                 }
 

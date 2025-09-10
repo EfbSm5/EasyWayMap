@@ -32,11 +32,14 @@ import com.amap.api.maps.CameraUpdateFactory
 import com.amap.api.maps.model.BitmapDescriptorFactory
 import com.amap.api.maps.model.CameraPosition
 import com.amap.api.maps.model.LatLng
+import com.amap.api.maps.model.MultiPointItem
 import com.efbsm5.easyway.contract.map.LocationTrackingContract
+import com.efbsm5.easyway.convertToMultiPointItem
 import com.efbsm5.easyway.dialog.ShowOpenGPSDialog
 import com.efbsm5.easyway.launcher.handlerGPSLauncher
 import com.efbsm5.easyway.repo.MultiPointOverlayRepository
 import com.efbsm5.easyway.showMsg
+import com.efbsm5.easyway.ui.components.melody.RedCenterLoading
 import com.efbsm5.easyway.ui.components.requestMultiplePermission
 import com.efbsm5.easyway.viewmodel.mapViewModel.LocationTrackingViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -46,6 +49,7 @@ import com.melody.map.gd_compose.overlay.MultiPointOverlay
 import com.melody.map.gd_compose.overlay.rememberMarkerState
 import com.melody.map.gd_compose.position.rememberCameraPositionState
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.onEach
 
 /**
@@ -57,25 +61,22 @@ import kotlinx.coroutines.flow.onEach
  */
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-internal fun LocationTrackingScreen() {
+internal fun LocationTrackingScreen(onClick: (MultiPointItem) -> Unit) {
     val viewModel: LocationTrackingViewModel = viewModel()
     val currentState by viewModel.uiState.collectAsState()
     val cameraPosition = rememberCameraPositionState {
-        // 不预加载显示默认北京的位置
-        position = CameraPosition(LatLng(0.0, 0.0), 11f, 0f, 0f)
+        position = CameraPosition(LatLng(39.91, 116.40), 11f, 0f, 0f)
     }
-    var firstValue by remember { mutableStateOf<LatLng?>(null) }
+    var firstValue by remember { mutableStateOf(false) }
     val markerState = rememberMarkerState()
-
-
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.onEach {
-            if (it is LocationTrackingContract.Effect.Toast) {
-                showMsg(it.msg)
+            when (it) {
+                is LocationTrackingContract.Effect.Toast -> showMsg(it.msg)
+                is LocationTrackingContract.Effect.ClickPoint -> onClick(it.multiPointItem)
             }
         }.collect()
     }
-
     val openGpsLauncher = handlerGPSLauncher(viewModel::checkGpsStatus)
     val reqGPSPermission = requestMultiplePermission(
         permissions = listOf(
@@ -91,14 +92,16 @@ internal fun LocationTrackingScreen() {
             viewModel.checkGpsStatus()
         }
     }
-
-    LaunchedEffect(currentState.locationLatLng) {
-        if (null == currentState.locationLatLng) return@LaunchedEffect
-        if (null == firstValue)
-            firstValue = currentState.locationLatLng
+    LaunchedEffect(currentState.clickedPoint) {
+        snapshotFlow { currentState.clickedPoint }.filterNotNull()
+            .collect { markerState.position = it }
     }
-    LaunchedEffect(firstValue) {
-        cameraPosition.move(CameraUpdateFactory.newLatLng(currentState.locationLatLng))
+    LaunchedEffect(currentState.locationLatLng) {
+        if (null != currentState.locationLatLng && !firstValue) {
+            firstValue = true
+            cameraPosition.move(CameraUpdateFactory.newLatLng(currentState.locationLatLng))
+        }
+
     }
 
     LaunchedEffect(currentState.isOpenGps, reqGPSPermission.allPermissionsGranted) {
@@ -120,24 +123,34 @@ internal fun LocationTrackingScreen() {
 
     Box(modifier = Modifier.fillMaxSize()) {
         GDMap(
+            modifier = Modifier.matchParentSize(),
             cameraPositionState = cameraPosition,
             properties = currentState.mapProperties,
             uiSettings = currentState.mapUiSettings,
             locationSource = viewModel,
-            onMapLoaded = viewModel::checkGpsStatus
-        ) {
+            onMapLoaded = viewModel::checkGpsStatus,
+            onMapClick = {
+                viewModel.handleEvents(LocationTrackingContract.Event.ClickPoint(MultiPointItem(it)))
+            },
+            onMapPOIClick = {
+                it?.let {
+                    viewModel.handleEvents(LocationTrackingContract.Event.ClickPoint(it.convertToMultiPointItem()))
+                }
+            }) {
             MultiPointOverlay(
                 enable = true,
                 icon = MultiPointOverlayRepository.initMultiPointIcon(),
                 multiPointItems = MultiPointOverlayRepository.initMultiPointItemList(),
-                onClick = {}
-            )
+                onClick = { viewModel.handleEvents(LocationTrackingContract.Event.ClickPoint(it)) })
             Marker(
                 icon = BitmapDescriptorFactory.defaultMarker(),
                 state = markerState,
-                visible = false,
+                visible = currentState.clickedPoint != null,
                 isClickable = false
             )
+        }
+        if (currentState.isLoading) {
+            RedCenterLoading()
         }
 
     }
