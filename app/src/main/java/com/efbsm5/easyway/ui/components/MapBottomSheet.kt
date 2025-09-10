@@ -1,4 +1,4 @@
-package com.efbsm5.easyway.ui.page.map
+package com.efbsm5.easyway.ui.components
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.core.animateFloatAsState
@@ -37,7 +37,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.efbsm5.easyway.ui.components.SearchBar
 import io.morfly.compose.bottomsheet.material3.BottomSheetScaffold
 import io.morfly.compose.bottomsheet.material3.BottomSheetState
 import io.morfly.compose.bottomsheet.material3.rememberBottomSheetScaffoldState
@@ -48,7 +47,7 @@ enum class SheetValue { Collapsed, PartiallyExpanded, Expanded }
 @SuppressLint("ConfigurationScreenWidthHeight")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun MapScreen(
+fun MapBottomSheet(
     sheetState: BottomSheetState<SheetValue>,
     sheetContent: @Composable (ColumnScope.() -> Unit) = {},
     mapPlace: @Composable (() -> Unit) = {},

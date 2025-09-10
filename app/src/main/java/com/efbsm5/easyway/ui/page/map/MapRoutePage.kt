@@ -11,12 +11,15 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.efbsm5.easyway.contract.map.MapContract
+import com.efbsm5.easyway.contract.map.MapRouteContract
 import com.efbsm5.easyway.contract.map.MapState
 import com.efbsm5.easyway.showMsg
+import com.efbsm5.easyway.ui.components.MapBottomSheet
+import com.efbsm5.easyway.ui.components.SheetValue
 import com.efbsm5.easyway.ui.components.mapcards.CardScreen
 import com.efbsm5.easyway.ui.components.mapcards.MapPageCard
-import com.efbsm5.easyway.viewmodel.mapViewModel.MapPageViewModel
+import com.efbsm5.easyway.viewmodel.mapViewModel.MapRouteViewModel
+import com.efbsm5.easyway.viewmodel.mapViewModel.MapViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import io.morfly.compose.bottomsheet.material3.rememberBottomSheetState
 import kotlinx.coroutines.flow.collect
@@ -31,15 +34,16 @@ import kotlinx.coroutines.flow.onEach
 )
 @Preview
 @Composable
-fun MapPage() {
-    val viewmodel: MapPageViewModel = viewModel()
+fun MapRoutePage(
+    viewmodel: MapRouteViewModel = viewModel()
+) {
     val currentState by viewmodel.uiState.collectAsState()
 
     val sheetState = rememberBottomSheetState(
         initialValue = SheetValue.Collapsed, defineValues = {
             SheetValue.Collapsed at height(0.dp)
-            SheetValue.PartiallyExpanded at offset(percent = 60)
-            SheetValue.Expanded at contentHeight
+            SheetValue.PartiallyExpanded at contentHeight
+            SheetValue.Expanded at height(percent = 100)
         })
     LaunchedEffect(Unit) {
         snapshotFlow { currentState.cardScreen }.drop(1).collect {
@@ -49,41 +53,45 @@ fun MapPage() {
     LaunchedEffect(viewmodel.effect) {
         viewmodel.effect.onEach { effect ->
             when (effect) {
-                is MapContract.Effect.Toast -> showMsg(effect.msg)
+                is MapRouteContract.Effect.Toast -> showMsg(effect.msg)
             }
         }.collect()
     }
+    val viewModel: MapViewModel = viewModel()
+
     BackHandler(
         enabled = currentState.cardScreen != CardScreen.Function,
-        onBack = { viewmodel.onEvent(MapContract.Event.ChangeScreen(CardScreen.Function)) })
-    MapScreen(
+        onBack = { viewmodel.handleEvents(MapRouteContract.Event.ChangeScreen(CardScreen.Function)) })
+    MapBottomSheet(
         sheetState = sheetState,
         sheetContent = {
             MapPageCard(
-                onNavigate = { viewmodel.onEvent(MapContract.Event.ChangeState(MapState.Route(it))) },
+                onNavigate = {
+                    viewmodel.handleEvents(
+                        MapRouteContract.Event.ChangeState(
+                            MapState.Route(
+                                it
+                            )
+                        )
+                    )
+                },
                 content = currentState.cardScreen,
-                onChangeScreen = { { viewmodel.onEvent(MapContract.Event.ChangeScreen(it)) } })
+                onChangeScreen = { { viewmodel.handleEvents(MapRouteContract.Event.ChangeScreen(it)) } })
         },
         mapPlace = {
-            when (currentState.mapState) {
-                MapState.LocationState -> {
-                    LocationTrackingScreen(onClick = {
-                        viewmodel.handleEvents(MapContract.Event.ClickPoint(it))
-                    })
-                }
-
-                is MapState.Route -> {
-                    RoutePlanScreen()
-                }
-            }
+            MapScreen(
+                onClick = { viewmodel.handleEvents(MapRouteContract.Event.ClickPoint(it)) },
+                mapState = currentState.mapState,
+                onChangeState = { viewmodel.handleEvents(MapRouteContract.Event.ChangeState(it)) },
+                viewModel = viewModel,
+                selectedPoint = currentState.selectedPoint
+            )
         },
-        onClickChange = { viewmodel.onEvent(MapContract.Event.SwitchMap) },
+        onClickChange = { viewmodel.handleEvents(MapRouteContract.Event.SwitchMap) },
         onClickLocation = { },
         searchText = currentState.searchBarText,
-        editText = {
-            viewmodel.onEvent(MapContract.Event.EditText(it))
-        },
-        search = { viewmodel.onEvent(MapContract.Event.Search) })
+        editText = { viewmodel.handleEvents(MapRouteContract.Event.EditText(it)) },
+        search = { viewmodel.handleEvents(MapRouteContract.Event.Search) })
 
 }
 

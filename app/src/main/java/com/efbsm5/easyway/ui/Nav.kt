@@ -36,7 +36,7 @@ import com.efbsm5.easyway.ui.page.communityPage.CommunitySquareRoute
 import com.efbsm5.easyway.ui.page.communityPage.DetailRoute
 import com.efbsm5.easyway.ui.page.communityPage.NewPostPage
 import com.efbsm5.easyway.ui.page.homepage.HomePage
-import com.efbsm5.easyway.ui.page.map.MapPage
+import com.efbsm5.easyway.ui.page.map.MapRoutePage
 import com.efbsm5.easyway.viewmodel.communityViewModel.CommunityViewModel
 import com.efbsm5.easyway.viewmodel.communityViewModel.DetailViewModel
 import com.efbsm5.easyway.viewmodel.communityViewModel.NewPostViewModel
@@ -110,7 +110,7 @@ fun EasyWay() {
                     .fillMaxSize()
             ) {
                 composable(RootRoute.Map.route) {
-                    MapPage()
+                    MapRoutePage()
                 }
                 composable(RootRoute.Home.route) {
                     HomePage()

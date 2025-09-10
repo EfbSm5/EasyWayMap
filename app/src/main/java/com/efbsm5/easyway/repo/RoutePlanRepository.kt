@@ -35,6 +35,7 @@ import com.amap.api.services.route.RouteSearchV2
 import com.amap.api.services.route.WalkRouteResultV2
 import com.efbsm5.easyway.R
 import com.efbsm5.easyway.SDKUtils
+import com.efbsm5.easyway.data.LocationSaver
 import com.efbsm5.easyway.model.BaseRouteDataState
 import com.efbsm5.easyway.model.BusRouteDataState
 import com.efbsm5.easyway.model.DrivingRouteDataState
@@ -141,8 +142,8 @@ object RoutePlanRepository {
         queryType: Int,
         startPoint: LatLng,
         endPoint: LatLng,
-        cityCode: String
     ): BaseRouteDataState {
+        val cityCode = LocationSaver.cityCode
         return when (queryType) {
             0 -> drivingRoutePlanSearch(startPoint, endPoint)
             1 -> busRoutePlanSearch(startPoint, endPoint, cityCode)

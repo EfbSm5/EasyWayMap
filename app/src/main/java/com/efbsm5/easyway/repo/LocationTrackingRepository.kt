@@ -28,6 +28,7 @@ import com.amap.api.location.AMapLocation
 import com.amap.api.location.AMapLocationClient
 import com.amap.api.location.AMapLocationClientOption
 import com.amap.api.location.AMapLocationListener
+import com.amap.api.maps.model.BitmapDescriptor
 import com.amap.api.maps.model.BitmapDescriptorFactory
 import com.amap.api.maps.model.MyLocationStyle
 import com.efbsm5.easyway.R
@@ -67,6 +68,15 @@ object LocationTrackingRepository {
                 // 设置圆形的边框粗细
                 strokeWidth(0.1f)
             }
+        )
+    }
+
+    fun initMultiPointIcon(): BitmapDescriptor {
+        return BitmapDescriptorFactory.fromBitmap(
+            BitmapFactory.decodeResource(
+                SDKUtils.getContext().resources,
+                R.drawable.multi_point_blue
+            )
         )
     }
 

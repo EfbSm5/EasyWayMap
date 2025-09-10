@@ -8,7 +8,7 @@ import com.efbsm5.easyway.state.IUiEvent
 import com.efbsm5.easyway.state.IUiState
 import com.efbsm5.easyway.ui.components.mapcards.CardScreen
 
-class MapContract {
+class MapRouteContract {
     sealed class Event : IUiEvent {
         data class ChangeState(val mapState: MapState) : Event()
         data class ChangeScreen(val cardScreen: CardScreen) : Event()
@@ -24,7 +24,8 @@ class MapContract {
     data class State(
         val mapState: MapState = MapState.LocationState,
         val cardScreen: CardScreen = CardScreen.Function,
-        val searchBarText: String = ""
+        val searchBarText: String = "",
+        val selectedPoint: MultiPointItem? = null
     ) : IUiState
 
     sealed class Effect : IUiEffect {

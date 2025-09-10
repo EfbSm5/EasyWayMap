@@ -36,10 +36,12 @@ import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.MultiPointItem
 import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.map.LocationTrackingContract
+import com.efbsm5.easyway.contract.map.MapState
 import com.efbsm5.easyway.data.LocationSaver
 import com.efbsm5.easyway.openAppPermissionSettingPage
 import com.efbsm5.easyway.repo.DragDropSelectPointRepository
 import com.efbsm5.easyway.repo.LocationTrackingRepository
+import com.efbsm5.easyway.repo.RoutePlanRepository
 import com.efbsm5.easyway.safeLaunch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -51,13 +53,14 @@ import kotlinx.coroutines.delay
  * @github: https://github.com/TheMelody/OmniMap
  * created 2022/10/10 17:40
  */
-class LocationTrackingViewModel :
+class MapViewModel :
     BaseViewModel<LocationTrackingContract.Event, LocationTrackingContract.State, LocationTrackingContract.Effect>(),
     LocationSource, AMapLocationListener {
 
     private var mListener: OnLocationChangedListener? = null
     private var mLocationClient: AMapLocationClient? = null
     private var mLocationOption: AMapLocationClientOption? = null
+    private var routeStartLocation: LatLng? = null
 
     override fun createInitialState(): LocationTrackingContract.State {
         return LocationTrackingContract.State(
@@ -67,7 +70,7 @@ class LocationTrackingViewModel :
             grantLocationPermission = false,
             locationLatLng = null,
             isOpenGps = null,
-            clickedPoint = null
+            clickedPoint = null,
         )
     }
 
@@ -82,9 +85,58 @@ class LocationTrackingViewModel :
             }
 
             is LocationTrackingContract.Event.ClickPoint -> clickPoint(event.multiPointItem)
+            is LocationTrackingContract.Event.QueryRoutePlan -> routePlanSearch(
+                event.queryType,
+                startPoint = LocationSaver.location,
+                endPoint = event.endPoint,
+            )
+
+            LocationTrackingContract.Event.RoadTrafficClick -> setState {
+                copy(
+                    mapProperties = mapProperties.copy(
+                        isTrafficEnabled = !mapProperties.isTrafficEnabled
+                    )
+                )
+            }
         }
     }
 
+    fun changeState(mapState: MapState) {
+        if (mapState == MapState.LocationState) {
+            setState {
+                copy(
+                    mapUiSettings = LocationTrackingRepository.initMapUiSettings(),
+                    mapProperties = LocationTrackingRepository.initMapProperties()
+                )
+            }
+        } else {
+            setState {
+                copy(
+                    mapUiSettings = RoutePlanRepository.initMapUiSettings(),
+                    mapProperties = RoutePlanRepository.initMapProperties()
+                )
+            }
+        }
+    }
+
+    fun routePlanSearch(queryType: Int, startPoint: LatLng, endPoint: LatLng) {
+        setState { copy(isLoading = true, routDataState = null) }
+        asyncLaunch(Dispatchers.IO) {
+            val result = runCatching {
+                RoutePlanRepository.getRoutePlanResult(
+                    queryType = queryType,
+                    startPoint = startPoint,
+                    endPoint = endPoint,
+                )
+            }
+            if (result.isSuccess) {
+                setState { copy(isLoading = false, routDataState = result.getOrNull()) }
+            } else {
+                setState { copy(isLoading = false) }
+                setEffect { LocationTrackingContract.Effect.Toast(result.exceptionOrNull()?.message) }
+            }
+        }
+    }
 
     /**
      * 检查系统GPS开关是否打开

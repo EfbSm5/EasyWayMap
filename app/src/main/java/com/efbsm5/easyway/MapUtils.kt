@@ -60,6 +60,14 @@ fun Poi.convertToMultiPointItem(): MultiPointItem {
     return item
 }
 
+fun EasyPoint.convertToMultiPointItem(): MultiPointItem {
+    val item = MultiPointItem(this.getLatlng()).apply {
+        title = this@convertToMultiPointItem.name
+        `object` = this@convertToMultiPointItem
+    }
+    return item
+}
+
 fun convertToLatLonPoint(latLng: LatLng): LatLonPoint {
     return LatLonPoint(latLng.latitude, latLng.longitude)
 }

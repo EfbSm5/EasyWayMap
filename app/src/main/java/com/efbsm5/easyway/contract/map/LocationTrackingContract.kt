@@ -24,6 +24,7 @@ package com.efbsm5.easyway.contract.map
 
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.MultiPointItem
+import com.efbsm5.easyway.model.BaseRouteDataState
 import com.efbsm5.easyway.state.IUiEffect
 import com.efbsm5.easyway.state.IUiEvent
 import com.efbsm5.easyway.state.IUiState
@@ -38,12 +39,12 @@ import com.melody.map.gd_compose.poperties.MapUiSettings
  * created 2022/10/10 17:45
  */
 class LocationTrackingContract {
-
     sealed class Event : IUiEvent {
-        object ShowOpenGPSDialog : Event()
-        object HideOpenGPSDialog : Event()
+        data object ShowOpenGPSDialog : Event()
+        data object HideOpenGPSDialog : Event()
         data class ClickPoint(val multiPointItem: MultiPointItem) : Event()
-
+        data object RoadTrafficClick : Event()
+        data class QueryRoutePlan(val queryType: Int, val endPoint: LatLng) : Event()
     }
 
     data class State(
@@ -58,7 +59,8 @@ class LocationTrackingContract {
         val isLoading: Boolean = true,
         val mapProperties: MapProperties,
         val mapUiSettings: MapUiSettings,
-        val clickedPoint: LatLng?
+        val clickedPoint: LatLng?,
+        val routDataState: BaseRouteDataState? = null,
     ) : IUiState
 
     sealed class Effect : IUiEffect {
