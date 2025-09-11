@@ -52,4 +52,8 @@ interface PostDao {
     @Transaction
     @Query("SELECT * FROM post WHERE title LIKE '%' || :keyword || '%'")
     suspend fun search(keyword: String): List<PostAndUser>
+
+    // 新增：获取全部 Post 实体列表用于 diff
+    @Query("SELECT * FROM post")
+    fun getAllPostEntities(): List<Post>
 }

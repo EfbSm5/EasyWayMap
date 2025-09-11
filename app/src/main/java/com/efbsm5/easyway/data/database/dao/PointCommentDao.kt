@@ -35,4 +35,8 @@ interface PointCommentDao {
 
     @Query("UPDATE pointComment SET dislike = dislike - 1 WHERE `index` = :id")
     fun decreaseDislikes(id: Int)
+
+    // 新增：获取全部 PointComment 实体列表用于 diff
+    @Query("SELECT * FROM pointComment")
+    fun getAll(): List<PointComment>
 }

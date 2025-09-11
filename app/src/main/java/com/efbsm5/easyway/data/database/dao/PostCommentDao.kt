@@ -35,5 +35,8 @@ interface PostCommentDao {
 
     @Query("UPDATE postComment SET dislike = CASE WHEN dislike > 0 THEN dislike - 1 ELSE 0 END WHERE `index` = :id")
     fun decreaseDislikes(id: Int)
-}
 
+    // 新增：获取全部 PostComment 实体列表用于 diff
+    @Query("SELECT * FROM postComment")
+    fun getAll(): List<PostComment>
+}

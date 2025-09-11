@@ -33,6 +33,7 @@ activity = "1.10.1"
 foundationLayout = "1.9.0"
 foundation = "1.9.0"
 uiGraphics = "1.9.0"
+firebaseCrashlyticsBuildtools = "3.0.6"
 
 [libraries]
 androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
@@ -72,6 +73,7 @@ androidx-activity = { group = "androidx.activity", name = "activity", version.re
 androidx-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayout" }
 androidx-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "uiGraphics" }
+firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebaseCrashlyticsBuildtools" }
 
 
 [plugins]

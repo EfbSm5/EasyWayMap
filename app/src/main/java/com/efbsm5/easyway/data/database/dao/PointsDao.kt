@@ -44,4 +44,8 @@ interface PointsDao {
 
     @Query("SELECT * FROM point WHERE name LIKE '%' || :searchString || '%'")
     fun searchEasyPointsByName(searchString: String): List<EasyPoint>
+
+    // 新增：获取全部 EasyPoint 实体列表用于 diff
+    @Query("SELECT * FROM point")
+    fun getAllPointEntities(): List<EasyPoint>
 }

@@ -2,6 +2,12 @@ package com.efbsm5.easyway.data.network
 
 import com.efbsm5.easyway.SDKUtils
 import com.efbsm5.easyway.data.database.AppDataBase
+import com.efbsm5.easyway.data.models.EasyPoint
+import com.efbsm5.easyway.data.models.ModelNames
+import com.efbsm5.easyway.data.models.PointComment
+import com.efbsm5.easyway.data.models.Post
+import com.efbsm5.easyway.data.models.PostComment
+import com.efbsm5.easyway.data.models.User
 
 object IntentRepository {
     private val db = AppDataBase.getDatabase(SDKUtils.getContext())
@@ -12,58 +18,90 @@ object IntentRepository {
     private val pointsDao = db.pointsDao()
 
     suspend fun syncData() {
+        // 顺序很重要：先用户 -> 帖子/地点 -> 评论（避免外键约束失败）
         syncUsers()
-        syncComments()
-//        syncDynamicPosts()
+        syncPosts()
         syncEasyPoints()
+        syncComments()
     }
 
     private suspend fun syncComments() {
-//        val localComments = postCommentDao.()
-//        val networkPointComments = EasyPointNetWork.sendRequest<PointComment>(ModelNames.Comments)
-//        val toInsert = networkPointComments.filter { it !in localComments }
-//        localComments.filter { it !in networkPointComments }.map { it.commentId }
-//        db.runInTransaction {
-////                    commentDao.deleteAll(toDelete)
-//            commentDao.insertAll(toInsert)
-//        }
+        // 同步点评论
+        val networkPointPointComment =
+            EasyPointNetWork.sendRequest<PointComment>(ModelNames.PointComment)
+        // 同步帖评论
+        val networkPostComments = EasyPointNetWork.sendRequest<PostComment>(ModelNames.PostComments)
 
+        val localPointComments = pointCommentDao.getAll()
+        val localPostComments = postCommentDao.getAll()
+
+        val localPointMap = localPointComments.associateBy { it.index }
+        val localPostMap = localPostComments.associateBy { it.index }
+
+        val pcNetworkIds = networkPointPointComment.map { it.index }.toSet()
+        val pcLocalIds = localPointComments.map { it.index }.toSet()
+        val pcToDelete = (pcLocalIds - pcNetworkIds).toList()
+        val pcChanged = networkPointPointComment.filter { localPointMap[it.index] != it }
+
+        val postcNetworkIds = networkPostComments.map { it.index }.toSet()
+        val postcLocalIds = localPostComments.map { it.index }.toSet()
+        val postcToDelete = (postcLocalIds - postcNetworkIds).toList()
+        val postcChanged = networkPostComments.filter { localPostMap[it.index] != it }
+
+        db.runInTransaction {
+            if (pcToDelete.isNotEmpty()) pointCommentDao.deleteAll(pcToDelete)
+            if (pcChanged.isNotEmpty()) pointCommentDao.insertAll(pcChanged)
+
+            if (postcToDelete.isNotEmpty()) postCommentDao.deleteAll(postcToDelete)
+            if (postcChanged.isNotEmpty()) postCommentDao.insertAll(postcChanged)
+        }
     }
 
     private suspend fun syncUsers() {
-//        val localUsers = userDao.getAllUsers()
-//        val networkUsers = EasyPointNetWork.sendRequest<User>(ModelNames.Users)
-//        val toInsert = networkUsers.filter { it !in localUsers }
-//        localUsers.filter { it !in networkUsers }.map { it.id }
-//        db.runInTransaction {
-////                    userDao.deleteAll(toDelete)
-//            userDao.insertAll(toInsert)
-//        }
+        val localUsers = userDao.getAllUsers()
+        val networkUsers = EasyPointNetWork.sendRequest<User>(ModelNames.Users)
+        val localMap = localUsers.associateBy { it.id }
+        val localIds = localMap.keys
+        val networkIds = networkUsers.map { it.id }.toSet()
+        val toDelete = (localIds - networkIds).toList()
+        // 仅保留新增或内容发生变化的用户
+        val changed = networkUsers.filter { localMap[it.id] != it }
+        db.runInTransaction {
+            if (toDelete.isNotEmpty()) userDao.deleteAll(toDelete)
+            if (changed.isNotEmpty()) userDao.insertAll(changed)
+        }
     }
 
-//    private suspend fun syncDynamicPosts() {
-//        val networkPosts = EasyPointNetWork.sendRequest<Post>(ModelNames.DynamicPosts)
-//        val localPosts = ostDao.getAllDynamicPostsByOnce()
-//        val toInsert = networkPosts.filter { it !in localPosts }
-//        localPosts.filter { it !in networkPosts }.map { it.id }
-//        db.runInTransaction {
-////                    dynamicPostDao.deleteAll(toDelete)
-//            ostDao.insertAll(toInsert)
-//        }
-//    }
+    private suspend fun syncPosts() {
+        val networkPosts = EasyPointNetWork.sendRequest<Post>(ModelNames.DynamicPosts)
+        val localPosts = postDao.getAllPostEntities()
+        val localMap = localPosts.associateBy { it.id }
+        val localIds = localMap.keys
+        val networkIds = networkPosts.map { it.id }.toSet()
+        val toDelete = (localIds - networkIds).toList()
+        // 尽量保留本地 likedByMe 状态
+        val changed = networkPosts.map { net ->
+            val local = localMap[net.id]
+            if (local != null) net.copy(likedByMe = local.likedByMe) else net
+        }.filter { post -> localMap[post.id] != post }
+        db.runInTransaction {
+            if (toDelete.isNotEmpty()) postDao.deleteAll(toDelete)
+            if (changed.isNotEmpty()) postDao.insertAll(changed)
+        }
+    }
 
     private suspend fun syncEasyPoints() {
-//        val networkPoints = EasyPointNetWork.sendRequest<EasyPoint>(ModelNames.EasyPoints)
-//        val localPoints = pointsDao.loadAllPointsByOnce()
-//        val toInsert =
-//            networkPoints.filter { networkPoint -> localPoints.none { it.pointId == networkPoint.pointId } }
-//        localPoints.filter { localPoint -> networkPoints.none { it.pointId == localPoint.pointId } }
-//            .map { it.pointId }
-//        db.runInTransaction {
-//                    pointsDao.deleteAll(toDelete)
-//            pointsDao.insertAll(toInsert)
-//        }
+        val networkPoints = EasyPointNetWork.sendRequest<EasyPoint>(ModelNames.EasyPoints)
+        val localPoints = pointsDao.getAllPointEntities()
+        val localMap = localPoints.associateBy { it.pointId }
+        val localIds = localMap.keys
+        val networkIds = networkPoints.map { it.pointId }.toSet()
+        val toInsertOrUpdate = networkPoints.filter { localMap[it.pointId] != it }
+        val toDelete = (localIds - networkIds).toList()
+        db.runInTransaction {
+            if (toDelete.isNotEmpty()) pointsDao.deleteAll(toDelete)
+            if (toInsertOrUpdate.isNotEmpty()) pointsDao.insertAll(toInsertOrUpdate)
+        }
     }
-
 
 }

@@ -1,11 +1,16 @@
 package com.efbsm5.easyway.data.network
 
-//import com.alibaba.idst.nui.BuildConfig
 import android.content.Intent
+import android.util.Log
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
 import com.efbsm5.easyway.BuildConfig
@@ -15,20 +20,23 @@ private const val TAG = "Update"
 
 @Composable
 fun CheckUpdate() {
-    //    LaunchedEffect(Unit) {
-//        HttpClient().checkForUpdate { info ->
-//            Log.e(TAG, "CheckUpdate: ${info.toString()}")
-//            if (info != null && shouldUpdate(info.versionCode)) {
-//                updateInfo = info
-//            }
-//        }
-//    }
-//    updateInfo?.let {
-//        UpdateDialog(it) {
-//            updateInfo = if (it) null
-//            else null
-//        }
-//    }
+    var updateInfo by remember { mutableStateOf<UpdateInfo?>(null) }
+    LaunchedEffect(Unit) {
+        val r =
+            EasyPointNetWork.getUpdate()
+        r.let { info ->
+            Log.e(TAG, "CheckUpdate: ${info.toString()}")
+            if (info != null && shouldUpdate(info.versionCode)) {
+                updateInfo = info
+            }
+        }
+    }
+    updateInfo?.let {
+        UpdateDialog(it) { boolean ->
+            updateInfo = if (boolean) null
+            else null
+        }
+    }
 }
 
 

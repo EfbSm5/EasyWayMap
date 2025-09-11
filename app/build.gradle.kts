@@ -59,12 +59,15 @@ dependencies {
     implementation(libs.androidx.foundation.layout)
     implementation(libs.androidx.foundation)
     implementation(libs.androidx.ui.graphics)
+    implementation(libs.firebase.crashlytics.buildtools)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.androidx.material3)
     implementation("io.github.TheMelody:gd_compose:1.0.7")
     debugImplementation(libs.leakcanary.android)
+
+    // Compose BOM 对齐（main）
     implementation(platform(libs.compose.bom))
     api(libs.androidx.runtime)
     api(libs.core.ktx)
@@ -85,13 +88,17 @@ dependencies {
     implementation(libs.core.ktx)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.activity.compose)
-    implementation(platform(libs.compose.bom))
     implementation(libs.androidx.navigation.compose)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-//    androidTestImplementation(libs.androidx.ui.test.junit4)
+
+    // Compose BOM 对齐（debug 与 androidTest）
+    debugImplementation(platform(libs.compose.bom))
+    androidTestImplementation(platform(libs.compose.bom))
+
+    // UI 测试
+    androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
     implementation(libs.retrofit)
@@ -100,7 +107,5 @@ dependencies {
     implementation("io.morfly.compose:advanced-bottomsheet-material3:0.1.0")
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
-//    testImplementation(libs.junit)
-
 
 }
