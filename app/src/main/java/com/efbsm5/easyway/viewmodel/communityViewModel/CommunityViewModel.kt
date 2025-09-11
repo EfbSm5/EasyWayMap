@@ -3,6 +3,7 @@ package com.efbsm5.easyway.viewmodel.communityViewModel
 import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.community.CommunityContract
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
+import com.efbsm5.easyway.repo.DataRepository
 import kotlinx.coroutines.Dispatchers
 
 class CommunityViewModel :
@@ -40,7 +41,12 @@ class CommunityViewModel :
 
     private fun submit() {
         asyncLaunch(Dispatchers.IO) {
-
+            val r = DataRepository.searchForPoint(currentState.searchText)
+            r.onSuccess {
+                setState { copy(filterPosts = it) }
+            }.onFailure {
+                setState { copy(error = "no data") }
+            }
         }
     }
 

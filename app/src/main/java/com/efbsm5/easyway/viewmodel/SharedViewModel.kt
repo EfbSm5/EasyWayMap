@@ -1,13 +1,8 @@
 package com.efbsm5.easyway.viewmodel
 
-import android.annotation.SuppressLint
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
 import com.efbsm5.easyway.repo.CommunityRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,25 +10,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-@SuppressLint("UnrememberedGetBackStackEntry")
-@Composable
-inline fun <reified VM : ViewModel> sharedViewModel(
-    navController: NavController, graphRoute: String
-): VM {
-    val parentEntry = remember(navController, graphRoute) {
-        navController.getBackStackEntry(graphRoute)
-    }
-    return viewModel(parentEntry)
-}
-
 class CommunitySharedViewModel(
     private val repo: CommunityRepository, private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _posts = MutableStateFlow<List<PostAndUser>>(emptyList())
     val posts: StateFlow<List<PostAndUser>> = _posts
-    private val _filterPosts = MutableStateFlow<List<PostAndUser>>(emptyList())
-    val filterPosts: StateFlow<List<PostAndUser>> = _posts
     private val _currentPost = MutableStateFlow<PostAndUser?>(null)
     val currentPost: StateFlow<PostAndUser?> = _currentPost
     private val _loading = MutableStateFlow(false)

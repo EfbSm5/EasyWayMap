@@ -13,5 +13,4 @@ object CommunityRepository {
     fun getPost(id: Int): Result<PostAndUser> =
         runCatching { postDao.getPostById(id) }
 
-
 }

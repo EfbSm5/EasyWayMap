@@ -48,4 +48,8 @@ interface PostDao {
 
     @Query("UPDATE post SET `like` = `like` - 1 WHERE id = :id")
     fun decreaseLike(id: Int)
+
+    @Transaction
+    @Query("SELECT * FROM post WHERE title LIKE '%' || :keyword || '%'")
+    suspend fun search(keyword: String): List<PostAndUser>
 }

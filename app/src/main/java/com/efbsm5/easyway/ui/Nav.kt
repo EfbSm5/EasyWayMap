@@ -24,7 +24,7 @@ import androidx.navigation.compose.rememberNavController
 import com.efbsm5.easyway.initializer.AppServiceLocator
 import com.efbsm5.easyway.ui.components.AppTopBar
 import com.efbsm5.easyway.ui.components.BottomNavigationBar
-import com.efbsm5.easyway.ui.components.FloatingActionButton
+import com.efbsm5.easyway.ui.components.FloatingButton
 import com.efbsm5.easyway.ui.page.communityPage.CommunitySquareRoute
 import com.efbsm5.easyway.ui.page.communityPage.DetailRoute
 import com.efbsm5.easyway.ui.page.communityPage.NewPostPage
@@ -47,6 +47,7 @@ fun EasyWay() {
     LaunchedEffect(nav?.route) {
         scaffoldController.refresh()
     }
+
     CompositionLocalProvider(LocalScaffoldController provides scaffoldController) {
 
         val fabConfig = scaffoldController.fabConfig
@@ -67,7 +68,7 @@ fun EasyWay() {
                 navController = navController, currentDestination = nav
             )
         }, floatingActionButton = {
-            FloatingActionButton(fabConfig)
+            FloatingButton(fabConfig)
         }) { innerPadding ->
             NavHost(
                 navController = navController,

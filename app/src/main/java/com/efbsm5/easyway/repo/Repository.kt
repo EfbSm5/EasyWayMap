@@ -181,6 +181,8 @@ object DataRepository {
         pointDao.decreaseDislikes(pointId)
     }
 
-
+    suspend fun searchForPoint(string: String): Result<List<PostAndUser>> {
+        return runCatching { postDao.search(string) }
+    }
 }
 

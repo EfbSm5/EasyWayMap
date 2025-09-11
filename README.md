@@ -1,5 +1,88 @@
-# EasyWayMap
-基于omni-map和旧版EasyWay进行的改进
-MapPage
-实现显示点位，显示当前位置，搜索路径
-缺少State之间的来回切换，缺少返回逻辑编写，State之间切换的数据传递
+# EasyWay
+
+一个基于 Jetpack Compose 的地图与社区应用。支持地图点位浏览与管理、位置与路线能力、社区帖子与评论、离线数据存储与后台同步等。
+
+## 功能概览
+
+- 地图能力
+    - 显示点位、当前位置与距离计算（MapUtils）
+    - 拖拽选择点位、多点覆盖物（DragDropSelectPointRepository、MultiPointOverlayRepository）
+    - 外部地图跳转（高德/百度/腾讯地图 URI Scheme）与路线规划入口（RoutePlanRepository）
+- 社区能力
+    - 帖子 Post、评论 Comment、用户 User 的本地存储与关联查询（Room + @Relation 聚合，如
+      PostWithComments、PostAndUser、PostCommentAndUser）
+    - 社区列表与详情数据访问（CommunityRepository + PostDao/PostCommentDao/UserDao）
+- 数据与同步
+    - 本地数据库 Room（类型转换器 Converter.kt、UriTypeAdapter.kt）
+    - Retrofit + Gson 的网络访问封装（ServiceCreator、HttpInterface、EasyPointNetWork）
+    - WorkManager 后台同步（SyncWorker）
+- UI 与导航
+    - 全面使用 Jetpack Compose（Material 3、Accompanist 权限/FlowLayout、Coil 图片加载）
+    - Navigation Compose 构建多页面导航（ui/Nav.kt）
+    - Advanced BottomSheet for Material3（io.morfly.compose:advanced-bottomsheet-material3）
+- 其他
+    - Koin 依赖注入
+    - LeakCanary Debug 内存泄漏检测
+
+## 技术栈
+
+- 语言与工具：Kotlin 2.2.x，AGP 8.11.x，JDK 19
+- Compose：Compose BOM（2025.08.01）、Material3、Navigation、Foundation/Runtime/UI-Graphics
+- 数据层：Room Runtime/KTK + KSP 编译器
+- 网络层：Retrofit 3.x + Gson Converter + Gson
+- 异步/任务：WorkManager
+- 依赖注入：Koin (android + androidX compose)
+- 辅助库：Accompanist（permissions、flowlayout）、Coil、LeakCanary、Material Components
+
+依赖声明可见：
+
+- app/build.gradle.kts
+- gradle/libs.versions.toml
+
+## 架构与目录
+
+- 单模块 app 工程
+- MVVM 分层（ViewModel + Repository + DAO/Entity），数据通过 Repository 聚合 UI 所需模型（assistModel）
+- 主要目录：
+    - data/
+        - database/（AppDataBase、Converter、Dao）
+        - models/（Entity 与组合模型 assistModel）
+        - network/（ServiceCreator、HttpInterface、Worker）
+    - repo/（社区、地图、多点覆盖物、路线规划等仓库）
+    - ui/（导航、组件、主题、页面）
+    - viewmodel/（Home、Map、Community 等）
+
+## 运行与开发
+
+- 要求
+    - Android Studio（Koala+ 推荐）
+    - Android SDK 36（compileSdk/targetSdk = 36），minSdk = 29
+    - JDK 19
+- 配置
+    - app/build.gradle.kts 已根据构建类型注入 BASE_URL 与日志开关（BuildConfig.BASE_URL/IS_LOG_ENABLED）
+- 启动
+    1. 使用 Android Studio 打开工程根目录
+    2. 同步 Gradle（确保已启用 Google 与 MavenCentral 仓库）
+    3. 选择 app 运行配置并安装到设备
+
+## 数据模型（简述）
+
+- Entity：User、Post、PostComment、EasyPoint、PointComment
+- 组合模型（assistModel）：
+    - PostAndUser、PostWithComments、PostCommentAndUser
+    - PointWithComments、PointCommentAndUser、EasyPointSimplify
+
+## 第三方与致谢
+
+- Jetpack Compose、Material3、Navigation、Room、WorkManager、Koin、Coil、Accompanist、LeakCanary
+- Advanced BottomSheet for Material3（io.morfly.compose:advanced-bottomsheet-material3）
+- 地图 URI 跳转（高德/百度/腾讯）
+
+## 许可证
+
+尚未提供许可证文件，请按需补充（例如 MIT/Apache-2.0）。
+
+---
+提示：如果首次构建遇到依赖解析问题，请确认 settings.gradle.kts 中的 repositories 已包含 google() 与
+mavenCentral()，并同步到最新 Gradle。
+

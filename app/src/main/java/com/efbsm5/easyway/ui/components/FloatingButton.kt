@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import com.efbsm5.easyway.ui.FabConfig
 
 @Composable
-fun FloatingActionButton(fabConfig: FabConfig?) {
+fun FloatingButton(fabConfig: FabConfig?) {
     AnimatedContent(
         targetState = fabConfig, label = "fabChange"
     ) { cfg ->
