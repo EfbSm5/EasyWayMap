@@ -26,7 +26,10 @@ import android.app.Application
 import android.content.Context
 import android.util.Log
 import androidx.startup.Initializer
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.WorkManager
 import com.efbsm5.easyway.SDKUtils
+import com.efbsm5.easyway.data.network.SyncWorker
 import com.melody.map.gd_compose.utils.MapUtils
 
 /**
@@ -45,6 +48,16 @@ class AppDataInitStartup : Initializer<Boolean> {
 
         MapUtils.setMapPrivacy(context, true)
         Log.e(TAG, "create:      initMapPrivacy")
+
+        // 调度周期同步任务：15 分钟一次，网络且电量不低
+        val workManager = WorkManager.getInstance(context)
+        val request = SyncWorker.buildRequest(repeatIntervalMinutes = 15)
+        workManager.enqueueUniquePeriodicWork(
+            SyncWorker.UNIQUE_NAME,
+            ExistingPeriodicWorkPolicy.UPDATE,
+            request
+        )
+
         return true
     }
 
