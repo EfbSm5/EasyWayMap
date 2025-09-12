@@ -52,7 +52,6 @@ import com.efbsm5.easyway.model.DrivingRouteDataState
 import com.efbsm5.easyway.model.RideRouteDataState
 import com.efbsm5.easyway.model.WalkRouteDataState
 import com.efbsm5.easyway.repo.LocationTrackingRepository
-import com.efbsm5.easyway.repo.MultiPointOverlayRepository
 import com.efbsm5.easyway.showMsg
 import com.efbsm5.easyway.ui.components.melody.MapMenuButton
 import com.efbsm5.easyway.ui.components.melody.RedCenterLoading
@@ -102,6 +101,11 @@ internal fun MapScreen(
                 is LocationTrackingContract.Effect.ClickPoint -> onClick(it.multiPointItem)
             }
         }.collect()
+    }
+    LaunchedEffect(selectedPoint) {
+        snapshotFlow { selectedPoint }.filterNotNull().collect {
+            viewModel.handleEvents(LocationTrackingContract.Event.ClickPoint(it))
+        }
     }
     val openGpsLauncher = handlerGPSLauncher(viewModel::checkGpsStatus)
     val reqGPSPermission = requestMultiplePermission(
@@ -178,7 +182,7 @@ internal fun MapScreen(
                 MultiPointOverlay(
                     enable = true,
                     icon = LocationTrackingRepository.initMultiPointIcon(),
-                    multiPointItems = MultiPointOverlayRepository.initMultiPointItemList(),
+                    multiPointItems = currentState.points,
                     onClick = { viewModel.handleEvents(LocationTrackingContract.Event.ClickPoint(it)) })
             }
             Marker(

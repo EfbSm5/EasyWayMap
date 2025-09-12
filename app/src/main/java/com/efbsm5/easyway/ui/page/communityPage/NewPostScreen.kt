@@ -109,11 +109,13 @@ fun NewPostPage(
             when (it) {
                 Effect.Back -> back()
                 Effect.GetLocation -> {
-                    photoLauncher.launch(photoIntent)
+                    locationLauncher.launch(locationIntent)
+
                 }
 
                 Effect.GetPhoto -> {
-                    locationLauncher.launch(locationIntent)
+                    photoLauncher.launch(photoIntent)
+
                 }
 
                 Effect.Upload -> onPostSuccess(

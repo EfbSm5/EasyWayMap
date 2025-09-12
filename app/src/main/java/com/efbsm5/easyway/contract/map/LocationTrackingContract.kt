@@ -61,6 +61,8 @@ class LocationTrackingContract {
         val mapUiSettings: MapUiSettings,
         val clickedPoint: LatLng?,
         val routDataState: BaseRouteDataState? = null,
+        val points: List<MultiPointItem> = emptyList(),
+        val error: String? = null
     ) : IUiState
 
     sealed class Effect : IUiEffect {

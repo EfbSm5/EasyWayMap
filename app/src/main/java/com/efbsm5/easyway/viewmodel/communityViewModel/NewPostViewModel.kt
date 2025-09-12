@@ -4,6 +4,7 @@ import android.net.Uri
 import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.community.NewPostContract
 import com.efbsm5.easyway.repo.DataRepository
+import kotlinx.coroutines.Dispatchers
 
 class NewPostViewModel :
     BaseViewModel<NewPostContract.Event, NewPostContract.State, NewPostContract.Effect>() {
@@ -57,7 +58,7 @@ class NewPostViewModel :
     }
 
     private fun publish() {
-        asyncLaunch {
+        asyncLaunch(Dispatchers.IO) {
             DataRepository.uploadPost(currentState.post)
             setEffect { NewPostContract.Effect.Upload }
         }

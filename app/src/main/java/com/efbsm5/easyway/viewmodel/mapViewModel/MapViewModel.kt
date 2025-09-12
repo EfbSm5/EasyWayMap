@@ -39,6 +39,7 @@ import com.efbsm5.easyway.contract.map.LocationTrackingContract
 import com.efbsm5.easyway.contract.map.MapState
 import com.efbsm5.easyway.data.LocationSaver
 import com.efbsm5.easyway.openAppPermissionSettingPage
+import com.efbsm5.easyway.repo.DataRepository
 import com.efbsm5.easyway.repo.DragDropSelectPointRepository
 import com.efbsm5.easyway.repo.LocationTrackingRepository
 import com.efbsm5.easyway.repo.RoutePlanRepository
@@ -72,6 +73,21 @@ class MapViewModel :
             isOpenGps = null,
             clickedPoint = null,
         )
+    }
+
+    init {
+        asyncLaunch(Dispatchers.IO) {
+            val r = DataRepository.getAllPoints()
+            r.onSuccess {
+                val list = it.map { it ->
+                    MultiPointItem(it.getLatLng()).apply {
+                        `object` = it
+                        title = it.name
+                    }
+                }
+                setState { copy(isLoading = false, points = list) }
+            }.onFailure { setState { copy(isLoading = false, error = "error") } }
+        }
     }
 
     override fun handleEvents(event: LocationTrackingContract.Event) {
