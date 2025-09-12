@@ -15,7 +15,8 @@ fun MapPageCard(
 ) {
     when (content) {
         is CardScreen.Comment -> {
-            val viewModel: CommentAndHistoryCardViewModel = viewModel()
+            val viewModel: CommentAndHistoryCardViewModel =
+                viewModel(key = content.easyPoint.pointId.toString())
             CommentAndHistoryCard(
                 point = content.easyPoint,
                 navigate = onNavigate,
@@ -45,5 +46,5 @@ fun MapPageCard(
 sealed interface CardScreen {
     data object Function : CardScreen
     data class NewPoint(val label: String) : CardScreen
-    data class Comment(val easyPoint: EasyPoint) : CardScreen
+    data class Comment(val easyPoint: EasyPoint, val nonce: Long = 0L) : CardScreen
 }

@@ -35,7 +35,7 @@ import com.amap.api.maps.LocationSource.OnLocationChangedListener
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.MultiPointItem
 import com.efbsm5.easyway.base.BaseViewModel
-import com.efbsm5.easyway.contract.map.LocationTrackingContract
+import com.efbsm5.easyway.contract.map.MapContract
 import com.efbsm5.easyway.contract.map.MapState
 import com.efbsm5.easyway.data.LocationSaver
 import com.efbsm5.easyway.openAppPermissionSettingPage
@@ -55,7 +55,7 @@ import kotlinx.coroutines.delay
  * created 2022/10/10 17:40
  */
 class MapViewModel :
-    BaseViewModel<LocationTrackingContract.Event, LocationTrackingContract.State, LocationTrackingContract.Effect>(),
+    BaseViewModel<MapContract.Event, MapContract.State, MapContract.Effect>(),
     LocationSource, AMapLocationListener {
 
     private var mListener: OnLocationChangedListener? = null
@@ -63,8 +63,8 @@ class MapViewModel :
     private var mLocationOption: AMapLocationClientOption? = null
     private var routeStartLocation: LatLng? = null
 
-    override fun createInitialState(): LocationTrackingContract.State {
-        return LocationTrackingContract.State(
+    override fun createInitialState(): MapContract.State {
+        return MapContract.State(
             mapProperties = LocationTrackingRepository.initMapProperties(),
             mapUiSettings = LocationTrackingRepository.initMapUiSettings(),
             isShowOpenGPSDialog = false,
@@ -90,24 +90,34 @@ class MapViewModel :
         }
     }
 
-    override fun handleEvents(event: LocationTrackingContract.Event) {
+    fun moveToLatLng(latLng: LatLng) {
+        setEffect { MapContract.Effect.MoveToPoint(latLng) }
+    }
+
+    fun moveToLocation() {
+        currentState.locationLatLng?.let {
+            moveToLatLng(it)
+        }
+    }
+
+    override fun handleEvents(event: MapContract.Event) {
         when (event) {
-            is LocationTrackingContract.Event.ShowOpenGPSDialog -> {
+            is MapContract.Event.ShowOpenGPSDialog -> {
                 setState { copy(isShowOpenGPSDialog = true) }
             }
 
-            is LocationTrackingContract.Event.HideOpenGPSDialog -> {
+            is MapContract.Event.HideOpenGPSDialog -> {
                 setState { copy(isShowOpenGPSDialog = false) }
             }
 
-            is LocationTrackingContract.Event.ClickPoint -> clickPoint(event.multiPointItem)
-            is LocationTrackingContract.Event.QueryRoutePlan -> routePlanSearch(
+            is MapContract.Event.ClickPoint -> clickPoint(event.multiPointItem)
+            is MapContract.Event.QueryRoutePlan -> routePlanSearch(
                 event.queryType,
                 startPoint = LocationSaver.location,
                 endPoint = event.endPoint,
             )
 
-            LocationTrackingContract.Event.RoadTrafficClick -> setState {
+            MapContract.Event.RoadTrafficClick -> setState {
                 copy(
                     mapProperties = mapProperties.copy(
                         isTrafficEnabled = !mapProperties.isTrafficEnabled
@@ -149,7 +159,7 @@ class MapViewModel :
                 setState { copy(isLoading = false, routDataState = result.getOrNull()) }
             } else {
                 setState { copy(isLoading = false) }
-                setEffect { LocationTrackingContract.Effect.Toast(result.exceptionOrNull()?.message) }
+                setEffect { MapContract.Effect.Toast(result.exceptionOrNull()?.message) }
             }
         }
     }
@@ -161,7 +171,7 @@ class MapViewModel :
         val isOpenGps = DragDropSelectPointRepository.checkGPSIsOpen()
         setState { copy(isOpenGps = isOpenGps) }
         if (!isOpenGps) {
-            setEvent(LocationTrackingContract.Event.ShowOpenGPSDialog)
+            setEvent(MapContract.Event.ShowOpenGPSDialog)
         } else {
             hideOpenGPSDialog()
         }
@@ -169,11 +179,11 @@ class MapViewModel :
 
     private fun clickPoint(multiPointItem: MultiPointItem) {
         setState { copy(clickedPoint = multiPointItem.latLng) }
-        setEffect { LocationTrackingContract.Effect.ClickPoint(multiPointItem) }
+        setEffect { MapContract.Effect.ClickPoint(multiPointItem) }
     }
 
     fun hideOpenGPSDialog() {
-        setEvent(LocationTrackingContract.Event.HideOpenGPSDialog)
+        setEvent(MapContract.Event.HideOpenGPSDialog)
     }
 
     /**
@@ -181,7 +191,7 @@ class MapViewModel :
      */
     fun handleNoGrantLocationPermission() {
         setState { copy(grantLocationPermission = false) }
-        setEvent(LocationTrackingContract.Event.ShowOpenGPSDialog)
+        setEvent(MapContract.Event.ShowOpenGPSDialog)
     }
 
     fun handleGrantLocationPermission() {
@@ -225,7 +235,7 @@ class MapViewModel :
                     locationDetail = aMapLocation.locationDetail
                 }
             } else {
-                setEffect { LocationTrackingContract.Effect.Toast(msg) }
+                setEffect { MapContract.Effect.Toast(msg) }
             }
         }
     }

@@ -25,7 +25,9 @@ class MapRouteContract {
         val mapState: MapState = MapState.LocationState,
         val cardScreen: CardScreen = CardScreen.Function,
         val searchBarText: String = "",
-        val selectedPoint: MultiPointItem? = null
+        val selectedPoint: MultiPointItem? = null,
+        // 用于强制触发重组的点击版本号，每次点击同一点也会变化
+        val clickNonce: Long = 0L
     ) : IUiState
 
     sealed class Effect : IUiEffect {

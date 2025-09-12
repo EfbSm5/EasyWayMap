@@ -49,11 +49,15 @@ object DevSeeder {
             // 2) 插入 Users
             val users = listOf(
                 User(
+                    id = 0,
+                    name = "Test",
+                    avatar = "https://bkimg.cdn.bcebos.com/pic/5882b2b7d0a20cf43289a8ce7d094b36acaf9981?x-bce-process=image/format,f_auto/watermark,image_d2F0ZXIvYmFpa2UyNzI,g_7,xp_5,yp_5,P_20/resize,m_lfit,limit_1,h_1080"
+                ),
+                User(
                     id = 1,
                     name = "Cindy",
                     avatar = "https://bkimg.cdn.bcebos.com/pic/5882b2b7d0a20cf43289a8ce7d094b36acaf9981?x-bce-process=image/format,f_auto/watermark,image_d2F0ZXIvYmFpa2UyNzI,g_7,xp_5,yp_5,P_20/resize,m_lfit,limit_1,h_1080"
                 ),
-
                 User(
                     id = 2, name = "Bob", avatar = null
                 ),

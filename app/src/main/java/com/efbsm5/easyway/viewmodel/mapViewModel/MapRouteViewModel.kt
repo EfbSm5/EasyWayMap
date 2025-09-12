@@ -9,22 +9,27 @@ import com.efbsm5.easyway.data.models.assistModel.EasyPointSimplify
 import com.efbsm5.easyway.repo.DataRepository
 import com.efbsm5.easyway.ui.components.mapcards.CardScreen
 import com.efbsm5.easyway.ui.components.mapcards.CardScreen.NewPoint
+import kotlinx.coroutines.Dispatchers
 
 
 class MapRouteViewModel :
     BaseViewModel<MapRouteContract.Event, MapRouteContract.State, MapRouteContract.Effect>() {
+
     fun setEffect(effect: MapRouteContract.Effect) {
         setEffect(effect)
     }
 
     private fun clickPoint(multiPointItem: MultiPointItem) {
         if (multiPointItem.`object` is EasyPointSimplify) {
-            asyncLaunch {
-                val r = DataRepository.getPointFromLatLng(multiPointItem.latLng)
+            asyncLaunch(Dispatchers.IO) {
+                val r =
+                    DataRepository.getPointFromLatLng(multiPointItem.`object` as EasyPointSimplify)
                 r.onSuccess {
+                    val next = currentState.clickNonce + 1
                     setState {
                         copy(
-                            cardScreen = CardScreen.Comment(it),
+                            clickNonce = next,
+                            cardScreen = CardScreen.Comment(it, nonce = next),
                             selectedPoint = multiPointItem
                         )
                     }

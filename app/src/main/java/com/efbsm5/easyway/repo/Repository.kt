@@ -1,7 +1,6 @@
 package com.efbsm5.easyway.repo
 
 
-import com.amap.api.maps.model.LatLng
 import com.efbsm5.easyway.SDKUtils
 import com.efbsm5.easyway.data.UserManager
 import com.efbsm5.easyway.data.database.AppDataBase
@@ -15,8 +14,8 @@ import com.efbsm5.easyway.data.models.assistModel.PointWithComments
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
 import com.efbsm5.easyway.data.models.assistModel.PostCommentAndUser
 import com.efbsm5.easyway.getCurrentFormattedTime
-import com.efbsm5.easyway.getInitPoint
 import com.efbsm5.easyway.getInitUser
+import com.efbsm5.easyway.showMsg
 
 object DataRepository {
 
@@ -50,7 +49,8 @@ object DataRepository {
             type = post.type,
             photo = post.photo,
         )
-        postDao.insert(entity)
+        showMsg(entity.userId.toString())
+//        postDao.insert(entity)
     }
 
     fun uploadPoint(easyPoint: EasyPoint) {
@@ -74,10 +74,8 @@ object DataRepository {
     fun uploadPointComment(comment: PointComment): Result<Unit> =
         runCatching { pointCommentDao.insert(comment) }
 
-    fun getPointFromLatLng(latLng: LatLng): Result<EasyPoint> = runCatching {
-        pointDao.getPointByLatLng(latLng.latitude, latLng.longitude) ?: getInitPoint(
-            latLng
-        )
+    fun getPointFromLatLng(simplify: EasyPointSimplify): Result<EasyPoint> = runCatching {
+        pointDao.getPointByLatLng(simplify.lat, simplify.lng)!!
     }
 
     fun getPointAndCommentByUserId(userId: Int): Result<List<PointWithComments>> =

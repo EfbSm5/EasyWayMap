@@ -42,7 +42,7 @@ import com.amap.api.maps.model.BitmapDescriptorFactory
 import com.amap.api.maps.model.CameraPosition
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.MultiPointItem
-import com.efbsm5.easyway.contract.map.LocationTrackingContract
+import com.efbsm5.easyway.contract.map.MapContract
 import com.efbsm5.easyway.contract.map.MapState
 import com.efbsm5.easyway.convertToMultiPointItem
 import com.efbsm5.easyway.dialog.ShowOpenGPSDialog
@@ -97,14 +97,19 @@ internal fun MapScreen(
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.onEach {
             when (it) {
-                is LocationTrackingContract.Effect.Toast -> showMsg(it.msg)
-                is LocationTrackingContract.Effect.ClickPoint -> onClick(it.multiPointItem)
+                is MapContract.Effect.Toast -> showMsg(it.msg)
+                is MapContract.Effect.ClickPoint -> onClick(it.multiPointItem)
+                is MapContract.Effect.MoveToPoint -> cameraPosition.animate(
+                    CameraUpdateFactory.newLatLng(
+                        it.latLng
+                    )
+                )
             }
         }.collect()
     }
     LaunchedEffect(selectedPoint) {
         snapshotFlow { selectedPoint }.filterNotNull().collect {
-            viewModel.handleEvents(LocationTrackingContract.Event.ClickPoint(it))
+            viewModel.handleEvents(MapContract.Event.ClickPoint(it))
         }
     }
     val openGpsLauncher = handlerGPSLauncher(viewModel::checkGpsStatus)
@@ -163,7 +168,7 @@ internal fun MapScreen(
             onMapLoaded = viewModel::checkGpsStatus,
             onMapClick = {
                 viewModel.handleEvents(
-                    LocationTrackingContract.Event.ClickPoint(
+                    MapContract.Event.ClickPoint(
                         MultiPointItem(it)
                     )
                 )
@@ -171,7 +176,7 @@ internal fun MapScreen(
             onMapPOIClick = {
                 it?.let {
                     viewModel.handleEvents(
-                        LocationTrackingContract.Event.ClickPoint(
+                        MapContract.Event.ClickPoint(
                             it.convertToMultiPointItem()
                         )
                     )
@@ -183,7 +188,7 @@ internal fun MapScreen(
                     enable = true,
                     icon = LocationTrackingRepository.initMultiPointIcon(),
                     multiPointItems = currentState.points,
-                    onClick = { viewModel.handleEvents(LocationTrackingContract.Event.ClickPoint(it)) })
+                    onClick = { viewModel.handleEvents(MapContract.Event.ClickPoint(it)) })
             }
             Marker(
                 icon = BitmapDescriptorFactory.defaultMarker(),
@@ -216,7 +221,7 @@ internal fun MapScreen(
         if (mapState is MapState.Route) {
             MenuButtonList(onClick = {
                 viewModel.handleEvents(
-                    LocationTrackingContract.Event.QueryRoutePlan(
+                    MapContract.Event.QueryRoutePlan(
                         it, mapState.destination
                     )
                 )
@@ -225,7 +230,7 @@ internal fun MapScreen(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .padding(end = 4.dp)
-                    .clickable(onClick = { viewModel.handleEvents(LocationTrackingContract.Event.RoadTrafficClick) }),
+                    .clickable(onClick = { viewModel.handleEvents(MapContract.Event.RoadTrafficClick) }),
                 isEnable = currentState.mapProperties.isTrafficEnabled
             )
         }

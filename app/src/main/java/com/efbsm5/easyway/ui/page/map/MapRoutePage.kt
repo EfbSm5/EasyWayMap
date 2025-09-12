@@ -7,6 +7,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -25,6 +29,7 @@ import io.morfly.compose.bottomsheet.material3.rememberBottomSheetState
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 
 @OptIn(
@@ -57,11 +62,30 @@ fun MapRoutePage(
             }
         }.collect()
     }
-    val viewModel: MapViewModel = viewModel()
+    val mapViewModel: MapViewModel = viewModel()
 
-    BackHandler(
-        enabled = currentState.cardScreen != CardScreen.Function,
-        onBack = { viewmodel.handleEvents(MapRouteContract.Event.ChangeScreen(CardScreen.Function)) })
+    var collapsing by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val sheetNotCollapsed = sheetState.currentValue != SheetValue.Collapsed
+    val showOtherScreen = currentState.cardScreen != CardScreen.Function
+    BackHandler(enabled = (sheetNotCollapsed || showOtherScreen) && !collapsing) {
+        when {
+            sheetNotCollapsed -> {
+                scope.launch {
+                    collapsing = true
+                    runCatching {
+                        sheetState.animateTo(SheetValue.Collapsed)
+                    }
+                    collapsing = false
+                }
+            }
+
+            showOtherScreen -> {
+                viewmodel.handleEvents(MapRouteContract.Event.ChangeScreen(CardScreen.Function))
+            }
+        }
+    }
+
     MapBottomSheet(
         sheetState = sheetState,
         sheetContent = {
@@ -76,22 +100,21 @@ fun MapRoutePage(
                     )
                 },
                 content = currentState.cardScreen,
-                onChangeScreen = { { viewmodel.handleEvents(MapRouteContract.Event.ChangeScreen(it)) } })
+                onChangeScreen = { viewmodel.handleEvents(MapRouteContract.Event.ChangeScreen(it)) })
         },
         mapPlace = {
             MapScreen(
                 onClick = { viewmodel.handleEvents(MapRouteContract.Event.ClickPoint(it)) },
                 mapState = currentState.mapState,
                 onChangeState = { viewmodel.handleEvents(MapRouteContract.Event.ChangeState(it)) },
-                viewModel = viewModel,
+                viewModel = mapViewModel,
                 selectedPoint = currentState.selectedPoint
             )
         },
         onClickChange = { viewmodel.handleEvents(MapRouteContract.Event.SwitchMap) },
-        onClickLocation = { },
+        onClickLocation = { mapViewModel.moveToLocation() },
         searchText = currentState.searchBarText,
         editText = { viewmodel.handleEvents(MapRouteContract.Event.EditText(it)) },
         search = { viewmodel.handleEvents(MapRouteContract.Event.Search) })
 
 }
-

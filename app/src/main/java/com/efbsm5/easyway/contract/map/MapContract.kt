@@ -38,7 +38,7 @@ import com.melody.map.gd_compose.poperties.MapUiSettings
  * @github: https://github.com/TheMelody/OmniMap
  * created 2022/10/10 17:45
  */
-class LocationTrackingContract {
+class MapContract {
     sealed class Event : IUiEvent {
         data object ShowOpenGPSDialog : Event()
         data object HideOpenGPSDialog : Event()
@@ -68,5 +68,6 @@ class LocationTrackingContract {
     sealed class Effect : IUiEffect {
         internal data class Toast(val msg: String?) : Effect()
         internal data class ClickPoint(val multiPointItem: MultiPointItem) : Effect()
+        internal data class MoveToPoint(val latLng: LatLng) : Effect()
     }
 }
