@@ -11,6 +11,7 @@ import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.PostComment
 import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.data.models.assistModel.EasyPointSimplify
+import com.efbsm5.easyway.data.models.assistModel.PointWithComments
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
 import com.efbsm5.easyway.data.models.assistModel.PostCommentAndUser
 import com.efbsm5.easyway.getCurrentFormattedTime
@@ -27,10 +28,6 @@ object DataRepository {
     private val pointCommentDao get() = database.pointCommentDao()
     private val userDao get() = database.userDao()
 
-    enum class ReactionType { LIKE, DISLIKE }
-
-    enum class TargetType { POST, POINT, POST_COMMENT, POINT_COMMENT }
-
     fun getAllPoints(): Result<List<EasyPointSimplify>> = runCatching { pointDao.loadAllPoints() }
 
     fun getPostAndUser(): Result<List<PostAndUser>> = runCatching { postDao.getPostWithUser() }
@@ -39,42 +36,6 @@ object DataRepository {
 
     fun getUserById(userId: Int): Result<User> =
         runCatching { userDao.getUserById(userId) ?: getInitUser() }
-
-
-//    private fun adjustCounters(
-//        targetType: TargetType,
-//        targetId: Int,
-//        increment: ReactionType? = null,
-//        decrement: ReactionType? = null
-//    ) {
-//        when (targetType) {
-//            TargetType.POST -> {
-//                if (increment == ReactionType.LIKE) postDao.increaseLike(targetId)
-//                if (decrement == ReactionType.LIKE) postDao.decreaseLike(targetId)
-//            }
-//
-//            TargetType.POINT -> {
-//                if (increment == ReactionType.LIKE) pointDao.increaseLikes(targetId)
-//                if (increment == ReactionType.DISLIKE) pointDao.increaseDislikes(targetId)
-//                if (decrement == ReactionType.LIKE) pointDao.decreaseLikes(targetId)
-//                if (decrement == ReactionType.DISLIKE) pointDao.decreaseDislikes(targetId)
-//            }
-//
-//            TargetType.POST_COMMENT -> {
-//                if (increment == ReactionType.LIKE) postCommentDao.increaseLikes(targetId)
-//                if (increment == ReactionType.DISLIKE) postCommentDao.increaseDislikes(targetId)
-//                if (decrement == ReactionType.LIKE) postCommentDao.decreaseLikes(targetId)
-//                if (decrement == ReactionType.DISLIKE) postCommentDao.decreaseDislikes(targetId)
-//            }
-//
-//            TargetType.POINT_COMMENT -> {
-//                if (increment == ReactionType.LIKE) pointCommentDao.increaseLikes(targetId)
-//                if (increment == ReactionType.DISLIKE) pointCommentDao.increaseDislikes(targetId)
-//                if (decrement == ReactionType.LIKE) pointCommentDao.decreaseLikes(targetId)
-//                if (decrement == ReactionType.DISLIKE) pointCommentDao.decreaseDislikes(targetId)
-//            }
-//        }
-//    }
 
     fun uploadPost(post: Post) {
         val date = getCurrentFormattedTime()
@@ -119,15 +80,18 @@ object DataRepository {
         )
     }
 
-    fun getPointByUserId(userId: Int): Result<List<EasyPoint>> =
-        runCatching { pointDao.getPointByUserId(userId) }
+    fun getPointAndCommentByUserId(userId: Int): Result<List<PointWithComments>> =
+        runCatching { pointDao.getPointWithCommentsByUserId(userId) }
 
     fun getPointByName(string: String): Result<List<EasyPoint>> =
         runCatching { pointDao.searchEasyPointsByName(string) }
 
-    fun addLikeForPost(postId: Int) {
-        runCatching { postDao.increaseLike(postId) }
-    }
+    fun addLikeForPost(postId: Int) = runCatching { postDao.increaseLike(postId) }
+
+
+    fun getPostAndCommentsByUserId(userId: Int) =
+        runCatching { postDao.getPostAndCommentsByUserId(userId) }
+
 
     fun decreaseLikeForPost(postId: Int) {
         postDao.increaseLike(postId)

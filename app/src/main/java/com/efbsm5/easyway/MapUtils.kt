@@ -134,7 +134,7 @@ fun getInitPoint(latLng: LatLng = LatLng(30.507950, 114.413514)): EasyPoint {
 fun getInitUser(): User {
     return User(
         id = 0,
-        name = "小明",
+        name = "null",
         avatar = null,
     )
 }

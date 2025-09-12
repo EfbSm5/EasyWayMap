@@ -1,72 +1,69 @@
 package com.efbsm5.easyway.viewmodel
 
-import androidx.lifecycle.viewModelScope
 import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.HomePageContract
 import com.efbsm5.easyway.data.UserManager
 import com.efbsm5.easyway.data.models.User
+import com.efbsm5.easyway.data.network.IntentRepository
 import com.efbsm5.easyway.getInitUser
 import com.efbsm5.easyway.repo.DataRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class HomePageViewModel :
     BaseViewModel<HomePageContract.Event, HomePageContract.State, HomePageContract.Effect>() {
 
     init {
+        getUser()
+        getUserPoint()
+        getUserPost()
+    }
+
+    fun getUser() {
         asyncLaunch(Dispatchers.IO) {
             val r = DataRepository.getUserById(UserManager.userId)
             r.onSuccess {
-                setState { copy(user = it) }
+                setState { copy(user = it, isLoading = false) }
             }.onFailure {
-                setState { copy(user = getInitUser()) }
+                setState { copy(isLoading = false, error = it.message) }
             }
         }
     }
 
-
     fun getUserPoint() {
         asyncLaunch(Dispatchers.IO) {
-//            DataRepository.getPointByUserId()
-//            repository.getPointByUserId(_user.value.id).collect {
-//                _points.value = it
-//            }
+            val r = DataRepository.getPointAndCommentByUserId(UserManager.userId)
+            r.onSuccess {
+                setState { copy(points = it, isLoading = false) }
+            }.onFailure {
+                setState { copy(isLoading = false, error = it.message) }
+            }
         }
     }
 
     fun getUserPost() {
         asyncLaunch(Dispatchers.IO) {
-//            repository.getAllDynamicPosts().collect { dynamicPosts ->
-//                val list = emptyList<PointCommentAndUser>().toMutableList()
-//                dynamicPosts.forEach { post ->
-//                    repository.getCommentCount(post.commentId).collect {
-//                        list.add(
-//                            PointCommentAndUser(
-//                                dynamicPost = post,
-//                                user = repository.getUserById(post.userId),
-//                                commentCount = it,
-//                            )
-//                        )
-//                        _post.value = list.toList()
-//                    }
-//                }
-//            }
+            val r = DataRepository.getPostAndCommentsByUserId(currentState.user.id)
+            r.onSuccess {
+                setState { copy(isLoading = false, post = it) }
+            }.onFailure {
+                setState { copy(isLoading = false, error = it.message) }
+            }
         }
     }
 
     fun editUser(user: User) {
-        viewModelScope.launch(Dispatchers.IO) {
-//            repository.
+        asyncLaunch(Dispatchers.IO) {
+
         }
     }
 
     fun updateData() {
         asyncLaunch(Dispatchers.IO) {
-//            intentRepository.syncData()
+            IntentRepository.syncData()
         }
     }
 
-    fun changeState(homePageState: HomePageState) {
+    private fun changeState(homePageState: HomePageState) {
         setState { copy(content = homePageState) }
     }
 
@@ -80,6 +77,10 @@ class HomePageViewModel :
     }
 
     override fun handleEvents(event: HomePageContract.Event) {
+        when (event) {
+            is HomePageContract.Event.ChangeState -> changeState(event.state)
+            HomePageContract.Event.UpdateData -> updateData()
+        }
     }
 }
 

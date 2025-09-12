@@ -56,4 +56,8 @@ interface PostDao {
     // 新增：获取全部 Post 实体列表用于 diff
     @Query("SELECT * FROM post")
     fun getAllPostEntities(): List<Post>
+
+    @Transaction
+    @Query("SELECT * FROM post WHERE userId = :userId")
+    fun getPostAndCommentsByUserId(userId: Int): List<PostWithComments>
 }

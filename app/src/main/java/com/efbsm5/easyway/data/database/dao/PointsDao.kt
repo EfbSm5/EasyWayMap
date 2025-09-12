@@ -4,11 +4,16 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.models.assistModel.EasyPointSimplify
+import com.efbsm5.easyway.data.models.assistModel.PointWithComments
 
 @Dao
 interface PointsDao {
+    @Query("SELECT * FROM point")
+    fun getAllPointEntities(): List<EasyPoint>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(point: EasyPoint)
 
@@ -39,13 +44,12 @@ interface PointsDao {
     @Query("DELETE FROM point WHERE pointId IN (:ids)")
     fun deleteAll(ids: List<Int>)
 
+    @Transaction
     @Query("SELECT * FROM point WHERE userId=:userId")
-    fun getPointByUserId(userId: Int): List<EasyPoint>
+    fun getPointWithCommentsByUserId(userId: Int): List<PointWithComments>
 
     @Query("SELECT * FROM point WHERE name LIKE '%' || :searchString || '%'")
     fun searchEasyPointsByName(searchString: String): List<EasyPoint>
 
-    // 新增：获取全部 EasyPoint 实体列表用于 diff
-    @Query("SELECT * FROM point")
-    fun getAllPointEntities(): List<EasyPoint>
+
 }
