@@ -52,20 +52,8 @@
     - ui/（导航、组件、主题、页面）
     - viewmodel/（Home、Map、Community 等）
 
-## 运行与开发
 
-- 要求
-    - Android Studio（Koala+ 推荐）
-    - Android SDK 36（compileSdk/targetSdk = 36），minSdk = 29
-    - JDK 19
-- 配置
-    - app/build.gradle.kts 已根据构建类型注入 BASE_URL 与日志开关（BuildConfig.BASE_URL/IS_LOG_ENABLED）
-- 启动
-    1. 使用 Android Studio 打开工程根目录
-    2. 同步 Gradle（确保已启用 Google 与 MavenCentral 仓库）
-    3. 选择 app 运行配置并安装到设备
-
-## 数据模型（简述）
+## 数据模型
 
 - Entity：User、Post、PostComment、EasyPoint、PointComment
 - 组合模型（assistModel）：
@@ -78,11 +66,4 @@
 - Advanced BottomSheet for Material3（io.morfly.compose:advanced-bottomsheet-material3）
 - 地图 URI 跳转（高德/百度/腾讯）
 
-## 许可证
-
-尚未提供许可证文件，请按需补充（例如 MIT/Apache-2.0）。
-
----
-提示：如果首次构建遇到依赖解析问题，请确认 settings.gradle.kts 中的 repositories 已包含 google() 与
-mavenCentral()，并同步到最新 Gradle。
 
