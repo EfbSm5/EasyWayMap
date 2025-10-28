@@ -51,8 +51,8 @@ import com.efbsm5.easyway.data.models.assistModel.PostAndUser
 import com.efbsm5.easyway.ui.FabConfig
 import com.efbsm5.easyway.ui.LocalScaffoldController
 import com.efbsm5.easyway.ui.components.AppTopBar
-import com.efbsm5.easyway.ui.components.PostList
 import com.efbsm5.easyway.ui.components.TabSection
+import com.efbsm5.easyway.ui.components.postListItems
 import com.efbsm5.easyway.viewmodel.communityViewModel.CommunityViewModel
 
 @Composable
@@ -61,8 +61,6 @@ fun CommunitySquareRoute(
     onSelectPost: (PostAndUser) -> Unit,
     onCreateNew: () -> Unit,
     viewModel: CommunityViewModel = viewModel(),
-    posts: List<PostAndUser>,
-    loading: Boolean
 ) {
     val currentState by viewModel.uiState.collectAsState()
     val controller = LocalScaffoldController.current
@@ -169,11 +167,11 @@ fun CommunitySquareScreen(
                 }
             }
         } else {
-            item {
-                PostList(
-                    posts = filteredPosts,
-                    onClickPost = { onEvent(CommunityContract.Event.ClickPost(it)) })
-            }
+            // Use LazyListScope extension to avoid nested LazyColumn
+            postListItems(
+                posts = filteredPosts,
+                onClickPost = { onEvent(CommunityContract.Event.ClickPost(it)) }
+            )
         }
 
         if (isLoading && filteredPosts.isNotEmpty()) {
@@ -328,6 +326,3 @@ private fun PostSkeletonItem() {
     }
     HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
 }
-
-
-

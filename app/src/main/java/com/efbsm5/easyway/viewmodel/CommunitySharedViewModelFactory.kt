@@ -11,6 +11,6 @@ class CommunitySharedViewModelFactory(
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
         val handle = extras.createSavedStateHandle()
-        return CommunitySharedViewModel(repo, handle) as T
+        return CommunitySharedViewModel(handle) as T
     }
 }

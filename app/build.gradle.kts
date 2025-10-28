@@ -4,6 +4,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose") version "2.2.0"
     alias(libs.plugins.ksp)
     id("kotlin-parcelize")
+    alias(libs.plugins.jetbrains.kotlin.serialization)
 
 }
 
@@ -44,6 +45,10 @@ android {
             buildConfigField("boolean", "IS_LOG_ENABLED", "false")
         }
     }
+//    applicationVariants {
+//    applicationVariants.all { variant ->
+//
+//    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_19
         targetCompatibility = JavaVersion.VERSION_19
@@ -88,8 +93,11 @@ dependencies {
     implementation(libs.core.ktx)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.activity.compose)
-    implementation(libs.androidx.navigation.compose)
-
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+    implementation(libs.androidx.material3.adaptive.navigation3)
+    implementation(libs.kotlinx.serialization.core)
     // Compose BOM 对齐（debug 与 androidTest）
     debugImplementation(platform(libs.compose.bom))
     androidTestImplementation(platform(libs.compose.bom))
