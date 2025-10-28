@@ -15,6 +15,7 @@ import com.efbsm5.easyway.viewmodel.HomePageViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 
+
 @Composable
 fun HomePage(viewModel: HomePageViewModel = viewModel()) {
     val state by viewModel.uiState.collectAsState()
@@ -27,7 +28,7 @@ fun HomePage(viewModel: HomePageViewModel = viewModel()) {
         }.collect()
     }
     Box {
-        when (state) {
+        when (state.content) {
             HomePageState.RegForActivity -> RegScreen()
 
             HomePageState.ShowPoint -> ShowPointScreen()
@@ -66,6 +67,9 @@ fun HomePage(viewModel: HomePageViewModel = viewModel()) {
                     )
                 )
             })
+
+            HomePageState.Loading -> { /* Optional: keep empty, loader below covers it */
+            }
         }
         if (state.isLoading) {
             RedCenterLoading()
@@ -74,13 +78,9 @@ fun HomePage(viewModel: HomePageViewModel = viewModel()) {
 
 
     BackHandler(
-        enabled = state != HomePageState.Main, onBack = {
+        enabled = state.content != HomePageState.Main,
+        onBack = {
             viewModel.handleEvents(HomePageContract.Event.ChangeState(HomePageState.Main))
-        })
-
+        }
+    )
 }
-
-
-
-
-

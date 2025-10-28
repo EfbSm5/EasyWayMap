@@ -2,6 +2,7 @@ package com.efbsm5.easyway.repo
 
 import com.efbsm5.easyway.SDKUtils
 import com.efbsm5.easyway.data.database.AppDataBase
+import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
 
 object CommunityRepository {
@@ -13,4 +14,5 @@ object CommunityRepository {
     fun getPost(id: Int): Result<PostAndUser> =
         runCatching { postDao.getPostById(id) }
 
+    fun insert(post: Post): Result<Unit> = runCatching { postDao.insert(post) }
 }

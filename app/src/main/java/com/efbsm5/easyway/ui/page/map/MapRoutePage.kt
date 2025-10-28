@@ -12,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.efbsm5.easyway.contract.map.MapRouteContract
@@ -37,7 +36,6 @@ import kotlinx.coroutines.launch
     ExperimentalPermissionsApi::class,
     ExperimentalFoundationApi::class
 )
-@Preview
 @Composable
 fun MapRoutePage(
     viewmodel: MapRouteViewModel = viewModel()

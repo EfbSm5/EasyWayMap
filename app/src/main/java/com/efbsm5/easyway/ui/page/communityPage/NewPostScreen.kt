@@ -359,14 +359,15 @@ private fun ImagesSection(
 
     val gridState = rememberLazyGridState()
 
+    // Make the grid non-scrollable and let the outer Column handle scrolling.
     LazyVerticalGrid(
         columns = GridCells.Fixed(4),
         state = gridState,
+        userScrollEnabled = false,
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 120.dp, max = 260.dp)
     ) {
         items(selectedPhotos.size) { index ->
             val uri = selectedPhotos[index]

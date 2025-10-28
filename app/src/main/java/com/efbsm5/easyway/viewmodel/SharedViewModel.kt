@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
 import com.efbsm5.easyway.repo.CommunityRepository
+import com.efbsm5.easyway.showMsg
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -54,6 +55,13 @@ class CommunitySharedViewModel(
 
     fun insertNewPost(newPost: PostAndUser) {
         _posts.update { listOf(newPost) + it }
+        viewModelScope.launch {
+            repo.insert(newPost.post).onSuccess {
+                showMsg("success")
+            }.onFailure {
+                _error.value = it.message
+            }
+        }
     }
 
     fun updateSingle(updated: PostAndUser) {

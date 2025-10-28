@@ -36,7 +36,6 @@ import com.efbsm5.easyway.viewmodel.communityViewModel.CommunityViewModel
 import com.efbsm5.easyway.viewmodel.communityViewModel.DetailViewModel
 import com.efbsm5.easyway.viewmodel.communityViewModel.NewPostViewModel
 
-@SuppressLint("UnrememberedGetBackStackEntry")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EasyWay() {
