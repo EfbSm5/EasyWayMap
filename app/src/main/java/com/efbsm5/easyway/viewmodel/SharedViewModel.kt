@@ -1,6 +1,5 @@
 package com.efbsm5.easyway.viewmodel
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.efbsm5.easyway.SDKUtils
@@ -16,9 +15,7 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "SharedViewModel"
 
-class CommunitySharedViewModel(
-    handle: SavedStateHandle
-) : ViewModel() {
+class CommunitySharedViewModel() : ViewModel() {
 
     private val repo = CommunityRepository
     private val _posts = MutableStateFlow<List<PostAndUser>>(emptyList())
@@ -39,15 +36,9 @@ class CommunitySharedViewModel(
             _loading.value = false
         }
     }
-
-    init {
-        debug()
-    }
-
     fun debug() {
         viewModelScope.launch(Dispatchers.IO) {
             measureRoomUpdateLatencyRepeatTx(AppDataBase.getDatabase(SDKUtils.getContext()))
-
         }
     }
 

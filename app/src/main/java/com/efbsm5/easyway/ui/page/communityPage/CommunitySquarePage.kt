@@ -96,7 +96,7 @@ fun CommunitySquareRoute(
 @Preview
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CommunitySquareScreen(
+private inline fun CommunitySquareScreen(
     state: CommunityContract.State = CommunityContract.State(),
     isLoading: Boolean = false,
     filteredPosts: List<PostAndUser> = emptyList(),

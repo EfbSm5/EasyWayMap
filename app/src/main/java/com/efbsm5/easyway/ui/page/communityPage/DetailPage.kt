@@ -126,7 +126,7 @@ fun DetailRoute(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailScreen(
+private inline fun DetailScreen(
     state: DetailContract.State, onBack: () -> Unit, onEvent: (DetailContract.Event) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
