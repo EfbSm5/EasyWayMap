@@ -16,9 +16,7 @@ class CommunityContract {
 
     @Immutable
     data class State(
-        val filterPosts: List<PostAndUser> = emptyList(),
         val error: String? = null,
-        val isRefreshing: Boolean = false,
         val selectedTab: Int = 0,
         val searchText: String = ""
     ) : IUiState

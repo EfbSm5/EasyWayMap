@@ -46,6 +46,7 @@ import com.efbsm5.easyway.repo.RoutePlanRepository
 import com.efbsm5.easyway.safeLaunch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.catch
 
 /**
  * LocationTrackingViewModel
@@ -76,17 +77,20 @@ class MapViewModel :
     }
 
     init {
-        asyncLaunch(Dispatchers.IO) {
-            val r = DataRepository.getAllPoints()
-            r.onSuccess {
-                val list = it.map { it ->
-                    MultiPointItem(it.getLatLng()).apply {
-                        `object` = it
-                        title = it.name
-                    }
+        asyncLaunch {
+            DataRepository.observeAllPoints()
+                .catch {
+                    setState { copy(isLoading = false, error = "点位加载失败") }
                 }
-                setState { copy(isLoading = false, points = list) }
-            }.onFailure { setState { copy(isLoading = false, error = "error") } }
+                .collect { points ->
+                    val items = points.map { point ->
+                        MultiPointItem(point.getLatLng()).apply {
+                            `object` = point
+                            title = point.name
+                        }
+                    }
+                    setState { copy(isLoading = false, points = items, error = null) }
+                }
         }
     }
 

@@ -13,7 +13,7 @@ interface PostCommentDao {
     fun getAll(): List<PostComment>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(postComment: PostComment)
+    suspend fun insert(postComment: PostComment): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(posts: List<PostComment>)
@@ -32,4 +32,20 @@ interface PostCommentDao {
 
     @Query("UPDATE postComment SET dislike = CASE WHEN dislike > 0 THEN dislike - 1 ELSE 0 END WHERE `index` = :id")
     fun decreaseDislikes(id: Int)
+
+    @Query(
+        """UPDATE postComment
+            SET `like` = :likeCount,
+                dislike = :dislikeCount,
+                likedByMe = :likedByMe,
+                dislikedByMe = :dislikedByMe
+            WHERE `index` = :id"""
+    )
+    suspend fun updateReactionState(
+        id: Int,
+        likeCount: Int,
+        dislikeCount: Int,
+        likedByMe: Boolean,
+        dislikedByMe: Boolean,
+    ): Int
 }

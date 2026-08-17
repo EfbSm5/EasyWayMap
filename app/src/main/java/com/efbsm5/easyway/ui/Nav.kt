@@ -1,8 +1,10 @@
 package com.efbsm5.easyway.ui
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -14,13 +16,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.efbsm5.easyway.initializer.AppServiceLocator
 import com.efbsm5.easyway.ui.components.AppTopBar
 import com.efbsm5.easyway.ui.components.BottomNavigationBar
@@ -89,40 +94,56 @@ fun EasyWay() {
                     composable(CommunityRoute.Square.route) { squareEntry ->
                         val shared = rememberCommunitySharedViewModel(navController)
                         val viewModel: CommunityViewModel = viewModel(squareEntry)
-                        LaunchedEffect(Unit) {
-                            shared.loadInitialIfEmpty()
-                        }
                         val posts by shared.posts.collectAsState()
                         val loading by shared.loading.collectAsState()
+                        val error by shared.error.collectAsState()
 
                         CommunitySquareRoute(
                             back = { navController.popBackStack() },
                             onSelectPost = { pu ->
                                 shared.select(pu)
-                                navController.navigate(CommunityRoute.Detail)
+                                navController.navigate(CommunityRoute.Detail.build(pu.post.id))
                             },
                             onCreateNew = { navController.navigate(CommunityRoute.NewPost.route) },
                             viewModel = viewModel,
                             posts = posts,
-                            loading = loading
+                            loading = loading,
+                            error = error,
                         )
                     }
 
                     composable(
                         route = CommunityRoute.Detail.route,
+                        arguments = listOf(
+                            navArgument(CommunityRoute.Detail.ARG_POST_ID) {
+                                type = NavType.IntType
+                            }
+                        ),
                     ) { detailEntry ->
                         val shared = rememberCommunitySharedViewModel(navController)
                         val viewModel: DetailViewModel = viewModel()
                         val current by shared.currentPost.collectAsState()
-                        DetailRoute(
-                            onBack = { navController.popBackStack() },
-                            postAndUser = current!!,
-                            viewModel = viewModel,
-                            onLikeUpdated = { updated ->
-                                shared.updateLike(
-                                    updated.post.id, updated.post.likedByMe, updated.post.like
-                                )
-                            })
+                        val postId = detailEntry.arguments
+                            ?.getInt(CommunityRoute.Detail.ARG_POST_ID)
+                            ?: return@composable
+                        LaunchedEffect(postId) {
+                            shared.select(postId)
+                        }
+                        val selected = current?.takeIf { it.post.id == postId }
+                        if (selected == null) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        } else {
+                            DetailRoute(
+                                onBack = { navController.popBackStack() },
+                                postAndUser = selected,
+                                viewModel = viewModel,
+                            )
+                        }
                     }
 
                     composable(CommunityRoute.NewPost.route) { newEntry ->
@@ -131,8 +152,7 @@ fun EasyWay() {
 
                         NewPostPage(
                             back = { navController.popBackStack() },
-                            onPostSuccess = { newPost ->
-                                shared.insertNewPost(newPost)
+                            onPostSuccess = {
                                 navController.popBackStack()
                             },
                             viewModel = viewModel
@@ -175,4 +195,3 @@ sealed class CommunityRoute(val route: String) {
         const val ARG_POST_ID = "postId"
     }
 }
-

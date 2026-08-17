@@ -8,6 +8,7 @@ import androidx.room.Transaction
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.data.models.assistModel.EasyPointSimplify
 import com.efbsm5.easyway.data.models.assistModel.PointWithComments
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PointsDao {
@@ -17,8 +18,15 @@ interface PointsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(point: EasyPoint)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAndReturnId(point: EasyPoint): Long
+
     @Query("select pointId,name,lat,lng from point order by pointId desc ")
     fun loadAllPoints(): List<EasyPointSimplify>
+
+    /** 地图直接观察 Room；新增点位提交后无需重建 ViewModel。 */
+    @Query("SELECT pointId, name, lat, lng FROM point ORDER BY pointId DESC")
+    fun observeAllPoints(): Flow<List<EasyPointSimplify>>
 
     @Query("SELECT * FROM point WHERE pointId = :id")
     fun getPointById(id: Int): EasyPoint?
@@ -26,13 +34,13 @@ interface PointsDao {
     @Query("UPDATE point SET `like` = `like` + 1 WHERE pointId = :id ")
     fun increaseLikes(id: Int)
 
-    @Query("UPDATE point SET `like` = `like` -1 WHERE pointId = :id")
+    @Query("UPDATE point SET `like` = CASE WHEN `like` > 0 THEN `like` - 1 ELSE 0 END WHERE pointId = :id")
     fun decreaseLikes(id: Int)
 
     @Query("UPDATE point SET dislike = dislike + 1 WHERE pointId = :id")
     fun increaseDislikes(id: Int)
 
-    @Query("UPDATE point SET dislike = dislike -1 WHERE pointId = :id")
+    @Query("UPDATE point SET dislike = CASE WHEN dislike > 0 THEN dislike - 1 ELSE 0 END WHERE pointId = :id")
     fun decreaseDislikes(id: Int)
 
     @Query("SELECT * FROM point WHERE lat = :lat AND lng = :lng")

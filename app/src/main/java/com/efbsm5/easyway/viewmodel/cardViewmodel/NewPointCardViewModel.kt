@@ -6,7 +6,6 @@ import com.efbsm5.easyway.contract.card.NewPointCardContract
 import com.efbsm5.easyway.data.LocationSaver
 import com.efbsm5.easyway.getInitPoint
 import com.efbsm5.easyway.repo.DataRepository
-import kotlinx.coroutines.Dispatchers
 
 class NewPointCardViewModel :
     BaseViewModel<NewPointCardContract.Event, NewPointCardContract.State, NewPointCardContract.Effect>() {
@@ -40,13 +39,25 @@ class NewPointCardViewModel :
 
     fun callback(boolean: Boolean) {
         if (boolean) {
-            LocationSaver.location.apply {
-                setState { copy(tempPoint = tempPoint.copy(lat = latitude, lng = longitude)) }
+            val location = LocationSaver.location
+            val draft = currentState.tempPoint.copy(
+                lat = location.latitude,
+                lng = location.longitude,
+            )
+            setState { copy(tempPoint = draft) }
+            asyncLaunch {
+                DataRepository.uploadPoint(draft)
+                    .onSuccess {
+                        setEffect { NewPointCardContract.Effect.Back }
+                    }
+                    .onFailure { throwable ->
+                        setEffect {
+                            NewPointCardContract.Effect.Toast(
+                                throwable.message ?: "点位保存失败",
+                            )
+                        }
+                    }
             }
-            asyncLaunch(Dispatchers.IO) {
-                DataRepository.uploadPoint(currentState.tempPoint)
-            }
-            setEffect { NewPointCardContract.Effect.Back }
         } else {
             setEffect { NewPointCardContract.Effect.Back }
         }

@@ -57,6 +57,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.efbsm5.easyway.contract.card.NewPointCardContract
+import com.efbsm5.easyway.showMsg
 import com.efbsm5.easyway.data.models.EasyPoint
 import com.efbsm5.easyway.getInitPoint
 import com.efbsm5.easyway.viewmodel.cardViewmodel.NewPointCardViewModel
@@ -96,6 +97,7 @@ fun NewPointCard(
                 }
 
                 NewPointCardContract.Effect.Back -> changeScreen(CardScreen.Function)
+                is NewPointCardContract.Effect.Toast -> showMsg(effect.message)
             }
         }
     }

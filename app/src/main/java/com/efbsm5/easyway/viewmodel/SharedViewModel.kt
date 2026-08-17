@@ -5,10 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
 import com.efbsm5.easyway.repo.CommunityRepository
-import com.efbsm5.easyway.showMsg
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class CommunitySharedViewModel(
@@ -16,59 +16,54 @@ class CommunitySharedViewModel(
 ) : ViewModel() {
 
     private val _posts = MutableStateFlow<List<PostAndUser>>(emptyList())
-    val posts: StateFlow<List<PostAndUser>> = _posts
+    val posts: StateFlow<List<PostAndUser>> = _posts.asStateFlow()
     private val _currentPost = MutableStateFlow<PostAndUser?>(null)
-    val currentPost: StateFlow<PostAndUser?> = _currentPost
-    private val _loading = MutableStateFlow(false)
-    val loading: StateFlow<Boolean> = _loading
+    val currentPost: StateFlow<PostAndUser?> = _currentPost.asStateFlow()
+    private val _loading = MutableStateFlow(true)
+    val loading: StateFlow<Boolean> = _loading.asStateFlow()
     private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error
+    val error: StateFlow<String?> = _error.asStateFlow()
 
-    fun loadInitialIfEmpty() {
-        if (_posts.value.isNotEmpty()) return
+    init {
         viewModelScope.launch {
-            _loading.value = true
-            repo.getAllPosts().onSuccess { _posts.value = it }
-                .onFailure { _error.value = it.message }
-            _loading.value = false
+            repo.observePosts()
+                .catch { throwable ->
+                    _loading.value = false
+                    _error.value = throwable.message ?: "社区数据加载失败"
+                }
+                .collect { latestPosts ->
+                    _posts.value = latestPosts
+                    _loading.value = false
+                    _error.value = null
+
+                    val selectedId = savedStateHandle.get<Int>(SELECTED_POST_ID)
+                    if (selectedId != null) {
+                        _currentPost.value = latestPosts.firstOrNull { it.post.id == selectedId }
+                    }
+                }
         }
     }
 
     fun select(post: PostAndUser) {
+        savedStateHandle[SELECTED_POST_ID] = post.post.id
         _currentPost.value = post
     }
 
-    fun updateLike(postId: Int, liked: Boolean, newCount: Int) {
-        _posts.update { list ->
-            list.map {
-                if (it.post.id == postId) it.copy(
-                    post = it.post.copy(likedByMe = liked, like = newCount)
-                ) else it
-            }
+    /** 详情页在进程恢复或直接导航时按稳定 ID 从 Room 恢复。 */
+    fun select(postId: Int) {
+        savedStateHandle[SELECTED_POST_ID] = postId
+        _posts.value.firstOrNull { it.post.id == postId }?.let {
+            _currentPost.value = it
+            return
         }
-        _currentPost.update { cur ->
-            if (cur?.post?.id == postId) cur.copy(
-                post = cur.post.copy(likedByMe = liked, like = newCount)
-            ) else cur
-        }
-    }
-
-    fun insertNewPost(newPost: PostAndUser) {
-        _posts.update { listOf(newPost) + it }
         viewModelScope.launch {
-            repo.insert(newPost.post).onSuccess {
-                showMsg("success")
-            }.onFailure {
-                _error.value = it.message
-            }
+            repo.getPost(postId)
+                .onSuccess { _currentPost.value = it }
+                .onFailure { _error.value = it.message ?: "帖子加载失败" }
         }
     }
 
-    fun updateSingle(updated: PostAndUser) {
-        _posts.update { list -> list.map { if (it.post.id == updated.post.id) updated else it } }
-        if (_currentPost.value?.post?.id == updated.post.id) {
-            _currentPost.value = updated
-        }
+    companion object {
+        private const val SELECTED_POST_ID = "selected_post_id"
     }
-
 }

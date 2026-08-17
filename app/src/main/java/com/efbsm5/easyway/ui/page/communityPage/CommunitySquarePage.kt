@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,9 +52,10 @@ import com.efbsm5.easyway.data.models.assistModel.PostAndUser
 import com.efbsm5.easyway.ui.FabConfig
 import com.efbsm5.easyway.ui.LocalScaffoldController
 import com.efbsm5.easyway.ui.components.AppTopBar
-import com.efbsm5.easyway.ui.components.PostList
 import com.efbsm5.easyway.ui.components.TabSection
+import com.efbsm5.easyway.ui.components.communityPostItems
 import com.efbsm5.easyway.viewmodel.communityViewModel.CommunityViewModel
+import com.efbsm5.easyway.viewmodel.communityViewModel.filterCommunityPosts
 
 @Composable
 fun CommunitySquareRoute(
@@ -62,7 +64,8 @@ fun CommunitySquareRoute(
     onCreateNew: () -> Unit,
     viewModel: CommunityViewModel = viewModel(),
     posts: List<PostAndUser>,
-    loading: Boolean
+    loading: Boolean,
+    error: String?,
 ) {
     val currentState by viewModel.uiState.collectAsState()
     val controller = LocalScaffoldController.current
@@ -73,8 +76,12 @@ fun CommunitySquareRoute(
             visible = true,
         )
     )
-    LaunchedEffect(posts) {
-        viewModel.selectPost(posts)
+    val filteredPosts = remember(posts, currentState.searchText, currentState.selectedTab) {
+        filterCommunityPosts(
+            posts = posts,
+            query = currentState.searchText,
+            selectedTab = currentState.selectedTab,
+        )
     }
     // 收集一次性事件
     LaunchedEffect(Unit) {
@@ -91,7 +98,8 @@ fun CommunitySquareRoute(
         onEvent = viewModel::handleEvents,
         back = viewModel::back,
         isLoading = loading,
-        filteredPosts = currentState.filterPosts,
+        error = error,
+        filteredPosts = filteredPosts,
     )
 }
 
@@ -101,24 +109,23 @@ fun CommunitySquareRoute(
 fun CommunitySquareScreen(
     state: CommunityContract.State = CommunityContract.State(),
     isLoading: Boolean = false,
+    error: String? = null,
     filteredPosts: List<PostAndUser> = emptyList(),
     onEvent: (CommunityContract.Event) -> Unit = {},
     back: () -> Unit = {},
 ) {
     val listState = rememberLazyListState()
     if (isLoading && filteredPosts.isEmpty()) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
         CommunitySquareSkeleton()
+        return
     }
 
     // 全屏错误
-    if (state.error != null && filteredPosts.isEmpty()) {
+    if (error != null && filteredPosts.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(state.error)
+            Text(error)
         }
-
+        return
     }
 
     LazyColumn(
@@ -169,11 +176,10 @@ fun CommunitySquareScreen(
                 }
             }
         } else {
-            item {
-                PostList(
-                    posts = filteredPosts,
-                    onClickPost = { onEvent(CommunityContract.Event.ClickPost(it)) })
-            }
+            communityPostItems(
+                posts = filteredPosts,
+                onClickPost = { onEvent(CommunityContract.Event.ClickPost(it)) },
+            )
         }
 
         if (isLoading && filteredPosts.isNotEmpty()) {
@@ -328,6 +334,5 @@ private fun PostSkeletonItem() {
     }
     HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
 }
-
 
 

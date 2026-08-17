@@ -25,7 +25,8 @@ class NewPostContract {
         val post: Post = getInitPost(),
         val error: String? = null,
         val previewPhoto: Uri? = null,
-        val onSelectedCategory: Int = 0
+        val onSelectedCategory: Int = 0,
+        val publishing: Boolean = false,
     ) : IUiState
 
     sealed class Effect : IUiEffect {
@@ -33,5 +34,6 @@ class NewPostContract {
         object GetLocation : Effect()
         object Back : Effect()
         object Upload : Effect()
+        data class Toast(val message: String) : Effect()
     }
 }

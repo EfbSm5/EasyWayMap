@@ -2,9 +2,6 @@ package com.efbsm5.easyway.viewmodel.communityViewModel
 
 import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.community.CommunityContract
-import com.efbsm5.easyway.data.models.assistModel.PostAndUser
-import com.efbsm5.easyway.repo.DataRepository
-import kotlinx.coroutines.Dispatchers
 
 class CommunityViewModel :
     BaseViewModel<CommunityContract.Event, CommunityContract.State, CommunityContract.Effect>() {
@@ -22,48 +19,12 @@ class CommunityViewModel :
                 setState { copy(searchText = event.string) }
             }
 
-            CommunityContract.Event.Submit -> submit()
+            // 列表过滤由 Room 列表和当前输入实时推导，提交键无需再发起一次数据库查询。
+            CommunityContract.Event.Submit -> Unit
             is CommunityContract.Event.TabSelect -> {
                 setState { copy(selectedTab = event.int) }
             }
         }
-    }
-
-    fun updateSingle(updated: PostAndUser, insertIfMissing: Boolean = false) {
-        setState {
-            copy(filterPosts = change(updated = updated, insertIfMissing = insertIfMissing))
-        }
-    }
-
-    fun selectPost(posts: List<PostAndUser>) {
-        setState { copy(filterPosts = posts) }
-    }
-
-    private fun submit() {
-        asyncLaunch(Dispatchers.IO) {
-            val r = DataRepository.searchForPoint(currentState.searchText)
-            r.onSuccess {
-                setState { copy(filterPosts = it) }
-            }.onFailure {
-                setState { copy(error = "no data") }
-            }
-        }
-    }
-
-
-    private fun change(updated: PostAndUser, insertIfMissing: Boolean = false): List<PostAndUser> {
-        val old = currentState.filterPosts
-        val idx = old.indexOfFirst { it.post.id == updated.post.id }
-        if (idx == -1) {
-            if (!insertIfMissing) return old
-            return listOf(updated) + old
-        }
-        // 不做无变化替换
-        val current = old[idx]
-        if (current == updated) return old
-        val list = old.toMutableList()
-        list[idx] = updated
-        return list
     }
 
     fun back() {

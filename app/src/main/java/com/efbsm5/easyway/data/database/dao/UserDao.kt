@@ -9,7 +9,7 @@ import com.efbsm5.easyway.data.models.User
 @Dao
 interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(user: User)
+    fun insert(user: User): Long
 
     @Query("SELECT * FROM user WHERE id = :id")
     fun getUserById(id: Int): User?

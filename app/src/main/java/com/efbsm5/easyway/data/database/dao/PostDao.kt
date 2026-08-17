@@ -8,19 +8,20 @@ import androidx.room.Transaction
 import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.assistModel.PostAndUser
 import com.efbsm5.easyway.data.models.assistModel.PostWithComments
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PostDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(dynamicPost: Post)
+    suspend fun insert(dynamicPost: Post): Long
 
     @Transaction
     @Query("SELECT * FROM post WHERE id = :id")
-    fun getPostById(id: Int): PostAndUser
+    suspend fun getPostById(id: Int): PostAndUser?
 
     @Transaction
-    @Query("SELECT * FROM post")
-    fun getAllPosts(): List<PostAndUser>
+    @Query("SELECT * FROM post ORDER BY id DESC")
+    fun observeAllPosts(): Flow<List<PostAndUser>>
 
 
     @Query("DELETE FROM post WHERE id = :id")
@@ -41,13 +42,16 @@ interface PostDao {
 
     @Transaction
     @Query("SELECT * FROM post WHERE`id` = :id")
-    fun getPostWithComment(id: Int): PostWithComments
+    suspend fun getPostWithComment(id: Int): PostWithComments?
 
     @Query("UPDATE post SET `like` = `like` + 1 WHERE `id` = :id")
     fun increaseLike(id: Int)
 
-    @Query("UPDATE post SET `like` = `like` - 1 WHERE id = :id")
+    @Query("UPDATE post SET `like` = CASE WHEN `like` > 0 THEN `like` - 1 ELSE 0 END WHERE id = :id")
     fun decreaseLike(id: Int)
+
+    @Query("UPDATE post SET `like` = :likeCount, likedByMe = :likedByMe WHERE id = :id")
+    suspend fun updateLikeState(id: Int, likeCount: Int, likedByMe: Boolean): Int
 
     @Transaction
     @Query("SELECT * FROM post WHERE title LIKE '%' || :keyword || '%'")

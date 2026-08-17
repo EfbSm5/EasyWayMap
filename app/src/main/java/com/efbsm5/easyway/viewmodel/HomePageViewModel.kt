@@ -4,7 +4,6 @@ import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.HomePageContract
 import com.efbsm5.easyway.data.UserManager
 import com.efbsm5.easyway.data.models.User
-import com.efbsm5.easyway.data.network.IntentRepository
 import com.efbsm5.easyway.getInitUser
 import com.efbsm5.easyway.repo.DataRepository
 import kotlinx.coroutines.Dispatchers
@@ -42,7 +41,7 @@ class HomePageViewModel :
 
     fun getUserPost() {
         asyncLaunch(Dispatchers.IO) {
-            val r = DataRepository.getPostAndCommentsByUserId(currentState.user.id)
+            val r = DataRepository.getPostAndCommentsByUserId(UserManager.userId)
             r.onSuccess {
                 setState { copy(isLoading = false, post = it) }
             }.onFailure {
@@ -58,9 +57,10 @@ class HomePageViewModel :
     }
 
     fun updateData() {
-        asyncLaunch(Dispatchers.IO) {
-            IntentRepository.syncData()
-        }
+        // 本地优先模式下，“刷新”只重读 Room，绝不再用远端快照覆盖本地记录。
+        getUser()
+        getUserPoint()
+        getUserPost()
     }
 
     private fun changeState(homePageState: HomePageState) {

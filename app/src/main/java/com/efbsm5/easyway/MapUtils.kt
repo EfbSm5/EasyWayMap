@@ -148,8 +148,8 @@ fun getInitPost(): Post {
         lat = 30.5155,
         lng = 114.4268,
         position = "",
-        userId = 1,
-        id = 1,
+        userId = 0,
+        id = 0,
         type = 1,
         photo = emptyList()
     )

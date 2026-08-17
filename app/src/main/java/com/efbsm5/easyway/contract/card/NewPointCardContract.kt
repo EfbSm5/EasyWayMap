@@ -23,5 +23,6 @@ class NewPointCardContract {
         object Upload : Effect()
         class UploadPhoto(val uri: Uri) : Effect()
         object Back : Effect()
+        data class Toast(val message: String) : Effect()
     }
 }

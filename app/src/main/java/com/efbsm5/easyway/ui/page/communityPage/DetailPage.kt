@@ -56,9 +56,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -89,7 +87,6 @@ fun DetailRoute(
     postAndUser: PostAndUser,
     onBack: () -> Unit,
     viewModel: DetailViewModel,
-    onLikeUpdated: (PostAndUser) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -102,18 +99,6 @@ fun DetailRoute(
             when (effect) {
                 DetailContract.Effect.Back -> onBack()
                 is DetailContract.Effect.Toast -> showMsg(effect.string)
-                is DetailContract.Effect.Liked -> {
-                    val snapshot = postAndUser.post
-                    val delta = if (effect.boolean) 1 else -1
-                    onLikeUpdated(
-                        postAndUser.copy(
-                            post = snapshot.copy(
-                                likedByMe = effect.boolean,
-                                like = (snapshot.like + delta).coerceAtLeast(0)
-                            )
-                        )
-                    )
-                }
             }
         }.collect()
     }
@@ -250,8 +235,6 @@ private fun PostCard(
         return
     }
 
-    var localLiked by remember(liked) { mutableStateOf(liked) }
-
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp)
     ) {
@@ -285,14 +268,12 @@ private fun PostCard(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     ReactionButton(
-                        active = localLiked,
+                        active = liked,
                         activeColor = MaterialTheme.colorScheme.primary,
                         icon = Icons.Default.ThumbUp,
                         count = post.like,
-                        onClick = {
-                            localLiked = !localLiked
-                            onToggleLike()
-                        })
+                        onClick = onToggleLike,
+                    )
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                     IconButton(onClick = { /* 收藏 */ }) {
@@ -311,9 +292,6 @@ private fun PostCard(
 private fun CommentCard(
     data: PostCommentAndUser, onToggleLike: () -> Unit, onToggleDislike: () -> Unit
 ) {
-    var like by remember { mutableStateOf(data.postComment.likedByMe) }
-    var dislike by remember { mutableStateOf(data.postComment.dislikedByMe) }
-
     Surface(
         shape = RoundedCornerShape(16.dp), tonalElevation = 1.dp, modifier = Modifier.fillMaxWidth()
     ) {
@@ -346,31 +324,19 @@ private fun CommentCard(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     ReactionButton(
-                        active = like,
+                        active = data.postComment.likedByMe,
                         icon = Icons.Default.ThumbUp,
                         count = data.postComment.like,
-                        activeColor = MaterialTheme.colorScheme.primary
-                    ) {
-                        like = !like
-                        if (dislike && like) {
-                            dislike = false
-                            onToggleDislike()
-                        }
-                        onToggleLike()
-                    }
+                        activeColor = MaterialTheme.colorScheme.primary,
+                        onClick = onToggleLike,
+                    )
                     ReactionButton(
-                        active = dislike,
+                        active = data.postComment.dislikedByMe,
                         painter = painterResource(id = R.drawable.thumb_down),
                         count = data.postComment.dislike,
-                        activeColor = MaterialTheme.colorScheme.error
-                    ) {
-                        dislike = !dislike
-                        if (like && dislike) {
-                            like = false
-                            onToggleLike()
-                        }
-                        onToggleDislike()
-                    }
+                        activeColor = MaterialTheme.colorScheme.error,
+                        onClick = onToggleDislike,
+                    )
                 }
             }
         }
@@ -490,4 +456,3 @@ private fun LoadingPostSkeleton() {
         }
     }
 }
-

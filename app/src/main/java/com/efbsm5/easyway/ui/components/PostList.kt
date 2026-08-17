@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -108,16 +109,12 @@ fun PostList(
                 modifier = modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 12.dp)
             ) {
-                items(items = posts, key = { it.post.id } // 确保 Post.id 唯一
-                ) { pu ->
-                    PostItem(
-                        postAndUser = pu,
-                        onClick = { onClickPost(pu) },
-                        onClickLike = onClickLike,
-                        enableExpand = enableExpandContent
-                    )
-                    HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
-                }
+                communityPostItems(
+                    posts = posts,
+                    onClickPost = onClickPost,
+                    onClickLike = onClickLike,
+                    enableExpandContent = enableExpandContent,
+                )
 
                 if (isAppending) {
                     item("appending_indicator") {
@@ -128,6 +125,24 @@ fun PostList(
                 item("bottom_spacer") { Spacer(Modifier.height(32.dp)) }
             }
         }
+    }
+}
+
+/** 将帖子直接加入调用方的 LazyColumn，避免同方向 LazyColumn 嵌套。 */
+internal fun LazyListScope.communityPostItems(
+    posts: List<PostAndUser>,
+    onClickPost: (PostAndUser) -> Unit,
+    onClickLike: ((PostAndUser) -> Unit)? = null,
+    enableExpandContent: Boolean = true,
+) {
+    items(items = posts, key = { it.post.id }) { postAndUser ->
+        PostItem(
+            postAndUser = postAndUser,
+            onClick = { onClickPost(postAndUser) },
+            onClickLike = onClickLike,
+            enableExpand = enableExpandContent,
+        )
+        HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
     }
 }
 

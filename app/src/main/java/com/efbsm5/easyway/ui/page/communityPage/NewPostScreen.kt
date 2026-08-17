@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -56,6 +55,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -67,8 +67,7 @@ import com.efbsm5.easyway.R
 import com.efbsm5.easyway.SDKUtils
 import com.efbsm5.easyway.contract.community.NewPostContract
 import com.efbsm5.easyway.contract.community.NewPostContract.Effect
-import com.efbsm5.easyway.data.UserManager
-import com.efbsm5.easyway.data.models.assistModel.PostAndUser
+import com.efbsm5.easyway.showMsg
 import com.efbsm5.easyway.ui.LocalScaffoldController
 import com.efbsm5.easyway.ui.TopBarConfig
 import com.efbsm5.easyway.viewmodel.communityViewModel.NewPostViewModel
@@ -78,9 +77,10 @@ import kotlinx.coroutines.flow.onEach
 
 @Composable
 fun NewPostPage(
-    back: () -> Unit, onPostSuccess: (PostAndUser) -> Unit, viewModel: NewPostViewModel
+    back: () -> Unit, onPostSuccess: () -> Unit, viewModel: NewPostViewModel
 ) {
     val currentState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     val locationLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -95,13 +95,23 @@ fun NewPostPage(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            viewModel.getPicture(result.data?.data)
+            result.data?.data?.let { uri ->
+                runCatching {
+                    context.contentResolver.takePersistableUriPermission(
+                        uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                    )
+                }
+                viewModel.getPicture(uri)
+            }
         }
     }
     val photoIntent = remember {
         Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "image/*"
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
         }
     }
     LaunchedEffect(Unit) {
@@ -118,12 +128,8 @@ fun NewPostPage(
 
                 }
 
-                Effect.Upload -> onPostSuccess(
-                    PostAndUser(
-                        currentState.post,
-                        UserManager.getUser()
-                    )
-                )
+                Effect.Upload -> onPostSuccess()
+                is Effect.Toast -> showMsg(it.message)
             }
         }.collect()
 
@@ -206,7 +212,9 @@ private fun PostScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     onPublish = { onEvent(NewPostContract.Event.Publish) },
-                    enabled = state.post.title.isNotBlank() && state.post.content.isNotBlank()
+                    enabled = state.post.title.isNotBlank() &&
+                        state.post.content.isNotBlank() &&
+                        !state.publishing,
                 )
             }
         }
@@ -357,17 +365,18 @@ private fun ImagesSection(
         modifier = Modifier.padding(bottom = 8.dp)
     )
 
-    val gridState = rememberLazyGridState()
+    val itemCount = selectedPhotos.size + if (selectedPhotos.size < max) 1 else 0
+    val rowCount = ((itemCount + 3) / 4).coerceAtLeast(1)
 
-    // Make the grid non-scrollable and let the outer Column handle scrolling.
+    // 固定网格高度，由外层 Column 统一滚动，避免嵌套滚动容器收到无限高度约束。
     LazyVerticalGrid(
         columns = GridCells.Fixed(4),
-        state = gridState,
         userScrollEnabled = false,
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .height((rowCount * 96).dp)
     ) {
         items(selectedPhotos.size) { index ->
             val uri = selectedPhotos[index]

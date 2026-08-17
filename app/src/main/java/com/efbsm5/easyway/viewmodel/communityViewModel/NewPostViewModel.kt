@@ -32,7 +32,12 @@ class NewPostViewModel :
             }
 
             is NewPostContract.Event.SelectedCategory -> {
-                setState { copy(onSelectedCategory = event.int) }
+                setState {
+                    copy(
+                        onSelectedCategory = event.int,
+                        post = post.copy(type = event.int),
+                    )
+                }
             }
 
             is NewPostContract.Event.TitleChanged -> {
@@ -58,9 +63,24 @@ class NewPostViewModel :
     }
 
     private fun publish() {
+        if (currentState.publishing) return
+        val draft = currentState.post
+        if (draft.title.isBlank() || draft.content.isBlank()) {
+            setEffect { NewPostContract.Effect.Toast("请填写标题和正文") }
+            return
+        }
+        setState { copy(publishing = true, error = null) }
         asyncLaunch(Dispatchers.IO) {
-            DataRepository.uploadPost(currentState.post)
-            setEffect { NewPostContract.Effect.Upload }
+            DataRepository.uploadPost(draft)
+                .onSuccess { saved ->
+                    setState { copy(post = saved.post, publishing = false) }
+                    setEffect { NewPostContract.Effect.Upload }
+                }
+                .onFailure { throwable ->
+                    val message = throwable.message ?: "发布失败，请稍后重试"
+                    setState { copy(publishing = false, error = message) }
+                    setEffect { NewPostContract.Effect.Toast(message) }
+                }
         }
     }
 

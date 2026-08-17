@@ -10,10 +10,10 @@ import com.efbsm5.easyway.data.models.User
 
 /**
  * 简单的开发环境种子数据填充器。
- * 删除现有数据后，按外键顺序插入：Users -> Posts/EasyPoints -> Comments。
+ * 仅在数据库完全为空时按外键顺序插入：Users -> Posts/EasyPoints -> Comments。
  */
 object DevSeeder {
-    fun seed() {
+    fun seedIfEmpty() {
         val db = AppDataBase.getDatabase(SDKUtils.getContext())
         val userDao = db.userDao()
         val postDao = db.postDao()
@@ -22,31 +22,17 @@ object DevSeeder {
         val pointCommentDao = db.pointCommentDao()
 
         db.runInTransaction {
-            // 1) 先清空子表，再清空父表
-            run {
-                val allPostComments = postCommentDao.getAll()
-                if (allPostComments.isNotEmpty()) {
-                    postCommentDao.deleteAll(allPostComments.map { it.index })
-                }
-                val allPointComments = pointCommentDao.getAll()
-                if (allPointComments.isNotEmpty()) {
-                    pointCommentDao.deleteAll(allPointComments.map { it.index })
-                }
-                val allPosts = postDao.getAllPostEntities()
-                if (allPosts.isNotEmpty()) {
-                    postDao.deleteAll(allPosts.map { it.id })
-                }
-                val allPoints = pointsDao.getAllPointEntities()
-                if (allPoints.isNotEmpty()) {
-                    pointsDao.deleteAll(allPoints.map { it.pointId })
-                }
-                val allUsers = userDao.getAllUsers()
-                if (allUsers.isNotEmpty()) {
-                    userDao.deleteAll(allUsers.map { it.id })
-                }
+            // 不覆盖开发者或用户已经创建的任何本地数据。
+            val hasLocalData = postCommentDao.getAll().isNotEmpty() ||
+                pointCommentDao.getAll().isNotEmpty() ||
+                postDao.getAllPostEntities().isNotEmpty() ||
+                pointsDao.getAllPointEntities().isNotEmpty() ||
+                userDao.getAllUsers().isNotEmpty()
+            if (hasLocalData) {
+                return@runInTransaction
             }
 
-            // 2) 插入 Users
+            // 1) 插入 Users
             val users = listOf(
                 User(
                     id = 0,
@@ -65,7 +51,7 @@ object DevSeeder {
             )
             userDao.insertAll(users)
 
-            // 3) 插入 Posts（引用 userId）
+            // 2) 插入 Posts（引用 userId）
             val posts = listOf(
                 Post(
                     id = 101,
@@ -101,7 +87,7 @@ object DevSeeder {
             )
             postDao.insertAll(posts)
 
-            // 4) 插入 EasyPoints（引用 userId）
+            // 3) 插入 EasyPoints（引用 userId）
             val points = listOf(
                 EasyPoint(
                     pointId = 201,
@@ -134,7 +120,7 @@ object DevSeeder {
             )
             pointsDao.insertAll(points)
 
-            // 5) 插入 PostComments（引用 postId/userId）
+            // 4) 插入 PostComments（引用 postId/userId）
             val postComments = listOf(
                 PostComment(
                     index = 1001,
@@ -161,7 +147,7 @@ object DevSeeder {
             )
             postCommentDao.insertAll(postComments)
 
-            // 6) 插入 PointComments（引用 pointId/userId）
+            // 5) 插入 PointComments（引用 pointId/userId）
             val pointComments = listOf(
                 PointComment(
                     index = 3001,
@@ -186,4 +172,3 @@ object DevSeeder {
         }
     }
 }
-
