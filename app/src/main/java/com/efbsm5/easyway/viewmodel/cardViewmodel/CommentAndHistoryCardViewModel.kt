@@ -111,7 +111,7 @@ class CommentAndHistoryCardViewModel() :
 //               currentState.pointComments.items.find { commentAndUser ->
 //                    commentAndUser.pointComment.index == commentIndex
 //                }!!
-                DataRepository.addDisLikeForPointComment(commentIndex)
+                DataRepository.addLikeForPointComment(commentIndex)
             } else {
 //                _pointComments.value.find { commentAndUser ->
 //                    commentAndUser.first.index == commentIndex

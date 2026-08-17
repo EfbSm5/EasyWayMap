@@ -23,13 +23,13 @@ interface PointCommentDao {
     @Query("UPDATE pointComment SET `like` = `like` + 1 WHERE `index` = :id")
     fun increaseLikes(id: Int)
 
-    @Query("UPDATE pointComment SET `like` = `like` - 1 WHERE `index` = :id")
+    @Query("UPDATE pointComment SET `like` = CASE WHEN `like` > 0 THEN `like` - 1 ELSE 0 END WHERE `index` = :id")
     fun decreaseLikes(id: Int)
 
     @Query("UPDATE pointComment SET dislike = dislike + 1 WHERE `index` = :id")
     fun increaseDislikes(id: Int)
 
-    @Query("UPDATE pointComment SET dislike = dislike - 1 WHERE `index` = :id")
+    @Query("UPDATE pointComment SET dislike = CASE WHEN dislike > 0 THEN dislike - 1 ELSE 0 END WHERE `index` = :id")
     fun decreaseDislikes(id: Int)
 
 }
