@@ -132,20 +132,21 @@ class MapViewModel :
     }
 
     fun changeState(mapState: MapState) {
-        if (mapState == MapState.LocationState) {
-            setState {
-                copy(
-                    mapUiSettings = LocationTrackingRepository.initMapUiSettings(),
-                    mapProperties = LocationTrackingRepository.initMapProperties()
-                )
-            }
+        val mapUiSettings = if (mapState == MapState.LocationState) {
+            LocationTrackingRepository.initMapUiSettings()
         } else {
-            setState {
-                copy(
-                    mapUiSettings = RoutePlanRepository.initMapUiSettings(),
-                    mapProperties = RoutePlanRepository.initMapProperties()
-                )
-            }
+            RoutePlanRepository.initMapUiSettings()
+        }
+        val mapProperties = if (mapState == MapState.LocationState) {
+            LocationTrackingRepository.initMapProperties()
+        } else {
+            RoutePlanRepository.initMapProperties()
+        }
+        setState {
+            copy(
+                mapUiSettings = mapUiSettings,
+                mapProperties = mapProperties,
+            )
         }
     }
 

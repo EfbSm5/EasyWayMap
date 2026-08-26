@@ -16,7 +16,7 @@ class MapRouteViewModel :
     BaseViewModel<MapRouteContract.Event, MapRouteContract.State, MapRouteContract.Effect>() {
 
     fun setEffect(effect: MapRouteContract.Effect) {
-        setEffect(effect)
+        setEffect { effect }
     }
 
     private fun clickPoint(multiPointItem: MultiPointItem) {
@@ -69,5 +69,4 @@ class MapRouteViewModel :
 
 
 }
-
 
