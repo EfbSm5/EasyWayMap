@@ -17,9 +17,9 @@ import com.efbsm5.easyway.data.models.PostComment
 import com.efbsm5.easyway.data.models.User
 
 @Database(
-    version = 1,
+    version = 2,
     entities = [EasyPoint::class, User::class, PointComment::class, Post::class, PostComment::class],
-    exportSchema = false
+    exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class AppDataBase : RoomDatabase() {
@@ -39,7 +39,9 @@ abstract class AppDataBase : RoomDatabase() {
             }
             return Room.databaseBuilder(
                 context.applicationContext, AppDataBase::class.java, "app_database"
-            ).build().apply { instance = this }
+            ).addMigrations(AppDatabaseMigrations.MIGRATION_1_2)
+                .build()
+                .apply { instance = this }
         }
     }
 }

@@ -51,6 +51,13 @@ android {
     kotlinOptions {
         jvmTarget = "19"
     }
+    sourceSets {
+        getByName("androidTest").assets.srcDir("$projectDir/schemas")
+    }
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
@@ -63,6 +70,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.room.testing)
     implementation(libs.androidx.material3)
     implementation("io.github.TheMelody:gd_compose:1.0.7")
     debugImplementation(libs.leakcanary.android)
