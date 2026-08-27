@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.efbsm5.easyway.data.models.User
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UserDao {
@@ -13,6 +14,9 @@ interface UserDao {
 
     @Query("SELECT * FROM user WHERE id = :id")
     fun getUserById(id: Int): User?
+
+    @Query("SELECT * FROM user WHERE id = :id")
+    fun observeUserById(id: Int): Flow<User?>
 
     @Query("SELECT * FROM user")
     fun getAllUsers(): List<User>

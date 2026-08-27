@@ -18,7 +18,7 @@ import com.efbsm5.easyway.getCurrentFormattedTime
 import com.efbsm5.easyway.getInitUser
 import kotlinx.coroutines.flow.Flow
 
-object DataRepository {
+object DataRepository : HomePageDataSource {
 
     private val database = AppDataBase.getDatabase(SDKUtils.getContext())
 
@@ -31,6 +31,13 @@ object DataRepository {
     fun getAllPoints(): Result<List<EasyPointSimplify>> = runCatching { pointDao.loadAllPoints() }
 
     fun observeAllPoints(): Flow<List<EasyPointSimplify>> = pointDao.observeAllPoints()
+
+    override fun observeHomePage(userId: Int): Flow<HomePageSnapshot> = combineHomePageData(
+        userFlow = userDao.observeUserById(userId),
+        pointsFlow = pointDao.observePointWithCommentsByUserId(userId),
+        postsFlow = postDao.observePostAndCommentsByUserId(userId),
+        fallbackUser = getInitUser(),
+    )
 
     fun getPostAndUser(): Result<List<PostAndUser>> = runCatching { postDao.getPostWithUser() }
     suspend fun getPostComments(id: Int): Result<List<PostCommentAndUser>> =

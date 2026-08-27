@@ -3,64 +3,58 @@ package com.efbsm5.easyway.viewmodel
 import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.HomePageContract
 import com.efbsm5.easyway.data.UserManager
-import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.getInitUser
 import com.efbsm5.easyway.repo.DataRepository
-import kotlinx.coroutines.Dispatchers
+import com.efbsm5.easyway.repo.HomePageDataSource
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
-class HomePageViewModel :
+@OptIn(ExperimentalCoroutinesApi::class)
+class HomePageViewModel(
+    private val userIds: Flow<Int> = UserManager.userIdFlow,
+    private val dataSource: HomePageDataSource = DataRepository,
+) :
     BaseViewModel<HomePageContract.Event, HomePageContract.State, HomePageContract.Effect>() {
 
     init {
-        getUser()
-        getUserPoint()
-        getUserPost()
-    }
-
-    fun getUser() {
-        asyncLaunch(Dispatchers.IO) {
-            val r = DataRepository.getUserById(UserManager.userId)
-            r.onSuccess {
-                setState { copy(user = it, isLoading = false) }
-            }.onFailure {
-                setState { copy(isLoading = false, error = it.message) }
-            }
+        asyncLaunch {
+            userIds
+                .distinctUntilChanged()
+                .flatMapLatest { userId ->
+                    dataSource.observeHomePage(userId)
+                        .map { snapshot -> Result.success(snapshot) }
+                        .catch { throwable -> emit(Result.failure(throwable)) }
+                        .onStart {
+                            setState { copy(isLoading = true, error = null) }
+                        }
+                }
+                .collect { result ->
+                    result.onSuccess { snapshot ->
+                        setState {
+                            copy(
+                                isLoading = false,
+                                user = snapshot.user,
+                                points = snapshot.points,
+                                post = snapshot.posts,
+                                error = null,
+                            )
+                        }
+                    }.onFailure { throwable ->
+                        setState {
+                            copy(
+                                isLoading = false,
+                                error = throwable.message?.takeIf { it.isNotBlank() }
+                                    ?: "个人页数据加载失败",
+                            )
+                        }
+                    }
+                }
         }
-    }
-
-    fun getUserPoint() {
-        asyncLaunch(Dispatchers.IO) {
-            val r = DataRepository.getPointAndCommentByUserId(UserManager.userId)
-            r.onSuccess {
-                setState { copy(points = it, isLoading = false) }
-            }.onFailure {
-                setState { copy(isLoading = false, error = it.message) }
-            }
-        }
-    }
-
-    fun getUserPost() {
-        asyncLaunch(Dispatchers.IO) {
-            val r = DataRepository.getPostAndCommentsByUserId(UserManager.userId)
-            r.onSuccess {
-                setState { copy(isLoading = false, post = it) }
-            }.onFailure {
-                setState { copy(isLoading = false, error = it.message) }
-            }
-        }
-    }
-
-    fun editUser(user: User) {
-        asyncLaunch(Dispatchers.IO) {
-
-        }
-    }
-
-    fun updateData() {
-        // 本地优先模式下，“刷新”只重读 Room，绝不再用远端快照覆盖本地记录。
-        getUser()
-        getUserPoint()
-        getUserPost()
     }
 
     private fun changeState(homePageState: HomePageState) {
@@ -79,7 +73,6 @@ class HomePageViewModel :
     override fun handleEvents(event: HomePageContract.Event) {
         when (event) {
             is HomePageContract.Event.ChangeState -> changeState(event.state)
-            HomePageContract.Event.UpdateData -> updateData()
         }
     }
 }

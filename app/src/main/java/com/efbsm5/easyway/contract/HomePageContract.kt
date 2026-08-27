@@ -12,7 +12,6 @@ import com.efbsm5.easyway.viewmodel.HomePageState
 class HomePageContract {
     sealed class Event : IUiEvent {
         data class ChangeState(val state: HomePageState) : Event()
-        data object UpdateData : Event()
     }
 
     @Immutable

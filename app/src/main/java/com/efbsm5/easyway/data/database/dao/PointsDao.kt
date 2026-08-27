@@ -56,6 +56,10 @@ interface PointsDao {
     @Query("SELECT * FROM point WHERE userId=:userId")
     fun getPointWithCommentsByUserId(userId: Int): List<PointWithComments>
 
+    @Transaction
+    @Query("SELECT * FROM point WHERE userId = :userId")
+    fun observePointWithCommentsByUserId(userId: Int): Flow<List<PointWithComments>>
+
     @Query("SELECT * FROM point WHERE name LIKE '%' || :searchString || '%'")
     fun searchEasyPointsByName(searchString: String): List<EasyPoint>
 

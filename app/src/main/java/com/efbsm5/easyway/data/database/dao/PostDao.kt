@@ -64,4 +64,8 @@ interface PostDao {
     @Transaction
     @Query("SELECT * FROM post WHERE userId = :userId")
     fun getPostAndCommentsByUserId(userId: Int): List<PostWithComments>
+
+    @Transaction
+    @Query("SELECT * FROM post WHERE userId = :userId")
+    fun observePostAndCommentsByUserId(userId: Int): Flow<List<PostWithComments>>
 }
