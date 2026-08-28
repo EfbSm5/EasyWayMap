@@ -47,7 +47,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -61,6 +60,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import com.efbsm5.easyway.LocationPoiActivity
 import com.efbsm5.easyway.R
@@ -79,7 +79,7 @@ import kotlinx.coroutines.flow.onEach
 fun NewPostPage(
     back: () -> Unit, onPostSuccess: () -> Unit, viewModel: NewPostViewModel
 ) {
-    val currentState by viewModel.uiState.collectAsState()
+    val currentState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     val locationLauncher = rememberLauncherForActivityResult(

@@ -35,6 +35,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.amap.api.maps.CameraUpdateFactory
 import com.amap.api.maps.model.BitmapDescriptorFactory
@@ -72,7 +73,7 @@ internal fun DragDropSelectPointScreen(onSelected: (String) -> Unit) {
     val cameraPositionState = rememberCameraPositionState()
     val locationState = rememberMarkerState()
     val viewModel: DragDropSelectPointViewModel = viewModel()
-    val currentState by viewModel.uiState.collectAsState()
+    val currentState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val openGpsLauncher = handlerGPSLauncher(viewModel::checkGpsStatus)
 

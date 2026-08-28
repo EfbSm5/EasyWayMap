@@ -96,6 +96,7 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.core.ktx)
     implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.lifecycle.runtime.compose)
     implementation(libs.activity.compose)
     implementation(libs.androidx.navigation.compose)
 

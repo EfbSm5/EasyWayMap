@@ -12,11 +12,11 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.NavController
@@ -94,9 +94,9 @@ fun EasyWay() {
                     composable(CommunityRoute.Square.route) { squareEntry ->
                         val shared = rememberCommunitySharedViewModel(navController)
                         val viewModel: CommunityViewModel = viewModel(squareEntry)
-                        val posts by shared.posts.collectAsState()
-                        val loading by shared.loading.collectAsState()
-                        val error by shared.error.collectAsState()
+                        val posts by shared.posts.collectAsStateWithLifecycle()
+                        val loading by shared.loading.collectAsStateWithLifecycle()
+                        val error by shared.error.collectAsStateWithLifecycle()
 
                         CommunitySquareRoute(
                             back = { navController.popBackStack() },
@@ -122,7 +122,7 @@ fun EasyWay() {
                     ) { detailEntry ->
                         val shared = rememberCommunitySharedViewModel(navController)
                         val viewModel: DetailViewModel = viewModel()
-                        val current by shared.currentPost.collectAsState()
+                        val current by shared.currentPost.collectAsStateWithLifecycle()
                         val postId = detailEntry.arguments
                             ?.getInt(CommunityRoute.Detail.ARG_POST_ID)
                             ?: return@composable

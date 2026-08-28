@@ -5,7 +5,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -13,6 +12,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.efbsm5.easyway.contract.map.MapRouteContract
 import com.efbsm5.easyway.contract.map.MapState
@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
 fun MapRoutePage(
     viewmodel: MapRouteViewModel = viewModel()
 ) {
-    val currentState by viewmodel.uiState.collectAsState()
+    val currentState by viewmodel.uiState.collectAsStateWithLifecycle()
 
     val sheetState = rememberBottomSheetState(
         initialValue = SheetValue.Collapsed, defineValues = {

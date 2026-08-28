@@ -44,6 +44,7 @@ foundation = { module = "androidx.compose.foundation:foundation" }
 core-ktx = {module = "androidx.core:core-ktx", version.ref = "coreKtx"}
 leakcanary-android = {module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanary_android"}
 lifecycle-runtime-ktx = {module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRunTimektx"}
+lifecycle-runtime-compose = {module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRunTimektx"}
 lifecycle-viewmodel-compose = {module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose"}
 activity-compose = {module = "androidx.activity:activity-compose", version.ref = "activityCompose"}
 accompanist-permissions = {module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions"}

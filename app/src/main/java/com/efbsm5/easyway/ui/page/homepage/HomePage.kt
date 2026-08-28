@@ -4,8 +4,8 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.efbsm5.easyway.contract.HomePageContract
 import com.efbsm5.easyway.showMsg
 import com.efbsm5.easyway.ui.components.melody.RedCenterLoading
@@ -18,7 +18,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun HomePage(viewModel: HomePageViewModel = koinViewModel()) {
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.effect.onEach {

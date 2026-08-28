@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.amap.api.maps.CameraUpdateFactory
 import com.amap.api.maps.model.BitmapDescriptorFactory
@@ -88,7 +89,7 @@ internal fun MapScreen(
     viewModel: MapViewModel = viewModel(),
     selectedPoint: MultiPointItem?
 ) {
-    val currentState by viewModel.uiState.collectAsState()
+    val currentState by viewModel.uiState.collectAsStateWithLifecycle()
     val cameraPosition = rememberCameraPositionState {
         position = CameraPosition(LatLng(39.91, 116.40), 11f, 0f, 0f)
     }
