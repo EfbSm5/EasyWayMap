@@ -1,5 +1,8 @@
 package com.efbsm5.easyway.repo
 
+import com.efbsm5.easyway.data.database.dao.PointsDao
+import com.efbsm5.easyway.data.database.dao.PostDao
+import com.efbsm5.easyway.data.database.dao.UserDao
 import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.data.models.assistModel.PointWithComments
 import com.efbsm5.easyway.data.models.assistModel.PostWithComments
@@ -12,8 +15,26 @@ data class HomePageSnapshot(
     val posts: List<PostWithComments>,
 )
 
-fun interface HomePageDataSource {
+interface HomePageRepository {
+    val userIds: Flow<Int>
+
     fun observeHomePage(userId: Int): Flow<HomePageSnapshot>
+}
+
+class RoomHomePageRepository(
+    private val userDao: UserDao,
+    private val pointsDao: PointsDao,
+    private val postDao: PostDao,
+    override val userIds: Flow<Int>,
+    private val fallbackUser: User,
+) : HomePageRepository {
+
+    override fun observeHomePage(userId: Int): Flow<HomePageSnapshot> = combineHomePageData(
+        userFlow = userDao.observeUserById(userId),
+        pointsFlow = pointsDao.observePointWithCommentsByUserId(userId),
+        postsFlow = postDao.observePostAndCommentsByUserId(userId),
+        fallbackUser = fallbackUser,
+    )
 }
 
 internal fun combineHomePageData(

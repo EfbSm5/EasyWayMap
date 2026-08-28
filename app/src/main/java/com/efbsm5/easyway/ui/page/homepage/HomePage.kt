@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.efbsm5.easyway.contract.HomePageContract
 import com.efbsm5.easyway.showMsg
 import com.efbsm5.easyway.ui.components.melody.RedCenterLoading
@@ -14,10 +13,11 @@ import com.efbsm5.easyway.viewmodel.HomePageState
 import com.efbsm5.easyway.viewmodel.HomePageViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
+import org.koin.compose.viewmodel.koinViewModel
 
 
 @Composable
-fun HomePage(viewModel: HomePageViewModel = viewModel()) {
+fun HomePage(viewModel: HomePageViewModel = koinViewModel()) {
     val state by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {

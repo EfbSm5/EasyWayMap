@@ -5,11 +5,12 @@ import com.efbsm5.easyway.data.models.Post
 import com.efbsm5.easyway.data.models.User
 import com.efbsm5.easyway.data.models.assistModel.PointWithComments
 import com.efbsm5.easyway.data.models.assistModel.PostWithComments
-import com.efbsm5.easyway.repo.HomePageDataSource
+import com.efbsm5.easyway.repo.HomePageRepository
 import com.efbsm5.easyway.repo.HomePageSnapshot
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -21,7 +22,6 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -42,18 +42,13 @@ class HomePageViewModelTest {
     }
 
     @Test
-    fun defaultConstructor_isAvailableForComposeViewModel() {
-        assertNotNull(HomePageViewModel::class.java.getDeclaredConstructor())
-    }
-
-    @Test
     fun snapshot_stopsLoadingAndSubsequentChangesRefreshState() = runTest {
         val updates = MutableSharedFlow<HomePageSnapshot>(replay = 1)
-        val dataSource = HomePageDataSource { requestedUserId ->
+        val repository = repository(flowOf(7)) { requestedUserId ->
             assertEquals(7, requestedUserId)
             updates
         }
-        val viewModel = HomePageViewModel(userIds = flowOf(7), dataSource = dataSource)
+        val viewModel = HomePageViewModel(repository)
         runCurrent()
 
         assertTrue(viewModel.uiState.value.isLoading)
@@ -75,13 +70,13 @@ class HomePageViewModelTest {
     @Test
     fun upstreamError_preservesLastSnapshotAndExposesStableError() = runTest {
         val initialSnapshot = snapshot(userId = 8, pointId = 5, postId = 6)
-        val dataSource = HomePageDataSource {
+        val repository = repository(flowOf(8)) {
             flow {
                 emit(initialSnapshot)
                 throw IllegalStateException("数据库读取失败")
             }
         }
-        val viewModel = HomePageViewModel(userIds = flowOf(8), dataSource = dataSource)
+        val viewModel = HomePageViewModel(repository)
 
         advanceUntilIdle()
 
@@ -99,7 +94,7 @@ class HomePageViewModelTest {
         val userZeroUpdates = MutableSharedFlow<HomePageSnapshot>(replay = 1)
         val realUserUpdates = MutableSharedFlow<HomePageSnapshot>(replay = 1)
         val observedUserIds = mutableListOf<Int>()
-        val dataSource = HomePageDataSource { userId ->
+        val repository = repository(userIds) { userId ->
             observedUserIds += userId
             when (userId) {
                 0 -> userZeroUpdates
@@ -107,7 +102,7 @@ class HomePageViewModelTest {
                 else -> error("未配置用户 $userId")
             }
         }
-        val viewModel = HomePageViewModel(userIds = userIds, dataSource = dataSource)
+        val viewModel = HomePageViewModel(repository)
         runCurrent()
 
         userIds.emit(0)
@@ -133,6 +128,15 @@ class HomePageViewModelTest {
         assertEquals(listOf(3), viewModel.uiState.value.points.map { it.point.pointId })
         assertEquals(listOf(4), viewModel.uiState.value.post.map { it.post.id })
         assertEquals(listOf(0, 9), observedUserIds)
+    }
+
+    private fun repository(
+        userIds: Flow<Int>,
+        observe: (Int) -> Flow<HomePageSnapshot>,
+    ): HomePageRepository = object : HomePageRepository {
+        override val userIds: Flow<Int> = userIds
+
+        override fun observeHomePage(userId: Int): Flow<HomePageSnapshot> = observe(userId)
     }
 
     private fun snapshot(userId: Int, pointId: Int, postId: Int) = HomePageSnapshot(

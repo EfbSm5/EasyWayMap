@@ -5,13 +5,19 @@ import android.util.Log
 import androidx.work.WorkManager
 import com.efbsm5.easyway.data.dev.DevSeeder
 import com.efbsm5.easyway.data.network.SyncWorker
+import com.efbsm5.easyway.di.homePageModule
 import com.melody.map.gd_compose.utils.MapUtils
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.startKoin
 
 class EasyWayApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        // 原先在 AppDataInitStartup 中的初始化逻辑
         SDKUtils.init(this)
+        startKoin {
+            androidContext(this@EasyWayApplication)
+            modules(homePageModule)
+        }
         MapUtils.setMapPrivacy(this, true)
         Log.e("EasyWayApplication", "initMapPrivacy")
 

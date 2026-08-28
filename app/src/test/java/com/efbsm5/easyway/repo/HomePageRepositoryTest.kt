@@ -15,10 +15,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class HomePageDataSourceTest {
+class HomePageRepositoryTest {
 
     @Test
-    fun combineHomePageData_waitsForAllSourcesAndRefreshesOnChange() = runTest {
+    fun combinedRoomData_waitsForAllSourcesAndRefreshesOnChange() = runTest {
         val users = MutableSharedFlow<User?>(replay = 1)
         val points = MutableSharedFlow<List<PointWithComments>>(replay = 1)
         val posts = MutableSharedFlow<List<PostWithComments>>(replay = 1)

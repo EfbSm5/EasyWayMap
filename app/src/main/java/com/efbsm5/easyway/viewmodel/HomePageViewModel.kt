@@ -2,12 +2,9 @@ package com.efbsm5.easyway.viewmodel
 
 import com.efbsm5.easyway.base.BaseViewModel
 import com.efbsm5.easyway.contract.HomePageContract
-import com.efbsm5.easyway.data.UserManager
 import com.efbsm5.easyway.getInitUser
-import com.efbsm5.easyway.repo.DataRepository
-import com.efbsm5.easyway.repo.HomePageDataSource
+import com.efbsm5.easyway.repo.HomePageRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -16,17 +13,16 @@ import kotlinx.coroutines.flow.onStart
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomePageViewModel(
-    private val userIds: Flow<Int> = UserManager.userIdFlow,
-    private val dataSource: HomePageDataSource = DataRepository,
+    private val repository: HomePageRepository,
 ) :
     BaseViewModel<HomePageContract.Event, HomePageContract.State, HomePageContract.Effect>() {
 
     init {
         asyncLaunch {
-            userIds
+            repository.userIds
                 .distinctUntilChanged()
                 .flatMapLatest { userId ->
-                    dataSource.observeHomePage(userId)
+                    repository.observeHomePage(userId)
                         .map { snapshot -> Result.success(snapshot) }
                         .catch { throwable -> emit(Result.failure(throwable)) }
                         .onStart {
