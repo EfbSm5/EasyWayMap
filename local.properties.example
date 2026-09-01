@@ -1,0 +1,7 @@
+# Copy this file to local.properties and keep the real values local.
+# Gradle -P properties override environment variables, which override local.properties.
+
+# sdk.dir=/absolute/path/to/Android/sdk
+easyway.amapApiKey=
+easyway.debugBaseUrl=https://example.invalid/
+easyway.releaseBaseUrl=

@@ -70,6 +70,18 @@ app/src/main/java/com/efbsm5/easyway/
   - 帖子与评论的本地缓存、网络读写、乐观更新
   - 列表与详情的状态管理与副作用（如 Toast）
 
+## 本地配置
+
+复制 `local.properties.example` 为已忽略的 `local.properties`，再填写高德 Key 和不同构建环境的服务地址。不要提交真实凭据或本机路径。
+
+配置按以下优先级读取：
+
+1. Gradle 参数：`-Peasyway.amapApiKey`、`-Peasyway.debugBaseUrl`、`-Peasyway.releaseBaseUrl`；
+2. 环境变量：`EASYWAY_AMAP_API_KEY`、`EASYWAY_DEBUG_BASE_URL`、`EASYWAY_RELEASE_BASE_URL`；
+3. `local.properties` 中对应的 `easyway.*` 配置。
+
+debug 未配置服务地址时使用 `https://example.invalid/`，旧网络调用会安全失败，不会连接真实服务。release 构建要求提供非空高德 Key，以及以 `/` 结尾、全局可路由且不含 userInfo、query 或 fragment 的绝对 HTTP(S) 服务地址；私网、保留域名、保留 IP、缺失值或格式错误都会在编译前失败。
+
 ## 开发约定
 
 - View 层通过观察 ViewModel 暴露的 State 渲染 UI，避免直接持久化业务状态到 Composable

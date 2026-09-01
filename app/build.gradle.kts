@@ -1,3 +1,14 @@
+import com.efbsm5.easyway.build.ReleaseUrlPolicy
+import com.efbsm5.easyway.build.buildConfigString
+import com.efbsm5.easyway.build.easyWayExternalConfiguration
+import com.efbsm5.easyway.build.registerEasyWayConfigurationTasks
+
+val externalConfiguration = easyWayExternalConfiguration()
+
+check(ReleaseUrlPolicy.isValidHttpBaseUrl(externalConfiguration.debugBaseUrl.get())) {
+    "Invalid easyway.debugBaseUrl: expected an absolute HTTP(S) URL ending with '/'."
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -23,6 +34,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["amapApiKey"] = externalConfiguration.amapApiKey.get()
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.6.0"
@@ -36,11 +48,19 @@ android {
             )
         }
         getByName("debug") {
-            buildConfigField("String", "BASE_URL", "\"https://egret-knowing-chimp.ngrok-free.app\"")
+            buildConfigField(
+                "String",
+                "BASE_URL",
+                buildConfigString(externalConfiguration.debugBaseUrl.get()),
+            )
             buildConfigField("boolean", "IS_LOG_ENABLED", "true")
         }
         getByName("release") {
-            buildConfigField("String", "BASE_URL", "\"http://47.122.123.42:5000/\"")
+            buildConfigField(
+                "String",
+                "BASE_URL",
+                buildConfigString(externalConfiguration.releaseBaseUrl.get()),
+            )
             buildConfigField("boolean", "IS_LOG_ENABLED", "false")
         }
     }
@@ -55,6 +75,8 @@ android {
         getByName("androidTest").assets.srcDir("$projectDir/schemas")
     }
 }
+
+registerEasyWayConfigurationTasks(externalConfiguration)
 
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")

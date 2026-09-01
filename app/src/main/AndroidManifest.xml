@@ -33,7 +33,7 @@
         <!-- 高德地图ApiKey -->
         <meta-data
             android:name="com.amap.api.v2.apikey"
-            android:value="7061fac06dc435bddfa8d8299573feac" /> <!-- 使用SDK默认的定位，需要使用此SDK服务 -->
+            android:value="${amapApiKey}" /> <!-- 使用SDK默认的定位，需要使用此SDK服务 -->
         <service android:name="com.amap.api.location.APSService" />
 
 
